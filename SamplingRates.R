@@ -12,6 +12,7 @@ library(readxl)
 library(ggplot2)
 library(gridExtra)
 
+
 # Sampling rates calculations under static conditions ---------------------
 
 # Read data.xlsx
