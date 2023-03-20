@@ -188,7 +188,6 @@ ggplot(WB.st.2, aes(x = time.2*24, y = WB.st.2[, 153]/PUF.mean.2[153])) +
 # Create matrix for sampling rate (SR)
 SR.rot <- matrix(nrow = length(WB.rot.2), ncol = 3)
 
-
 for(i in 1:length(WB.rot.2)) {
   if (PUF.mean.2[i] > 0) {
     fit <- lm(WB.rot.2[,i]/PUF.mean.2[i] ~ 0 + time.2)
