@@ -15,8 +15,7 @@ install.packages("ggplot2")
 }
 
 # Sampling rates calculations under static conditions ---------------------
-
-# Read data.xlsx
+# Read data from excel
 PUF <- data.frame(read_excel("Data/DataStatic.xlsx", sheet = "PUFv2",
                                col_names = TRUE, col_types = NULL))
 
@@ -27,7 +26,7 @@ WB <- data.frame(read_excel("Data/DataStatic.xlsx", sheet = "WDv2",
 WB.1 <- subset(WB, select = -c(sample:time))
 
 # Perform linear regression of WD accumulate mass vs time to check linearity
-# create matrix
+# Create matrix to storage data
 WBMatrix <- matrix(nrow = length(WB.1), ncol = 3)
 
 for(i in 1:length(WB.1)) {
@@ -84,12 +83,12 @@ write.csv(SR, file = "WDSamplingRate.csv")
 # Plots
 # Change number congener in [] 
 
-fit1 <- lm(WB.1[, 152]/PUF.mean[152] ~ 0 + time)
-ggplot(WB, aes(x = time, y = WB.1[, 152]/PUF.mean[152])) +
+fit1 <- lm(WB.1[, 11]/PUF.mean[11] ~ 0 + time)
+ggplot(WB, aes(x = time, y = WB.1[, 11]/PUF.mean[11])) +
   theme_bw() +
   theme(aspect.ratio = 10/15) +
   xlab(expression(bold("Deployment time (hr)"))) +
-  ylab(expression(bold("Effective Volume PCB 187 (m"^"3"*")"))) +
+  ylab(expression(bold("Effective Volume PCB 11 (m"^"3"*")"))) +
   theme(axis.text.y = element_text(face = "bold", size = 9),
         axis.title.y = element_text(face = "bold", size = 10)) +
   theme(axis.text.x = element_text(face = "bold", size = 9),
@@ -98,7 +97,7 @@ ggplot(WB, aes(x = time, y = WB.1[, 152]/PUF.mean[152])) +
   stat_smooth(method = "lm", col = "black", se = FALSE,
               formula = y ~ 0 + x, fullrange = T) +
   xlim(0, 125) +
-  ylim(0, 3) +
+  ylim(0, 4) +
   theme(plot.title = element_text(size = 8, face = "bold")) +
   annotate("text", x = 25, y = 3,
            label = paste(" Slope (m3/d)=",
@@ -107,15 +106,14 @@ ggplot(WB, aes(x = time, y = WB.1[, 152]/PUF.mean[152])) +
                          size = 2.5, fontface = 2)
 
 # Sampling rates calculations under static and rotating conditions -------------------
-
-# Read data.xlsx
-PUF.v2 <- data.frame(read_excel("DataV04.xlsx", sheet = "PUFv3",
+# Read data from excel
+PUF.v2 <- data.frame(read_excel("Data/DataV04.xlsx", sheet = "PUFv3",
                              col_names = TRUE, col_types = NULL))
 
-WB.st <- data.frame(read_excel("DataV03.xlsx", sheet = "WDST",
+WB.st <- data.frame(read_excel("Data/DataV03.xlsx", sheet = "WDST",
                             col_names = TRUE, col_types = NULL))
 
-WB.rot <- data.frame(read_excel("DataV03.xlsx", sheet = "WDROT",
+WB.rot <- data.frame(read_excel("Data/DataV03.xlsx", sheet = "WDROT",
                                col_names = TRUE, col_types = NULL))
 
 # Remove metadata
@@ -155,7 +153,7 @@ congener <- names(head(WB.st.2)[0,])
 SR.st <- cbind(congener, SR.st)
 
 #export
-write.csv(SR.st, file = "WDSamplingRateStV3.csv")
+write.csv(SR.st, file = "Output/csv/WDSamplingRateStV3.csv")
 
 # Plots
 # Change number congener in [] 
@@ -208,7 +206,7 @@ congener <- names(head(WB.rot.2)[0,])
 SR.rot <- cbind(congener, SR.rot)
 
 #export
-write.csv(SR.rot, file = "WDSamplingRateRotV2.csv")
+write.csv(SR.rot, file = "Output/csv/WDSamplingRateRotV2.csv")
 
 # Plots
 # Change number congener in [] 
