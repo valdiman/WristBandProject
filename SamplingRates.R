@@ -183,7 +183,7 @@ ggplot(WB.st.2, aes(x = time.2*24, y = WB.st.2[, 153]/PUF.mean.2[153])) +
 # Calculate sampling rate for rotating
 # (dMWD/Cair) = Rsdt
 # Force intercept 0
-# Conditions: Mean of PUF >0, but also all the measurements >0,
+# Conditions: Mean of PUF >0, but also all the measurements > 0,
 # Measurements from WB >3
 # Create matrix for sampling rate (SR)
 SR.rot <- matrix(nrow = length(WB.rot.2), ncol = 3)
