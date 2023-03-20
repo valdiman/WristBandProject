@@ -48,7 +48,6 @@ write.csv(normality, file = "Output/Data/csv/normality.csv")
 loq <- colMeans(bl.1) + 1.96*sapply(bl.1, sd)/sqrt(20)
 loq <- data.frame(t(loq))
 
-
 # Make comparison between s.1 and loq
 # If s.1 > loq, then s.1, if not 0
 # Create matrix to storage s.1 or loq values in s.2
