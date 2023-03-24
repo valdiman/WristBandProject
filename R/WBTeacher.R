@@ -17,7 +17,7 @@ install.packages("readxl") #say no!
 # Read blank data from excel
 bl <- data.frame(read_excel("Data/BlanksWBT.xlsx", sheet = "blanks",
                              col_names = TRUE, col_types = NULL))
-s <- data.frame(read_excel("Data/BlanksWBT.xlsx", sheet = "blanks",
+s <- data.frame(read_excel("Data/SamplesWBT.xlsx", sheet = "samples",
                             col_names = TRUE, col_types = NULL))
 
 # Distribution analysis ---------------------------------------------------
