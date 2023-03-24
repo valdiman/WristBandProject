@@ -1,7 +1,6 @@
 # R code to analyze school teacher wristband data
 
 # Install packages
-install.packages("userfriendlyscience")
 install.packages("reshape2")
 install.packages("tidyverse")
 install.packages("readxl") #say no!
@@ -9,16 +8,17 @@ install.packages("readxl") #say no!
 # Library
 {
   library(readxl)
-  library(userfriendlyscience) # Perform Tukey test
   library(reshape2) # For melt function
   library(tidyverse) # Data manipulation 
   library(dplyr) # performs %>%
 }
 
 # Read data ---------------------------------------------------------------
-# Read data from excel
+# Read blank data from excel
 bl <- data.frame(read_excel("Data/BlanksWBT.xlsx", sheet = "blanks",
                              col_names = TRUE, col_types = NULL))
+s <- data.frame(read_excel("Data/BlanksWBT.xlsx", sheet = "blanks",
+                            col_names = TRUE, col_types = NULL))
 
 # Distribution analysis ---------------------------------------------------
 # Remove metadata from blank data
@@ -40,6 +40,12 @@ congeners <- colnames(bl.1)
 normality <- cbind(congeners, normality)
 # Change column names
 colnames(normality) <- c("Congener", "shapiro.normal", "shapiro.log10")
+# Create Q-Q plot for individual PCB congeners
+{
+  qqnorm(bl.1$PCB9, main = "Concentration (ng/g)")
+  qqline(bl.1$PCB9)
+}
+
 # Export data
 write.csv(normality, file = "Output/Data/csv/normality.csv")
 
@@ -51,7 +57,7 @@ loq <- data.frame(t(loq))
 # Make comparison between s.1 and loq
 # If s.1 > loq, then s.1, if not 0
 # Create matrix to storage s.1 or loq values in s.2
-s.2 <- matrix(NA, nrow = dim(s.1)[1], ncol = dim(s.1)[2])
+ <- matrix(NA, nrow = dim(s.1)[1], ncol = dim(s.1)[2])
 # Do comparison
 for(i in 1:dim(s.1)[1]) {
   for(j in 1:dim(s.1)[2]) {
