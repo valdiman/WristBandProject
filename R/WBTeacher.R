@@ -187,8 +187,8 @@ for (i in 1:length(prof.cos[1,])) {
   }
 }
 
-# 3 significant figures
-costheta <- formatC(signif(costheta, digits=3), digits=3)
+# Just 3 significant figures
+costheta <- formatC(signif(costheta, digits = 3))
 # Remove upper diagonal values
 costheta[upper.tri(costheta)] <- NA
 # Add name to columns
