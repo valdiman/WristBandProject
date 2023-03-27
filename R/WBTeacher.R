@@ -197,3 +197,4 @@ colnames(costheta) <- colnames(prof.cos)
 rownames(costheta) <- colnames(prof.cos)
 # Export data
 write.csv(costheta, file = "Output/Data/csv/costheta.csv")
+
