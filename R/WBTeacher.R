@@ -3,11 +3,13 @@
 # Install packages
 install.packages("reshape2")
 install.packages("tidyverse")
+install.packages("ggplot2")
 install.packages("readxl") #say no!
 
 # Library
 {
   library(readxl)
+  library(ggplot2)
   library(reshape2) # For melt function
   library(tidyverse) # Data manipulation 
   library(dplyr) # performs %>%
@@ -17,8 +19,11 @@ install.packages("readxl") #say no!
 # Read blank data from excel
 bl <- data.frame(read_excel("Data/BlanksWBT.xlsx", sheet = "blanks",
                              col_names = TRUE, col_types = NULL))
-s <- data.frame(read_excel("Data/SamplesWBT.xlsx", sheet = "samples",
+# Remove entire "bad/yellow" transition
+s.1 <- data.frame(read_excel("Data/SamplesWBT.xlsx", sheet = "samples",
                             col_names = TRUE, col_types = NULL))
+s.2 <- data.frame(read_excel("Data/SamplesWBT.xlsx", sheet = "samplesv02",
+                             col_names = TRUE, col_types = NULL))
 
 # Distribution analysis ---------------------------------------------------
 # Remove metadata from blank data
@@ -46,6 +51,41 @@ colnames(normality) <- c("Congener", "shapiro.normal", "shapiro.log10")
   qqline(bl.1$PCB9)
 }
 
+# Bar plot to visualize Shapiro test (normality)
+# Organize data to be plotted
+norma <- data.frame(normality)
+norma$Congener <- as.character(norma$Congener)
+norma$shapiro.normal<- as.numeric(as.character(norma$shapiro.normal))
+norma$shapiro.log10 <- as.numeric(as.character(norma$shapiro.log10))
+
+# Plot
+# Values less than -log10(0.05) are not significant
+# Normal data
+ggplot(norma, aes(x = Congener, y = -log10(shapiro.normal))) +
+  geom_bar(position = position_dodge(), stat = "identity", fill = "black") +
+  theme_test() +
+  theme(aspect.ratio = 2/12) +
+  ylab("-log10 (p-value)") +
+  theme(axis.title.y = element_text(face = "bold", size = 8)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  geom_hline(yintercept = -log10(0.05), color = "red",
+             linewidth = 0.8)
+
+# log10 data
+ggplot(norma, aes(x = Congener, y = -log10(shapiro.log10))) +
+  geom_bar(position = position_dodge(), stat = "identity", fill = "black") +
+  theme_test() +
+  theme(aspect.ratio = 2/12) +
+  ylab("-log10 (p-value)") +
+  theme(axis.title.y = element_text(face = "bold", size = 8)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  geom_hline(yintercept = -log10(0.05), color = "red",
+             linewidth = 0.8)
+  
 # Export data
 write.csv(normality, file = "Output/Data/csv/normality.csv")
 
