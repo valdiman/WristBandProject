@@ -133,43 +133,44 @@ ggplot(s.2, aes(y = rowSums(s.2[, 2:174]), x = factor(Congener.Sample))) +
 
 # Profile Analysis --------------------------------------------------------
 # Generate profile
-tmp <- rowSums(s.1.1, na.rm = TRUE)
-prof <- sweep(s.1.1, 1, tmp, FUN = "/")
-# Include sample names
-prof <- cbind(s.1$Congener.Sample, prof)
-# Transpose
-prof <- t(prof)
-# Include PCB names
-prof <- cbind(row.names(prof), prof)
-# Add sample names as column names
-colnames(prof) <- prof[c(1),]
-# Delete first row with sample names
-prof <- prof[-c(1),]
-# Delete row names
-rownames(prof) <- NULL
-# Transform to data.frame
-prof <- data.frame(prof)
-# Change first column name to congener
-colnames(prof)[1] <- c('congener')
-# Transform congener column to factor
-prof$congener <- as.factor(prof$congener)
-# Convert all character columns to numeric
-prof[, 2:37] <- as.data.frame(apply(prof[, 2:37], 2, as.numeric))
-# Organize PCB congeners
-prof$congener <- factor(prof$congener, levels = unique(prof$congener))
+{
+  tmp <- rowSums(s.1.1, na.rm = TRUE)
+  prof <- sweep(s.1.1, 1, tmp, FUN = "/")
+  # Transpose
+  prof <- t(prof)
+  # Include sample names
+  colnames(prof) <- s.1$Congener.Sample
+  # Get congeners
+  congener <- row.names(prof)
+  names(congener) <- sub(".", "+", names(congener))
+  # Add congener names to first column
+  prof <- cbind(congener, prof)
+  # Delete row names
+  rownames(prof) <- NULL
+  # Transform prof column to data.frame
+  prof <- data.frame(prof)
+  # Change "." to "+" in the PCB congeners
+  prof$congener <- lapply(prof$congener, function(x) {gsub("\\.", "+", x)})
+  # Convert all character columns to numeric
+  prof[, 2:37] <- as.data.frame(apply(prof[, 2:37], 2, as.numeric))
+  # Organize PCB congeners
+  prof$congener <- factor(prof$congener, levels = unique(prof$congener)) 
+}
 
 # Plots
-ggplot(prof, aes(y = prof[, 37], x = congener)) +
-  geom_bar(stat = 'identity', width = 0.8, fill = "black") +
+ggplot(prof, aes(x = congener, y = WB_13300401)) +
+  geom_bar(position = position_dodge(), stat = "identity",
+           fill = "black") +
+  xlab("") +
+  ylim(0, 0.12) +
   theme_bw() +
-  ylim(0, 0.08) +
-  theme(aspect.ratio = 6/35) +
+  theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  xlab(expression("")) +
-  theme(axis.text.y = element_text(face = "bold", size = 8),
-        axis.title.y = element_text(face = "bold", size = 8)) +
-  theme(axis.text.x = element_text(face = "bold", size = 6,
-                                   angle = 60, hjust = 1))
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 5,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
 
 # Cosine theta ------------------------------------------------------------
 # Remove congener column
