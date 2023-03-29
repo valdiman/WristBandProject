@@ -142,7 +142,6 @@ ggplot(s.2, aes(y = rowSums(s.2[, 2:174]), x = factor(Congener.Sample))) +
   colnames(prof) <- s.1$Congener.Sample
   # Get congeners
   congener <- row.names(prof)
-  names(congener) <- sub(".", "+", names(congener))
   # Add congener names to first column
   prof <- cbind(congener, prof)
   # Delete row names
@@ -158,7 +157,7 @@ ggplot(s.2, aes(y = rowSums(s.2[, 2:174]), x = factor(Congener.Sample))) +
 }
 
 # Plots
-ggplot(prof, aes(x = congener, y = WB_13300401)) +
+ggplot(prof, aes(x = congener, y = X3301902_left.WB_batch.3)) +
   geom_bar(position = position_dodge(), stat = "identity",
            fill = "black") +
   xlab("") +
