@@ -208,9 +208,127 @@ ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
+
+# Calculate personal sampling rate Ya'u -----------------------------------
+{
+  # Select WBs to calculate air concentration
+  data.yau.1 <- data.yau[1:6, 4:174]
+  # Calculate air concentration in ng/m3
+  # = massWB/(0.5*time.day)
+  time <- data.yau[1:6, 1]
+  conc <- t(sweep(data.yau.1, 1, 0.5 * time, "/"))
+  # get WB mass
+  mass.WD <- data.yau[7:12, 4:174]
+  Veff.yau <- mass.WD/t(conc)
+  # Add metadata to Veff.amanda and change format
+  Veff.yau <- cbind(data.yau[7:12, 3], data.yau[7:12, 1], Veff.yau)
+  # Transform to data.frame
+  Veff.yau <- as.data.frame(Veff.yau)
+  # Add names to first 2 columns
+  colnames(Veff.yau)[1:2] <- c("sample", "time.day")
+  # Change characters to numbers format
+  Veff.yau[, 2:173] <- apply(Veff.yau[, 2:173], 2, as.numeric)
+  # Select 1st week, remove metadata
+  Veff.yau.1st <- Veff.yau[1:3, 3:173]
+  # Select time
+  Veff.yau.1st.t <- Veff.yau[1:3, 2]
+  # Select left, remove metadata
+  Veff.yau.2nd <- Veff.yau[4:6, 3:173]
+  # Select time
+  Veff.yau.2nd.t <- Veff.yau[4:6, 2]
+}
+
+# Calculate sampling rate (SR) for 1st and 2nd weeks (m3/d)
+# Create matrix for sampling rate (SR)
+SR.yau.1st <- matrix(nrow = length(Veff.yau.1st[1,]), ncol = 3)
+
+for(i in 1:length(SR.yau.1st[, 1])) {
+  if (sum(!is.na(Veff.yau.1st[, i ]) & !is.infinite(Veff.yau.1st[, i])) == 3) {
+    fit <- lm(Veff.yau.1st[, i] ~ 0 + Veff.yau.1st.t)
+    SR.yau.1st[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.1st[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.1st[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+  } else {
+    SR.yau.1st[i, 1] <- 0
+    SR.yau.1st[i, 2] <- 0
+    SR.yau.1st[i, 3] <- 0
+  }
+}
+
+colnames(SR.yau.1st) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.1st)[0, ])
+SR.yau.1st <- cbind(congener, SR.yau.1st)
+SR.yau.1st <- data.frame(SR.yau.1st, group = "yau.1st")
+
+# Plot
+SR.yau.1st[, 2:4] <- apply(SR.yau.1st[, 2:4], 2, as.numeric)
+# Organize PCB names
+SR.yau.1st$congener <- factor(SR.yau.1st$congener,
+                            levels = unique(SR.yau.1st$congener))
+
+# Define colors for each group
+group_colors <- c("yau.1st" = "violet")
+
+ggplot(SR.yau.1st[SR.yau.1st$Sampling_Rate > 0 & SR.yau.1st$p_value < 0.05, ],
+       aes(x = congener, y = Sampling_Rate, color = group)) +
+  geom_point() +
+  scale_color_manual(values = group_colors, name = "Group") +
+  theme_bw() +
+  theme(aspect.ratio = 4/16) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 5,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
+
+# Create matrix for sampling rate (SR)
+SR.yau.2nd <- matrix(nrow = length(Veff.yau.2nd[1,]), ncol = 3)
+
+for(i in 1:length(SR.yau.2nd[, 1])) {
+  if (sum(!is.na(Veff.yau.2nd[, i ]) & !is.infinite(Veff.yau.2nd[, i])) == 3) {
+    fit <- lm(Veff.yau.2nd[, i] ~ 0 + Veff.yau.2nd.t)
+    SR.yau.2nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.2nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.2nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+  } else {
+    SR.yau.2nd[i, 1] <- 0
+    SR.yau.2nd[i, 2] <- 0
+    SR.yau.2nd[i, 3] <- 0
+  }
+}
+
+colnames(SR.yau.2nd) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.2nd)[0, ])
+SR.yau.2nd <- cbind(congener, SR.yau.2nd)
+SR.yau.2nd <- data.frame(SR.yau.2nd, group = "yau.2nd")
+
+# Plot
+SR.yau.2nd[, 2:4] <- apply(SR.yau.2nd[, 2:4], 2, as.numeric)
+# Organize PCB names
+SR.yau.2nd$congener <- factor(SR.yau.2nd$congener,
+                              levels = unique(SR.yau.2nd$congener))
+
+# Define colors for each group
+group_colors <- c("yau.2nd" = "cyan")
+
+ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
+       aes(x = congener, y = Sampling_Rate, color = group)) +
+  geom_point() +
+  scale_color_manual(values = group_colors, name = "Group") +
+  theme_bw() +
+  theme(aspect.ratio = 4/16) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 5,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
+
 # Combine sampling rates --------------------------------------------------
 # Combine the three data frames
-combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r)
+combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r, SR.yau.1st,
+                     SR.yau.2nd)
 
 # Plot the combined data with different colors for each group
 ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
@@ -223,61 +341,5 @@ ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ]
         axis.title.y = element_text(face = "bold", size = 10),
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
-
-# Calculate personal sampling rate Ya'u -----------------------------------
-{
-  # Select WBs to calculate air concentration
-  data.yau.1 <- data.yau[1:6, 4:174]
-  # Calculate air concentration in ng/m3
-  # = massWB/(0.5*time.day)
-  time <- data.yau[1:6, 1]
-  conc <- t(sweep(data.yau.1, 1, 0.5 * time, "/"))
-  
-  
-  
-  
-  
-  # Calculate effective volume (Veff)
-  subset_data <- data.amanda[4:13, 3:175]
-  Veff.amanda <- t(apply(subset_data, 1, function(row) row / conc))
-  # Add metadata to Veff.amanda and change format
-  Veff.amanda <- cbind(data.amanda[4:13, 2], data.amanda[4:13, 1], Veff.amanda)
-  # Transform to data.frame
-  Veff.amanda <- as.data.frame(Veff.amanda)
-  # Add names to first 2 columns
-  colnames(Veff.amanda)[1:2] <- c("sample", "time.day")
-  # Change characters to numbers format
-  Veff.amanda[, 2:175] <- apply(Veff.amanda[, 2:175], 2, as.numeric)
-  # Select right, remove metadata
-  Veff.amanda.r <- Veff.amanda[1:5, 3:175]
-  # Select time
-  Veff.amanda.r.t <- Veff.amanda[1:5, 2]
-  # Select left, remove metadata
-  Veff.amanda.l <- Veff.amanda[6:10, 3:175]
-  # Select time
-  Veff.amanda.l.t <- Veff.amanda[6:10, 2]
-}
-
-# Calculate sampling rate (SR) for right and left hands (m3/d)
-# Create matrix for sampling rate (SR)
-SR.amanda.r <- matrix(nrow = length(Veff.amanda.r[1,]), ncol = 3)
-
-for(i in 1:length(SR.amanda.r[, 1])) {
-  if (length(unique(Veff.amanda.r[, i])) >= 3) {
-    fit <- lm(Veff.amanda.r[, i] ~ 0 + Veff.amanda.r.t)
-    SR.amanda.r[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.amanda.r[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.amanda.r[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
-  } else {
-    SR.amanda.r[i, 1] <- 0
-    SR.amanda.r[i, 2] <- 0
-    SR.amanda.r[i, 3] <- 0
-  }
-}
-
-colnames(SR.amanda.r) <-c("Sampling_Rate", "R2", "p_value")
-congener <- names(head(Veff.amanda.r)[0, ])
-SR.amanda.r <- cbind(congener, SR.amanda.r)
-SR.amanda.r <- data.frame(SR.amanda.r, group = "amanda.r")
 
 
