@@ -1,16 +1,18 @@
-## Code to individual PCB calculate "personal" sampling rates
-# for silicone wristbands. Sampling rates were calculated with
+## Code to calculate individual PCB "personal" sampling rates
+# for silicone wristbands.
 
 # Install packages
 install.packages("readxl") #say no!
 install.packages("gridExtra")
 install.packages("ggplot2")
+install.packages("tidyr")
 
 # Load libraries
 {
   library(readxl)
   library(ggplot2)
   library(gridExtra)
+  library(tidyr)
 }
 
 # Read data from excel ----------------------------------------------------
@@ -22,6 +24,9 @@ data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
 
 # Calculate personal sampling rate Amanda ---------------------------------
+# WBs were used to calculate PCB concentration
+# triplicates for 4.3 days were deployed
+# sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
   data.amanda.1 <- data.amanda[1:3,]
@@ -71,7 +76,7 @@ for(i in 1:length(SR.amanda.r[, 1])) {
 colnames(SR.amanda.r) <-c("Sampling_Rate", "R2", "p_value")
 congener <- names(head(Veff.amanda.r)[0, ])
 SR.amanda.r <- cbind(congener, SR.amanda.r)
-SR.amanda.r <- data.frame(SR.amanda.r, group = "amanda.r")
+SR.amanda.r <- data.frame(SR.amanda.r, group = "ParticipantA.r")
 
 # Create matrix for sampling rate (SR)
 SR.amanda.l <- matrix(nrow = length(Veff.amanda.l[1,]), ncol = 3)
@@ -91,7 +96,7 @@ for(i in 1:length(SR.amanda.l[, 1])) {
 
 colnames(SR.amanda.l) <-c("Sampling_Rate", "R2", "p_value")
 SR.amanda.l <- cbind(congener, SR.amanda.l)
-SR.amanda.l <- data.frame(SR.amanda.l, group = "amanda.l")
+SR.amanda.l <- data.frame(SR.amanda.l, group = "ParticipantA.l")
 
 # Plot
 # Convert numerical columns to numeric
@@ -101,7 +106,7 @@ SR.amanda.r$congener <- factor(SR.amanda.r$congener,
                             levels = unique(SR.amanda.r$congener))
 
 # Define colors for each group
-group_colors <- c("amanda.r" = "blue")
+group_colors <- c("ParticipantA.r" = "blue")
 
 # Plot with legend
 ggplot(SR.amanda.r[SR.amanda.r$Sampling_Rate > 0 & SR.amanda.r$p_value < 0.05, ],
@@ -124,7 +129,7 @@ SR.amanda.l$congener <- factor(SR.amanda.l$congener,
                                levels = unique(SR.amanda.l$congener))
 
 # Define colors for each group
-group_colors <- c("amanda.l" = "red")
+group_colors <- c("ParticipantA.l" = "red")
 
 ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
@@ -140,6 +145,9 @@ ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ]
         axis.title.x = element_text(face = "bold", size = 7))
 
 # Calculate personal sampling rate Kay ------------------------------------
+# WBs were used to calculate PCB concentration
+# triplicates for 4.27 days were deployed
+# sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
   data.kay.1 <- data.kay[1:3,]
@@ -184,7 +192,7 @@ for(i in 1:length(SR.kay.r[, 1])) {
 
 colnames(SR.kay.r) <-c("Sampling_Rate", "R2", "p_value")
 SR.kay.r <- cbind(congener, SR.kay.r)
-SR.kay.r <- data.frame(SR.kay.r, group = "kay.r")
+SR.kay.r <- data.frame(SR.kay.r, group = "ParticipantK.r")
 
 # Plot
 SR.kay.r[, 2:4] <- apply(SR.kay.r[, 2:4], 2, as.numeric)
@@ -193,7 +201,7 @@ SR.kay.r$congener <- factor(SR.kay.r$congener,
                                levels = unique(SR.kay.r$congener))
 
 # Define colors for each group
-group_colors <- c("kay.r" = "green")
+group_colors <- c("ParticipantK.r" = "green")
 
 ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
@@ -208,8 +216,10 @@ ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-
 # Calculate personal sampling rate Ya'u -----------------------------------
+# WBs were used to calculate PCB concentration
+# Concentrations were calculated for each sampling day 
+# sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
   data.yau.1 <- data.yau[1:6, 4:174]
@@ -258,7 +268,7 @@ for(i in 1:length(SR.yau.1st[, 1])) {
 colnames(SR.yau.1st) <-c("Sampling_Rate", "R2", "p_value")
 congener <- names(head(Veff.yau.1st)[0, ])
 SR.yau.1st <- cbind(congener, SR.yau.1st)
-SR.yau.1st <- data.frame(SR.yau.1st, group = "yau.1st")
+SR.yau.1st <- data.frame(SR.yau.1st, group = "ParticipantY.1st")
 
 # Plot
 SR.yau.1st[, 2:4] <- apply(SR.yau.1st[, 2:4], 2, as.numeric)
@@ -267,7 +277,7 @@ SR.yau.1st$congener <- factor(SR.yau.1st$congener,
                             levels = unique(SR.yau.1st$congener))
 
 # Define colors for each group
-group_colors <- c("yau.1st" = "violet")
+group_colors <- c("ParticipantY.1st" = "violet")
 
 ggplot(SR.yau.1st[SR.yau.1st$Sampling_Rate > 0 & SR.yau.1st$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
@@ -301,7 +311,7 @@ for(i in 1:length(SR.yau.2nd[, 1])) {
 colnames(SR.yau.2nd) <-c("Sampling_Rate", "R2", "p_value")
 congener <- names(head(Veff.yau.2nd)[0, ])
 SR.yau.2nd <- cbind(congener, SR.yau.2nd)
-SR.yau.2nd <- data.frame(SR.yau.2nd, group = "yau.2nd")
+SR.yau.2nd <- data.frame(SR.yau.2nd, group = "ParticipantY.2nd")
 
 # Plot
 SR.yau.2nd[, 2:4] <- apply(SR.yau.2nd[, 2:4], 2, as.numeric)
@@ -310,7 +320,7 @@ SR.yau.2nd$congener <- factor(SR.yau.2nd$congener,
                               levels = unique(SR.yau.2nd$congener))
 
 # Define colors for each group
-group_colors <- c("yau.2nd" = "cyan")
+group_colors <- c("ParticipantY.2nd" = "cyan")
 
 ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
@@ -342,4 +352,80 @@ ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ]
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
+ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
+       aes(x = congener, y = Sampling_Rate)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(aspect.ratio = 4/16) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
+
+# Potential regressions ---------------------------------------------------
+# Read logKoa
+logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
+                                  col_names = TRUE, col_types = NULL))
+
+# Reshape the dataset into a long format
+logKoa_long <- logKoa %>%
+  gather(key = "variable", value = "logKoa", -congener)
+
+# Combine the datasets based on the 'congener' column
+combined_data <- merge(combined_SR, logKoa_long, by = "congener")
+
+# Perform exponential regression with the specified condition
+exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
+               data = subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
+               start = list(a = 1, b = 1))
+
+# Extract coefficients
+a_value <- coef(exp_reg)[["a"]]
+b_value <- coef(exp_reg)[["b"]]
+
+# Calculate R-squared value
+RSS <- sum(residuals(exp_reg)^2)
+TSS <- sum((selected_data$Sampling_Rate - mean(selected_data$Sampling_Rate))^2)
+rsquared <- 1 - RSS/TSS
+
+# Create a data frame for text annotations
+annotation_df <- data.frame(
+  equation = sprintf("SR = %.3f * exp(%.3f * logKoa)", a_value, b_value),
+  rsquared = sprintf("R-squared = %.3f", rsquared),
+  x = max(selected_data$logKoa),  # Set x to the maximum logKoa value
+  y = max(selected_data$Sampling_Rate),  # Set y to the maximum Sampling Rate value
+  group = "exp regression"  # Specify a group for the text annotations
+)
+
+# Predict values and confidence intervals
+prediction_data <- data.frame(logKoa = seq(min(selected_data$logKoa),
+                                           max(selected_data$logKoa),
+                                           length.out = 100))
+prediction_data$fit <- predict(exp_reg, newdata = prediction_data,
+                               interval = "confidence")
+
+# Plot the data with the filtered exponential regression line
+ggplot(subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
+       aes(x = logKoa, y = Sampling_Rate, color = group)) +
+  geom_point() +
+  geom_line(data = data.frame(logKoa = seq(min(selected_data$logKoa),
+                                           max(selected_data$logKoa),
+                                           length.out = 100)),
+            aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
+            color = "red", linetype = "solid", size = 1) +  # Add exponential regression line
+  geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
+            hjust = 1.5, vjust = 5, size = 3) +
+  geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
+            hjust = 2.6, vjust = 7, size = 3) +
+  theme_bw() +
+  labs(
+    x = "logKoa",
+    y = "Sampling Rate",
+    title = paste("Sampling Rate vs. logKoa")
+  ) +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 12, face = "bold")
+  )
 
