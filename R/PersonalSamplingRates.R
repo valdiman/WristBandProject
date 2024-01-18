@@ -105,14 +105,10 @@ SR.amanda.r[, 2:4] <- apply(SR.amanda.r[, 2:4], 2, as.numeric)
 SR.amanda.r$congener <- factor(SR.amanda.r$congener,
                             levels = unique(SR.amanda.r$congener))
 
-# Define colors for each group
-group_colors <- c("ParticipantA.r" = "blue")
-
 # Plot with legend
 ggplot(SR.amanda.r[SR.amanda.r$Sampling_Rate > 0 & SR.amanda.r$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
-  scale_color_manual(values = group_colors, name = "Group") +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Sampling Rates Right (m"^3*"/d)"))) +
@@ -128,13 +124,9 @@ SR.amanda.l[, 2:4] <- apply(SR.amanda.l[, 2:4], 2, as.numeric)
 SR.amanda.l$congener <- factor(SR.amanda.l$congener,
                                levels = unique(SR.amanda.l$congener))
 
-# Define colors for each group
-group_colors <- c("ParticipantA.l" = "red")
-
 ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
-  scale_color_manual(values = group_colors, name = "Group") +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Sampling Rates Right (m"^3*"/d)"))) +
@@ -200,13 +192,9 @@ SR.kay.r[, 2:4] <- apply(SR.kay.r[, 2:4], 2, as.numeric)
 SR.kay.r$congener <- factor(SR.kay.r$congener,
                                levels = unique(SR.kay.r$congener))
 
-# Define colors for each group
-group_colors <- c("ParticipantK.r" = "green")
-
 ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
-  scale_color_manual(values = group_colors, name = "Group") +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Sampling Rates Right (m"^3*"/d)"))) +
@@ -276,13 +264,9 @@ SR.yau.1st[, 2:4] <- apply(SR.yau.1st[, 2:4], 2, as.numeric)
 SR.yau.1st$congener <- factor(SR.yau.1st$congener,
                             levels = unique(SR.yau.1st$congener))
 
-# Define colors for each group
-group_colors <- c("ParticipantY.1st" = "violet")
-
 ggplot(SR.yau.1st[SR.yau.1st$Sampling_Rate > 0 & SR.yau.1st$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
-  scale_color_manual(values = group_colors, name = "Group") +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
@@ -319,13 +303,9 @@ SR.yau.2nd[, 2:4] <- apply(SR.yau.2nd[, 2:4], 2, as.numeric)
 SR.yau.2nd$congener <- factor(SR.yau.2nd$congener,
                               levels = unique(SR.yau.2nd$congener))
 
-# Define colors for each group
-group_colors <- c("ParticipantY.2nd" = "cyan")
-
 ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
-  scale_color_manual(values = group_colors, name = "Group") +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
@@ -341,27 +321,42 @@ combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r, SR.yau.1st,
                      SR.yau.2nd)
 
 # Plot the combined data with different colors for each group
-ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
+Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
-  geom_point() +
+  geom_point(size = 1) +
   theme_bw() +
-  theme(aspect.ratio = 4/16) +
+  theme(aspect.ratio = 5/20) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.x = element_text(face = "bold", size = 7,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7)) +
+  scale_color_discrete(name = "Participants")
+
+# See plot
+print(Plot.SRs)
+# Save plot
+ggsave("Output/Plots/SRsV01.png",
+       plot = Plot.SRs, width = 15, height = 5, dpi = 500)
+
+# Box plot
+Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
+       aes(x = congener, y = Sampling_Rate)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(aspect.ratio = 5/20) +
   ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 10),
         axis.title.y = element_text(face = "bold", size = 10),
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate)) +
-  geom_boxplot() +
-  theme_bw() +
-  theme(aspect.ratio = 4/16) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
-        axis.title.x = element_text(face = "bold", size = 7))
+# See plot
+print(Plot.SRs.boxplot)
+# Save plot
+ggsave("Output/Plots/SRsBoxplotV01.png",
+       plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
 
 # Potential regressions ---------------------------------------------------
 # Read logKoa
@@ -374,6 +369,13 @@ logKoa_long <- logKoa %>%
 
 # Combine the datasets based on the 'congener' column
 combined_data <- merge(combined_SR, logKoa_long, by = "congener")
+
+# Select participant with high SR in the high PCBs
+group1 <- "ParticipantA.r"
+group2 <- "ParticipantA.l"
+
+# Filter the data for the selected groups
+selected_data <- combined_data[combined_data$group %in% c(group1, group2), ]
 
 # Perform exponential regression with the specified condition
 exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
@@ -398,34 +400,31 @@ annotation_df <- data.frame(
   group = "exp regression"  # Specify a group for the text annotations
 )
 
-# Predict values and confidence intervals
-prediction_data <- data.frame(logKoa = seq(min(selected_data$logKoa),
-                                           max(selected_data$logKoa),
-                                           length.out = 100))
-prediction_data$fit <- predict(exp_reg, newdata = prediction_data,
-                               interval = "confidence")
-
 # Plot the data with the filtered exponential regression line
-ggplot(subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
+Plot.exp.regr <- ggplot(subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
        aes(x = logKoa, y = Sampling_Rate, color = group)) +
   geom_point() +
   geom_line(data = data.frame(logKoa = seq(min(selected_data$logKoa),
                                            max(selected_data$logKoa),
                                            length.out = 100)),
             aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
-            color = "red", linetype = "solid", size = 1) +  # Add exponential regression line
+            color = "red", linetype = "solid", linewidth = 1) +  # Add exponential regression line
   geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
-            hjust = 1.5, vjust = 5, size = 3) +
+            hjust = 2, vjust = 5, size = 4) +
   geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
-            hjust = 2.6, vjust = 7, size = 3) +
+            hjust = 3.5, vjust = 7, size = 4) +
   theme_bw() +
-  labs(
-    x = "logKoa",
-    y = "Sampling Rate",
-    title = paste("Sampling Rate vs. logKoa")
-  ) +
-  theme(
-    axis.text = element_text(size = 10),
-    axis.title = element_text(size = 12, face = "bold")
-  )
+  theme(aspect.ratio = 10/10) +
+  xlab(expression(bold("log Koa (PCBi)"))) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 14),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 14)) +
+  scale_color_discrete(name = "Participants")
 
+# See plot
+print(Plot.exp.regr)
+# Save plot
+ggsave("Output/Plots/SRExpRegresionV01.png",
+       plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
