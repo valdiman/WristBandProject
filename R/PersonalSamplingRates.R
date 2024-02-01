@@ -6,6 +6,7 @@ install.packages("readxl") #say no!
 install.packages("gridExtra")
 install.packages("ggplot2")
 install.packages("tidyr")
+install.packages("dplyr")
 
 # Load libraries
 {
@@ -13,6 +14,7 @@ install.packages("tidyr")
   library(ggplot2)
   library(gridExtra)
   library(tidyr)
+  library(dplyr)
 }
 
 # Read data from excel ----------------------------------------------------
@@ -339,6 +341,30 @@ print(Plot.SRs)
 # Save plot
 ggsave("Output/Plots/SRsV01.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
+
+# Calculate averages
+# Filter the data to include only rows where p_value is less than 0.05
+filtered_data <- combined_SR %>%
+  filter(p_value < 0.05)
+
+# Calculate the average Sampling_Rate for each congener
+average_sampling_rate <- filtered_data %>%
+  group_by(congener) %>%
+  summarise(average_sampling_rate = mean(Sampling_Rate))
+
+# Remove rows where average_sampling_rate is 0
+average_sampling_rate <- average_sampling_rate %>%
+  filter(average_sampling_rate != 0)
+
+# Calculate the standard deviation for each congener
+summary_stats <- filtered_data %>%
+  group_by(congener) %>%
+  summarise(sd_sampling_rate = sd(Sampling_Rate))
+
+# Merge average_sampling_rate and summary_stats by congener
+result <- merge(average_sampling_rate, summary_stats, by = "congener")
+
+
 
 # Box plot
 Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
