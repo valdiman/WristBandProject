@@ -364,7 +364,8 @@ summary_stats <- filtered_data %>%
 # Merge average_sampling_rate and summary_stats by congener
 result <- merge(average_sampling_rate, summary_stats, by = "congener")
 
-
+# Export data
+write.csv(result, file = "Output/Data/csv/HumanSamplingRates.csv")
 
 # Box plot
 Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
