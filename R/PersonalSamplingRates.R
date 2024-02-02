@@ -7,6 +7,7 @@ install.packages("gridExtra")
 install.packages("ggplot2")
 install.packages("tidyr")
 install.packages("dplyr")
+install.packages("RColorBrewer")
 
 # Load libraries
 {
@@ -15,6 +16,7 @@ install.packages("dplyr")
   library(gridExtra)
   library(tidyr)
   library(dplyr)
+  library(RColorBrewer)
 }
 
 # Read data from excel ----------------------------------------------------
@@ -339,33 +341,8 @@ Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_val
 # See plot
 print(Plot.SRs)
 # Save plot
-ggsave("Output/Plots/SRsV01.png",
+ggsave("Output/Plots/SRsV02.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
-
-# Calculate averages
-# Filter the data to include only rows where p_value is less than 0.05
-filtered_data <- combined_SR %>%
-  filter(p_value < 0.05)
-
-# Calculate the average Sampling_Rate for each congener
-average_sampling_rate <- filtered_data %>%
-  group_by(congener) %>%
-  summarise(average_sampling_rate = mean(Sampling_Rate))
-
-# Remove rows where average_sampling_rate is 0
-average_sampling_rate <- average_sampling_rate %>%
-  filter(average_sampling_rate != 0)
-
-# Calculate the standard deviation for each congener
-summary_stats <- filtered_data %>%
-  group_by(congener) %>%
-  summarise(sd_sampling_rate = sd(Sampling_Rate))
-
-# Merge average_sampling_rate and summary_stats by congener
-result <- merge(average_sampling_rate, summary_stats, by = "congener")
-
-# Export data
-write.csv(result, file = "Output/Data/csv/HumanSamplingRates.csv")
 
 # Box plot
 Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
@@ -382,7 +359,7 @@ Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_
 # See plot
 print(Plot.SRs.boxplot)
 # Save plot
-ggsave("Output/Plots/SRsBoxplotV01.png",
+ggsave("Output/Plots/SRsBoxplotV02.png",
        plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
 
 # Potential regressions ---------------------------------------------------
@@ -457,7 +434,7 @@ Plot.exp.regr.all <- ggplot(subset(combined_data, Sampling_Rate > 0 & p_value < 
 # See plot
 print(Plot.exp.regr.all)
 # Save plot
-ggsave("Output/Plots/SRExpRegresionAllV01.png",
+ggsave("Output/Plots/SRExpRegresionAllV02.png",
        plot = Plot.exp.regr.all, width = 8, height = 8, dpi = 500)
 
 # Select participant with high SR in the high PCBs
@@ -518,3 +495,56 @@ print(Plot.exp.regr)
 # Save plot
 ggsave("Output/Plots/SRExpRegresionV01.png",
        plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
+
+# Profiles ----------------------------------------------------------------
+# Select data 
+stat.amanda <- t(data.frame(data.amanda.2))
+worn.amanda.R <- data.amanda[8, 3:175]
+worn.amanda.L <- data.amanda[13, 3:175]
+value.amanda <- rbind(stat.amanda, worn.amanda.R, worn.amanda.L)
+tmp <- rowSums(value.amanda, na.rm = TRUE)
+profile.amanda <- sweep(value.amanda, 1, tmp, FUN = "/")
+profile.amanda <- t(profile.amanda)
+profile_matrix <- as.matrix(profile.amanda)
+profile.amanda <- data.frame(RowNames = rownames(profile_matrix),
+                             profile_matrix)
+rownames(profile.amanda) <- NULL
+colnames(profile.amanda) <- c("congeners", "Stat.day5", "ParticipantA.r.day5",
+                              "ParticipantA.l.day5")
+profile.amanda$congeners <- factor(profile.amanda$congeners,
+                                   levels = unique(profile.amanda$congeners))
+
+# Reshape the data frame to long format
+profile_long <- profile.amanda %>%
+  pivot_longer(cols = c(Stat.day5, ParticipantA.r.day5, ParticipantA.l.day5),
+               names_to = "Participant",
+               values_to = "Value")
+
+# Define color
+palette <- brewer.pal(3, "Set1")
+
+# Profile plot
+Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                             fill = Participant)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylim(0, 0.12) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  scale_fill_manual(name = "Samples", values = palette)
+
+# see plot
+print(Plot.prof.amanda)
+
+# Save plot
+ggsave("Output/Plots/ProfAmandaV01.png",
+       plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
+
+
+
