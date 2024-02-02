@@ -397,6 +397,69 @@ logKoa_long <- logKoa %>%
 # Combine the datasets based on the 'congener' column
 combined_data <- merge(combined_SR, logKoa_long, by = "congener")
 
+# Analisys all data
+# Perform exponential regression with the specified condition
+exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
+               data = subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
+               start = list(a = 1, b = 1))
+
+# Extract coefficients
+a_value <- coef(exp_reg)[["a"]]
+b_value <- coef(exp_reg)[["b"]]
+
+# Calculate R-squared value
+RSS <- sum(residuals(exp_reg)^2)
+TSS <- sum((combined_data$Sampling_Rate - mean(combined_data$Sampling_Rate))^2)
+rsquared <- 1 - RSS/TSS
+
+# Errors
+# Calculate Residual Standard Error (RSE)
+RSE <- sqrt(RSS / (length(residuals(exp_reg)) - 2))
+# Calculate Mean Absolute Error (MAE)
+MAE <- mean(abs(residuals(exp_reg)))
+# Calculate Mean Squared Error (MSE)
+MSE <- mean(residuals(exp_reg)^2)
+# Calculate Root Mean Squared Error (RMSE)
+RMSE <- sqrt(MSE)
+
+# Create a data frame for text annotations
+annotation_df <- data.frame(
+  equation = sprintf("SR = %.3f * exp(%.3f * logKoa)", a_value, b_value),
+  rsquared = sprintf("R-squared = %.3f", rsquared),
+  x = max(combined_data$logKoa),  # Set x to the maximum logKoa value
+  y = max(combined_data$Sampling_Rate),  # Set y to the maximum Sampling Rate value
+  group = "exp regression"  # Specify a group for the text annotations
+)
+
+# Plot the data with the filtered exponential regression line
+Plot.exp.regr.all <- ggplot(subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
+       aes(x = logKoa, y = Sampling_Rate, color = group)) +
+  geom_point() +
+  geom_line(data = data.frame(logKoa = seq(min(combined_data$logKoa),
+                                           max(combined_data$logKoa),
+                                           length.out = 100)),
+            aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
+            color = "red", linetype = "solid", linewidth = 1) +  # Add exponential regression line
+  geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
+            hjust = 2, vjust = 1, size = 4) +
+  geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
+            hjust = 3.5, vjust = 3, size = 4) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10) +
+  xlab(expression(bold("log Koa (PCBi)"))) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 14),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 14)) +
+  scale_color_discrete(name = "Participants")
+
+# See plot
+print(Plot.exp.regr.all)
+# Save plot
+ggsave("Output/Plots/SRExpRegresionAllV01.png",
+       plot = Plot.exp.regr.all, width = 8, height = 8, dpi = 500)
+
 # Select participant with high SR in the high PCBs
 group1 <- "ParticipantA.r"
 group2 <- "ParticipantA.l"
