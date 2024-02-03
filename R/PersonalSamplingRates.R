@@ -8,6 +8,7 @@ install.packages("ggplot2")
 install.packages("tidyr")
 install.packages("dplyr")
 install.packages("RColorBrewer")
+install.packages("gridExtra")
 
 # Load libraries
 {
@@ -17,6 +18,7 @@ install.packages("RColorBrewer")
   library(tidyr)
   library(dplyr)
   library(RColorBrewer)
+  library(gridExtra)
 }
 
 # Read data from excel ----------------------------------------------------
@@ -496,7 +498,8 @@ print(Plot.exp.regr)
 ggsave("Output/Plots/SRExpRegresionV01.png",
        plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
 
-# Profiles ----------------------------------------------------------------
+
+# Profiles Amanda ---------------------------------------------------------
 # Select data 
 stat.amanda <- t(data.frame(data.amanda.2))
 worn.amanda.R <- data.amanda[8, 3:175]
@@ -526,9 +529,9 @@ palette <- brewer.pal(3, "Set1")
 # Profile plot
 Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
                                              fill = Participant)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
   xlab("") +
-  ylim(0, 0.12) +
+  ylim(0, max(profile_long$Value) * 1.1) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60,
@@ -546,5 +549,239 @@ print(Plot.prof.amanda)
 ggsave("Output/Plots/ProfAmandaV01.png",
        plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
 
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
+                                y = ParticipantA.r.day5, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.amanda,
+                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+ii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.l.day5,
+                                 label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.amanda,
+                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
+                                  label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.amanda,
+                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
+
+# Save plot
+ggsave("Output/Plots/ProfDotAmandaV01.png",
+       plot = combined_plot, width = 15, height = 5, dpi = 500)
+
+# Profiles Kay ------------------------------------------------------------
+# Select data 
+stat.kay <- t(data.frame(data.kay.2))
+worn.kay.R <- data.kay[8, 3:175]
+value.kay <- rbind(stat.kay, worn.kay.R)
+tmp <- rowSums(value.kay, na.rm = TRUE)
+profile.kay <- sweep(value.kay, 1, tmp, FUN = "/")
+profile.kay <- t(profile.kay)
+profile_matrix <- as.matrix(profile.kay)
+profile.kay <- data.frame(RowNames = rownames(profile_matrix),
+                             profile_matrix)
+rownames(profile.kay) <- NULL
+colnames(profile.kay) <- c("congeners", "Stat.day5", "ParticipantK.r.day5")
+profile.kay$congeners <- factor(profile.kay$congeners,
+                                   levels = unique(profile.kay$congeners))
+
+# Reshape the data frame to long format
+profile_long <- profile.kay %>%
+  pivot_longer(cols = c(Stat.day5, ParticipantK.r.day5),
+               names_to = "Participant",
+               values_to = "Value")
+
+# Profile plot
+Plot.prof.kay <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                             fill = Participant)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
+
+# see plot
+print(Plot.prof.kay)
+
+# Save plot
+ggsave("Output/Plots/ProfKayV01.png",
+       plot = Plot.prof.kay, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.002  # Define the threshold for labeling
+
+i <- ggplot(profile.kay, aes(x = Stat.day5,
+                                y = ParticipantK.r.day5, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.kay,
+                          abs(Stat.day5 - ParticipantK.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(i)
+
+# Save plot
+ggsave("Output/Plots/ProfDotKayV01.png",
+       plot = i, width = 15, height = 5, dpi = 500)
+
+# Profiles Ya'u -----------------------------------------------------------
+# Select data 
+# HERE
 
 
+stat.yau <- t(data.frame(data.yau.2))
+worn.amanda.R <- data.amanda[8, 3:175]
+worn.amanda.L <- data.amanda[13, 3:175]
+value.amanda <- rbind(stat.amanda, worn.amanda.R, worn.amanda.L)
+tmp <- rowSums(value.amanda, na.rm = TRUE)
+profile.amanda <- sweep(value.amanda, 1, tmp, FUN = "/")
+profile.amanda <- t(profile.amanda)
+profile_matrix <- as.matrix(profile.amanda)
+profile.amanda <- data.frame(RowNames = rownames(profile_matrix),
+                             profile_matrix)
+rownames(profile.amanda) <- NULL
+colnames(profile.amanda) <- c("congeners", "Stat.day5", "ParticipantA.r.day5",
+                              "ParticipantA.l.day5")
+profile.amanda$congeners <- factor(profile.amanda$congeners,
+                                   levels = unique(profile.amanda$congeners))
+
+# Reshape the data frame to long format
+profile_long <- profile.amanda %>%
+  pivot_longer(cols = c(Stat.day5, ParticipantA.r.day5, ParticipantA.l.day5),
+               names_to = "Participant",
+               values_to = "Value")
+
+# Define color
+palette <- brewer.pal(3, "Set1")
+
+# Profile plot
+Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                             fill = Participant)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  scale_fill_manual(name = "Samples", values = palette)
+
+# see plot
+print(Plot.prof.amanda)
+
+# Save plot
+ggsave("Output/Plots/ProfAmandaV01.png",
+       plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
+                                y = ParticipantA.r.day5, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.amanda,
+                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+ii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.l.day5,
+                                 label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.amanda,
+                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
+                                  label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(profile.amanda,
+                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
+
+# Save plot
+ggsave("Output/Plots/ProfDotAmandaV01.png",
+       plot = combined_plot, width = 15, height = 5, dpi = 500)
