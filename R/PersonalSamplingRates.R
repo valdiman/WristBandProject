@@ -35,7 +35,7 @@ data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
 # sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
-  data.amanda.1 <- data.amanda[1:3,]
+  data.amanda.1 <- data.amanda[3,]
   # Average 3 WBs
   data.amanda.2 <- colMeans(data.amanda.1[, 3:175])
   # Calculate air concentration in ng/m3
@@ -677,38 +677,40 @@ ggsave("Output/Plots/ProfDotKayV01.png",
        plot = i, width = 15, height = 5, dpi = 500)
 
 # Profiles Ya'u -----------------------------------------------------------
-# Select data 
-# HERE
-
-
-stat.yau <- t(data.frame(data.yau.2))
-worn.amanda.R <- data.amanda[8, 3:175]
-worn.amanda.L <- data.amanda[13, 3:175]
-value.amanda <- rbind(stat.amanda, worn.amanda.R, worn.amanda.L)
-tmp <- rowSums(value.amanda, na.rm = TRUE)
-profile.amanda <- sweep(value.amanda, 1, tmp, FUN = "/")
-profile.amanda <- t(profile.amanda)
-profile_matrix <- as.matrix(profile.amanda)
-profile.amanda <- data.frame(RowNames = rownames(profile_matrix),
+tmp <- rowSums(data.yau[, 4:176], na.rm = TRUE)
+profile.yau <- sweep(data.yau[, 4:176], 1, tmp, FUN = "/")
+profile.yau <- cbind(data.yau$congeners, profile.yau)
+profile.yau <- cbind(data.yau$week, profile.yau)
+names(profile.yau)[1] <- "week"
+profile.yau.1st <- profile.yau[profile.yau$week == 1, ]
+prof.yau.1st.day1 <- profile.yau.1st[c(1, 4), ]
+prof.yau.1st.day3 <- profile.yau.1st[c(2, 5), ]
+prof.yau.1st.day5 <- profile.yau.1st[c(3, 6), ]
+profile.yau.2nd <- profile.yau[profile.yau$week == 2, ]
+prof.yau.2nd.day1 <- profile.yau.2nd[c(1, 4), ]
+prof.yau.2nd.day3 <- profile.yau.2nd[c(2, 5), ]
+prof.yau.2nd.day5 <- profile.yau.2nd[c(3, 6), ]
+# Select week
+# 1st week
+# Day 1
+prof.yau.1st.day1 <- t(prof.yau.1st.day1[, 3:175])
+profile_matrix <- as.matrix(prof.yau.1st.day1)
+prof.yau.1st.day1 <- data.frame(RowNames = rownames(profile_matrix),
                              profile_matrix)
-rownames(profile.amanda) <- NULL
-colnames(profile.amanda) <- c("congeners", "Stat.day5", "ParticipantA.r.day5",
-                              "ParticipantA.l.day5")
-profile.amanda$congeners <- factor(profile.amanda$congeners,
-                                   levels = unique(profile.amanda$congeners))
+rownames(prof.yau.1st.day1) <- NULL
+colnames(prof.yau.1st.day1) <- c("congeners", "Stat.1st.day1", "ParticipantY.1st.day1")
+prof.yau.1st.day1$congeners <- factor(prof.yau.1st.day1$congeners,
+                                   levels = unique(prof.yau.1st.day1$congeners))
 
 # Reshape the data frame to long format
-profile_long <- profile.amanda %>%
-  pivot_longer(cols = c(Stat.day5, ParticipantA.r.day5, ParticipantA.l.day5),
-               names_to = "Participant",
+profile_long <- prof.yau.1st.day1 %>%
+  pivot_longer(cols = c(Stat.1st.day1, ParticipantY.1st.day1),
+               names_to = "Samples",
                values_to = "Value")
 
-# Define color
-palette <- brewer.pal(3, "Set1")
-
 # Profile plot
-Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
-                                             fill = Participant)) +
+Plot.prof.yau <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                             fill = Samples)) +
   geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
   xlab("") +
   ylim(0, max(profile_long$Value) * 1.1) +
@@ -719,24 +721,23 @@ Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
         axis.title.x = element_text(face = "bold", size = 7),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  scale_fill_manual(name = "Samples", values = palette)
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
 
 # see plot
-print(Plot.prof.amanda)
+print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfAmandaV01.png",
-       plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
+ggsave("Output/Plots/ProfYau1stV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plots
 threshold <- 0.005  # Define the threshold for labeling
 
-i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
-                                y = ParticipantA.r.day5, label = congeners)) +
+i <- ggplot(prof.yau.1st.day1, aes(x = Stat.1st.day1,
+                                y = ParticipantY.1st.day1, label = congeners)) +
   geom_point() +
-  geom_text(data = subset(profile.amanda,
-                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+  geom_text(data = subset(prof.yau.1st.day1,
+                          abs(Stat.1st.day1 - ParticipantY.1st.day1) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.1) +
@@ -748,40 +749,301 @@ i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13))
 
-ii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.l.day5,
-                                 label = congeners)) +
-  geom_point() +
-  geom_text(data = subset(profile.amanda,
-                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
-            size = 3, vjust = 1.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10,
-        axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 13),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
+# Day 3
+prof.yau.1st.day3 <- t(prof.yau.1st.day3[, 3:175])
+profile_matrix <- as.matrix(prof.yau.1st.day3)
+prof.yau.1st.day3 <- data.frame(RowNames = rownames(profile_matrix),
+                                profile_matrix)
+rownames(prof.yau.1st.day3) <- NULL
+colnames(prof.yau.1st.day3) <- c("congeners", "Stat.1st.day3", "ParticipantY.1st.day3")
+prof.yau.1st.day3$congeners <- factor(prof.yau.1st.day3$congeners,
+                                      levels = unique(prof.yau.1st.day3$congeners))
 
-iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
-                                  label = congeners)) +
-  geom_point() +
-  geom_text(data = subset(profile.amanda,
-                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
-            size = 3, vjust = 1.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10,
-        axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 13),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
+# Reshape the data frame to long format
+profile_long <- prof.yau.1st.day3 %>%
+  pivot_longer(cols = c(Stat.1st.day3, ParticipantY.1st.day3),
+               names_to = "Samples",
+               values_to = "Value")
 
-combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
+# Profile plot
+Plot.prof.yau <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                          fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
+
+# see plot
+print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfDotAmandaV01.png",
-       plot = combined_plot, width = 15, height = 5, dpi = 500)
+ggsave("Output/Plots/ProfYau1stV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(prof.yau.1st.day3, aes(x = Stat.1st.day3,
+                                   y = ParticipantY.1st.day3, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(prof.yau.1st.day3,
+                          abs(Stat.1st.day3 - ParticipantY.1st.day3) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# Day 5
+prof.yau.1st.day5 <- t(prof.yau.1st.day5[, 3:175])
+profile_matrix <- as.matrix(prof.yau.1st.day5)
+prof.yau.1st.day5 <- data.frame(RowNames = rownames(profile_matrix),
+                                profile_matrix)
+rownames(prof.yau.1st.day5) <- NULL
+colnames(prof.yau.1st.day5) <- c("congeners", "Stat.1st.day5", "ParticipantY.1st.day5")
+prof.yau.1st.day5$congeners <- factor(prof.yau.1st.day5$congeners,
+                                      levels = unique(prof.yau.1st.day5$congeners))
+
+# Reshape the data frame to long format
+profile_long <- prof.yau.1st.day5 %>%
+  pivot_longer(cols = c(Stat.1st.day5, ParticipantY.1st.day5),
+               names_to = "Samples",
+               values_to = "Value")
+
+# Profile plot
+Plot.prof.yau <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                          fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1stV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(prof.yau.1st.day5, aes(x = Stat.1st.day5,
+                                   y = ParticipantY.1st.day5, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(prof.yau.1st.day5,
+                          abs(Stat.1st.day5 - ParticipantY.1st.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(i)
+
+# 2nd week
+# Day 1
+prof.yau.2nd.day1 <- t(prof.yau.2nd.day1[, 3:175])
+profile_matrix <- as.matrix(prof.yau.2nd.day1)
+prof.yau.2nd.day1 <- data.frame(RowNames = rownames(profile_matrix),
+                                profile_matrix)
+rownames(prof.yau.2nd.day1) <- NULL
+colnames(prof.yau.2nd.day1) <- c("congeners", "Stat.2nd.day1", "ParticipantY.2nd.day1")
+prof.yau.2nd.day1$congeners <- factor(prof.yau.2nd.day1$congeners,
+                                      levels = unique(prof.yau.2nd.day1$congeners))
+
+# Reshape the data frame to long format
+profile_long <- prof.yau.2nd.day1 %>%
+  pivot_longer(cols = c(Stat.2nd.day1, ParticipantY.2nd.day1),
+               names_to = "Samples",
+               values_to = "Value")
+
+# Profile plot
+Plot.prof.yau <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                          fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1stV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(prof.yau.2nd.day1, aes(x = Stat.2nd.day1,
+                                   y = ParticipantY.2nd.day1, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(prof.yau.2nd.day1,
+                          abs(Stat.2nd.day1 - ParticipantY.2nd.day1) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(i)
+
+# Day 3
+prof.yau.2nd.day3 <- t(prof.yau.2nd.day3[, 3:175])
+profile_matrix <- as.matrix(prof.yau.2nd.day3)
+prof.yau.2nd.day3 <- data.frame(RowNames = rownames(profile_matrix),
+                                profile_matrix)
+rownames(prof.yau.2nd.day3) <- NULL
+colnames(prof.yau.2nd.day3) <- c("congeners", "Stat.2nd.day3", "ParticipantY.2nd.day3")
+prof.yau.2nd.day3$congeners <- factor(prof.yau.2nd.day3$congeners,
+                                      levels = unique(prof.yau.2nd.day3$congeners))
+
+# Reshape the data frame to long format
+profile_long <- prof.yau.2nd.day3 %>%
+  pivot_longer(cols = c(Stat.2nd.day3, ParticipantY.2nd.day3),
+               names_to = "Samples",
+               values_to = "Value")
+
+# Profile plot
+Plot.prof.yau <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                          fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1stV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(prof.yau.1st.day3, aes(x = Stat.1st.day3,
+                                   y = ParticipantY.1st.day3, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(prof.yau.1st.day3,
+                          abs(Stat.1st.day3 - ParticipantY.1st.day3) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# Day 5
+prof.yau.1st.day5 <- t(prof.yau.1st.day5[, 3:175])
+profile_matrix <- as.matrix(prof.yau.1st.day5)
+prof.yau.1st.day5 <- data.frame(RowNames = rownames(profile_matrix),
+                                profile_matrix)
+rownames(prof.yau.1st.day5) <- NULL
+colnames(prof.yau.1st.day5) <- c("congeners", "Stat.1st.day5", "ParticipantY.1st.day5")
+prof.yau.1st.day5$congeners <- factor(prof.yau.1st.day5$congeners,
+                                      levels = unique(prof.yau.1st.day5$congeners))
+
+# Reshape the data frame to long format
+profile_long <- prof.yau.1st.day5 %>%
+  pivot_longer(cols = c(Stat.1st.day5, ParticipantY.1st.day5),
+               names_to = "Samples",
+               values_to = "Value")
+
+# Profile plot
+Plot.prof.yau <- ggplot(profile_long, aes(x = congeners, y = Value,
+                                          fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
+  xlab("") +
+  ylim(0, max(profile_long$Value) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60,
+                                   hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1stV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plots
+threshold <- 0.005  # Define the threshold for labeling
+
+i <- ggplot(prof.yau.1st.day5, aes(x = Stat.1st.day5,
+                                   y = ParticipantY.1st.day5, label = congeners)) +
+  geom_point() +
+  geom_text(data = subset(prof.yau.1st.day5,
+                          abs(Stat.1st.day5 - ParticipantY.1st.day5) > threshold),
+            size = 3, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.1) +
+  ylim(0, 0.1) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(i)
+
+
+
+
