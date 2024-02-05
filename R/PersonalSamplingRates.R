@@ -35,7 +35,7 @@ data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
 # sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
-  data.amanda.1 <- data.amanda[3,]
+  data.amanda.1 <- data.amanda[1:3, ]
   # Average 3 WBs
   data.amanda.2 <- colMeans(data.amanda.1[, 3:175])
   # Calculate air concentration in ng/m3
