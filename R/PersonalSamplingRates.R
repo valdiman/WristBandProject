@@ -546,7 +546,7 @@ Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
 print(Plot.prof.amanda)
 
 # Save plot
-ggsave("Output/Plots/ProfAmandaV01.png",
+ggsave("Output/Plots/ProfAmanada5dayBarV01.png",
        plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
 
 # 1:1 plots
@@ -559,8 +559,8 @@ i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
                           abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 10/10,
         axis.text.x = element_text(face = "bold", size = 12),
@@ -575,8 +575,8 @@ ii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.l.day5,
                           abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 10/10,
         axis.text.x = element_text(face = "bold", size = 12),
@@ -591,8 +591,8 @@ iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
                           abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 10/10,
         axis.text.x = element_text(face = "bold", size = 12),
@@ -603,7 +603,7 @@ iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
 combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
 
 # Save plot
-ggsave("Output/Plots/ProfDotAmandaV01.png",
+ggsave("Output/Plots/ProfAmanda5dayDotV01.png",
        plot = combined_plot, width = 15, height = 5, dpi = 500)
 
 # Profiles Kay ------------------------------------------------------------
@@ -647,7 +647,7 @@ Plot.prof.kay <- ggplot(profile_long, aes(x = congeners, y = Value,
 print(Plot.prof.kay)
 
 # Save plot
-ggsave("Output/Plots/ProfKayV01.png",
+ggsave("Output/Plots/ProfKay5dayBarV01.png",
        plot = Plot.prof.kay, width = 15, height = 5, dpi = 500)
 
 # 1:1 plots
@@ -660,8 +660,8 @@ i <- ggplot(profile.kay, aes(x = Stat.day5,
                           abs(Stat.day5 - ParticipantK.r.day5) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 10/10,
         axis.text.x = element_text(face = "bold", size = 12),
@@ -673,7 +673,7 @@ i <- ggplot(profile.kay, aes(x = Stat.day5,
 print(i)
 
 # Save plot
-ggsave("Output/Plots/ProfDotKayV01.png",
+ggsave("Output/Plots/ProfKay5dayDotV01.png",
        plot = i, width = 15, height = 5, dpi = 500)
 
 # Profiles Ya'u -----------------------------------------------------------
@@ -742,8 +742,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.1,
                           abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 10/10,
         axis.text.x = element_text(face = "bold", size = 12),
@@ -929,8 +929,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.1,
                           abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.1) +
-  ylim(0, 0.1) +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 10/10,
         axis.text.x = element_text(face = "bold", size = 12),
