@@ -498,7 +498,6 @@ print(Plot.exp.regr)
 ggsave("Output/Plots/SRExpRegresionV01.png",
        plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
 
-
 # Profiles Amanda ---------------------------------------------------------
 # Select data 
 stat.amanda <- t(data.frame(data.amanda.2))
@@ -512,14 +511,14 @@ profile_matrix <- as.matrix(profile.amanda)
 profile.amanda <- data.frame(RowNames = rownames(profile_matrix),
                              profile_matrix)
 rownames(profile.amanda) <- NULL
-colnames(profile.amanda) <- c("congeners", "Stat.day5", "ParticipantA.r.day5",
-                              "ParticipantA.l.day5")
+colnames(profile.amanda) <- c("congeners", "Air", "ParticipantA.r",
+                              "ParticipantA.l")
 profile.amanda$congeners <- factor(profile.amanda$congeners,
                                    levels = unique(profile.amanda$congeners))
 
 # Reshape the data frame to long format
 profile_long <- profile.amanda %>%
-  pivot_longer(cols = c(Stat.day5, ParticipantA.r.day5, ParticipantA.l.day5),
+  pivot_longer(cols = c(Air, ParticipantA.r, ParticipantA.l),
                names_to = "Participant",
                values_to = "Value")
 
@@ -531,7 +530,7 @@ Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
                                              fill = Participant)) +
   geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
   xlab("") +
-  ylim(0, max(profile_long$Value) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60,
@@ -552,11 +551,11 @@ ggsave("Output/Plots/ProfAmanada5dayBarV01.png",
 # 1:1 plots
 threshold <- 0.005  # Define the threshold for labeling
 
-i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
-                                y = ParticipantA.r.day5, label = congeners)) +
+i <- ggplot(profile.amanda, aes(x = ParticipantA.l,
+                                y = ParticipantA.r, label = congeners)) +
   geom_point() +
   geom_text(data = subset(profile.amanda,
-                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+                          abs(ParticipantA.l - ParticipantA.r) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -566,13 +565,15 @@ i <- ggplot(profile.amanda, aes(x = ParticipantA.l.day5,
         axis.text.x = element_text(face = "bold", size = 12),
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("WB Personal A (l)"))) +
+  xlab(expression(bold("WB Personal A (r)")))
 
-ii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.l.day5,
+ii <- ggplot(profile.amanda, aes(x = Air, y = ParticipantA.l,
                                  label = congeners)) +
   geom_point() +
   geom_text(data = subset(profile.amanda,
-                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+                          abs(Air - ParticipantA.l) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -582,13 +583,15 @@ ii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.l.day5,
         axis.text.x = element_text(face = "bold", size = 12),
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air"))) +
+  xlab(expression(bold("WB Personal A (l)")))
 
-iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
+iii <- ggplot(profile.amanda, aes(x = Air, y = ParticipantA.r,
                                   label = congeners)) +
   geom_point() +
   geom_text(data = subset(profile.amanda,
-                          abs(ParticipantA.l.day5 - ParticipantA.r.day5) > threshold),
+                          abs(Air - ParticipantA.r) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -598,7 +601,9 @@ iii <- ggplot(profile.amanda, aes(x = Stat.day5, y = ParticipantA.r.day5,
         axis.text.x = element_text(face = "bold", size = 12),
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air"))) +
+  xlab(expression(bold("WB Personal A (r)")))
 
 combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
 
@@ -618,22 +623,22 @@ profile_matrix <- as.matrix(profile.kay)
 profile.kay <- data.frame(RowNames = rownames(profile_matrix),
                              profile_matrix)
 rownames(profile.kay) <- NULL
-colnames(profile.kay) <- c("congeners", "Stat.day5", "ParticipantK.r.day5")
+colnames(profile.kay) <- c("congeners", "Air", "ParticipantK.r")
 profile.kay$congeners <- factor(profile.kay$congeners,
                                    levels = unique(profile.kay$congeners))
 
 # Reshape the data frame to long format
 profile_long <- profile.kay %>%
-  pivot_longer(cols = c(Stat.day5, ParticipantK.r.day5),
-               names_to = "Participant",
+  pivot_longer(cols = c(Air, ParticipantK.r),
+               names_to = "Samples",
                values_to = "Value")
 
 # Profile plot
 Plot.prof.kay <- ggplot(profile_long, aes(x = congeners, y = Value,
-                                             fill = Participant)) +
+                                             fill = Samples)) +
   geom_bar(stat = "identity", position = "dodge", width = 1, alpha = 0.8) +
   xlab("") +
-  ylim(0, max(profile_long$Value) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60,
@@ -653,11 +658,11 @@ ggsave("Output/Plots/ProfKay5dayBarV01.png",
 # 1:1 plots
 threshold <- 0.002  # Define the threshold for labeling
 
-i <- ggplot(profile.kay, aes(x = Stat.day5,
-                                y = ParticipantK.r.day5, label = congeners)) +
+i <- ggplot(profile.kay, aes(x = Air,
+                                y = ParticipantK.r, label = congeners)) +
   geom_point() +
   geom_text(data = subset(profile.kay,
-                          abs(Stat.day5 - ParticipantK.r.day5) > threshold),
+                          abs(Air - ParticipantK.r) > threshold),
             size = 3, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -667,7 +672,9 @@ i <- ggplot(profile.kay, aes(x = Stat.day5,
         axis.text.x = element_text(face = "bold", size = 12),
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air"))) +
+  xlab(expression(bold("WB Personal K")))
 
 # see plot
 print(i)
@@ -693,6 +700,12 @@ rownames_data <- rownames(profile.yau.1st)
 rownames(profile.yau.1st) <- NULL
 profile.yau.1st <- cbind(Row_Name = rownames_data, profile.yau.1st)
 colnames(profile.yau.1st)[1] <- "congeners"
+colnames(profile.yau.1st)[2] <- "Air.day1"
+colnames(profile.yau.1st)[3] <- "Air.day3"
+colnames(profile.yau.1st)[4] <- "Air.day5"
+colnames(profile.yau.1st)[5] <- "WB Personal Y (1st) day 1"
+colnames(profile.yau.1st)[6] <- "WB Personal Y (1st) day 3"
+colnames(profile.yau.1st)[7] <- "WB Personal Y (1st) day 5"
 
 profile_long <- profile.yau.1st %>%
   as.data.frame() %>%
@@ -701,7 +714,7 @@ profile_long <- profile.yau.1st %>%
                values_to = "Value")
 
 # Day 1
-selected_samples <- c("WB_Stat_day 1", "WB_Personal_day 1")
+selected_samples <- c("Air.day1", "WB Personal Y (1st) day 1")
 profile_long_filtered <- profile_long %>%
   filter(Samples %in% selected_samples)
 profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
@@ -735,11 +748,12 @@ prof.yau.1st[, 2:7] <- lapply(prof.yau.1st[, 2:7],
                               as.numeric)
 threshold <- 0.005  # Define the threshold for labeling
 
-Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.1,
-                                   y = WB_Personal_day.1, label = congeners)) +
+Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day1,
+                                   y = WB.Personal.Y..1st..day.1,
+                                   label = congeners)) +
   geom_point(size = 3) +
   geom_text(data = subset(prof.yau.1st,
-                          abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
+                          abs(Air.day1 - WB.Personal.Y..1st..day.1) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -750,8 +764,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.1,
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("WB Static Day 1"))) +
-  xlab(expression(bold("WB Personal Day 1")))
+  ylab(expression(bold("Air Day 1"))) +
+  xlab(expression(bold("WB Personal Y (1st) day 1")))
 
 # see plot
 print(Plot.prof.yau)
@@ -761,7 +775,7 @@ ggsave("Output/Plots/ProfYau1st1dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 3
-selected_samples <- c("WB_Stat_day 3", "WB_Personal_day 3")
+selected_samples <- c("Air.day3", "WB Personal Y (1st) day 3")
 profile_long_filtered <- profile_long %>%
   filter(Samples %in% selected_samples)
 profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
@@ -774,7 +788,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
   geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
   xlab("") +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, max(profile_long_filtered$Value, na.rm = TRUE) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
@@ -790,11 +804,12 @@ ggsave("Output/Plots/ProfYau1st3dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
-Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.3,
-                                          y = WB_Personal_day.3, label = congeners)) +
+Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
+                                          y = WB.Personal.Y..1st..day.3,
+                                          label = congeners)) +
   geom_point(size = 3) +
   geom_text(data = subset(prof.yau.1st,
-                          abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
+                          abs(Air.day3 - WB.Personal.Y..1st..day.3) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -805,8 +820,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.3,
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("WB Static Day 3"))) +
-  xlab(expression(bold("WB Personal Day 3")))
+  ylab(expression(bold("Air Day 3"))) +
+  xlab(expression(bold("WB Personal Y (1st) Day 3")))
 
 # see plot
 print(Plot.prof.yau)
@@ -816,7 +831,7 @@ ggsave("Output/Plots/ProfYau1st2dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
-selected_samples <- c("WB_Stat_day 5", "WB_Personal_day 5")
+selected_samples <- c("Air.day5", "WB Personal Y (1st) day 5")
 profile_long_filtered <- profile_long %>%
   filter(Samples %in% selected_samples)
 profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
@@ -829,7 +844,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
   geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
   xlab("") +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, max(profile_long_filtered$Value, na.rm = TRUE) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
@@ -845,11 +860,12 @@ ggsave("Output/Plots/ProfYau1st5dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
-Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.5,
-                                          y = WB_Personal_day.5, label = congeners)) +
+Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
+                                          y = WB.Personal.Y..1st..day.5,
+                                          label = congeners)) +
   geom_point(size = 3) +
   geom_text(data = subset(prof.yau.1st,
-                          abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
+                          abs(Air.day5 - WB.Personal.Y..1st..day.5) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -860,8 +876,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.5,
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("WB Static Day 5"))) +
-  xlab(expression(bold("WB Personal Day 5")))
+  ylab(expression(bold("Air day 5"))) +
+  xlab(expression(bold("WB Personal Y (1st) day 5")))
 
 # see plot
 print(Plot.prof.yau)
@@ -880,6 +896,12 @@ rownames_data <- rownames(profile.yau.2nd)
 rownames(profile.yau.2nd) <- NULL
 profile.yau.2nd <- cbind(Row_Name = rownames_data, profile.yau.2nd)
 colnames(profile.yau.2nd)[1] <- "congeners"
+colnames(profile.yau.2nd)[2] <- "Air.day1"
+colnames(profile.yau.2nd)[3] <- "Air.day3"
+colnames(profile.yau.2nd)[4] <- "Air.day5"
+colnames(profile.yau.2nd)[5] <- "WB Personal Y (2nd) day 1"
+colnames(profile.yau.2nd)[6] <- "WB Personal Y (2nd) day 3"
+colnames(profile.yau.2nd)[7] <- "WB Personal Y (2nd) day 5"
 
 profile_long <- profile.yau.2nd %>%
   as.data.frame() %>%
@@ -888,7 +910,7 @@ profile_long <- profile.yau.2nd %>%
                values_to = "Value")
 
 # Day 1
-selected_samples <- c("WB_Stat_day 1", "WB_Personal_day 1")
+selected_samples <- c("Air.day1", "WB Personal Y (2nd) day 1")
 profile_long_filtered <- profile_long %>%
   filter(Samples %in% selected_samples)
 profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
@@ -901,7 +923,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
   geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
   xlab("") +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, max(profile_long_filtered$Value, na.rm = TRUE) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
@@ -922,11 +944,12 @@ prof.yau.2nd[, 2:7] <- lapply(prof.yau.2nd[, 2:7],
                               as.numeric)
 threshold <- 0.005  # Define the threshold for labeling
 
-Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.1,
-                                          y = WB_Personal_day.1, label = congeners)) +
+Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day1,
+                                          y = WB.Personal.Y..2nd..day.1,
+                                          label = congeners)) +
   geom_point(size = 3) +
-  geom_text(data = subset(prof.yau.1st,
-                          abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
+  geom_text(data = subset(prof.yau.2nd,
+                          abs(Air.day1 - WB.Personal.Y..2nd..day.1) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -937,8 +960,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.1,
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("WB Static Day 1"))) +
-  xlab(expression(bold("WB Personal Day 1")))
+  ylab(expression(bold("Air Day 1"))) +
+  xlab(expression(bold("WB Personal Y (2nd) day 1")))
 
 # see plot
 print(Plot.prof.yau)
@@ -948,7 +971,7 @@ ggsave("Output/Plots/ProfYau2nd1dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 3
-selected_samples <- c("WB_Stat_day 3", "WB_Personal_day 3")
+selected_samples <- c("Air.day3", "WB Personal Y (2nd) day 3")
 profile_long_filtered <- profile_long %>%
   filter(Samples %in% selected_samples)
 profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
@@ -961,7 +984,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
   geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
   xlab("") +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, max(profile_long_filtered$Value, na.rm = TRUE) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
@@ -977,11 +1000,12 @@ ggsave("Output/Plots/ProfYau2nd3dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
-Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.3,
-                                          y = WB_Personal_day.3, label = congeners)) +
+Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day3,
+                                          y = WB.Personal.Y..2nd..day.3,
+                                          label = congeners)) +
   geom_point(size = 3) +
-  geom_text(data = subset(prof.yau.1st,
-                          abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
+  geom_text(data = subset(prof.yau.2nd,
+                          abs(Air.day3 - WB.Personal.Y..2nd..day.3) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -992,8 +1016,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.3,
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("WB Static Day 3"))) +
-  xlab(expression(bold("WB Personal Day 3")))
+  ylab(expression(bold("Air Day 3"))) +
+  xlab(expression(bold("WB Personal Y (2nd) Day 3")))
 
 # see plot
 print(Plot.prof.yau)
@@ -1003,7 +1027,7 @@ ggsave("Output/Plots/ProfYau2nd3dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
-selected_samples <- c("WB_Stat_day 5", "WB_Personal_day 5")
+selected_samples <- c("Air.day5", "WB Personal Y (2nd) day 5")
 profile_long_filtered <- profile_long %>%
   filter(Samples %in% selected_samples)
 profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
@@ -1016,7 +1040,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
   geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
   xlab("") +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, max(profile_long_filtered$Value, na.rm = TRUE) * 1.1) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12,
         axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
@@ -1032,11 +1056,12 @@ ggsave("Output/Plots/ProfYau2nd5dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
-Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.5,
-                                          y = WB_Personal_day.5, label = congeners)) +
+Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day5,
+                                          y = WB.Personal.Y..2nd..day.5,
+                                          label = congeners)) +
   geom_point(size = 3) +
-  geom_text(data = subset(prof.yau.1st,
-                          abs(WB_Stat_day.1 - WB_Personal_day.1) > threshold),
+  geom_text(data = subset(prof.yau.2nd,
+                          abs(Air.day5 - WB.Personal.Y..2nd..day.5) > threshold),
             size = 5, vjust = 1.5) +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   xlim(0, 0.15) +
@@ -1047,8 +1072,8 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = WB_Stat_day.5,
         axis.title.x = element_text(face = "bold", size = 13),
         axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("WB Static Day 5"))) +
-  xlab(expression(bold("WB Personal Day 5")))
+  ylab(expression(bold("Air Day 5"))) +
+  xlab(expression(bold("WB Personal Y (2nd) Day 5")))
 
 # see plot
 print(Plot.prof.yau)
