@@ -328,8 +328,11 @@ combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r, SR.yau.1st,
 
 # Plot the combined data with different colors for each group
 Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+                   aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point(size = 1) +
+  geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
+  annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
+           hjust = -0.1, vjust = -1, color = "black", fontface = "bold") +  
   theme_bw() +
   theme(aspect.ratio = 5/20) +
   ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
@@ -343,13 +346,16 @@ Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_val
 # See plot
 print(Plot.SRs)
 # Save plot
-ggsave("Output/Plots/SRsV02.png",
+ggsave("Output/Plots/SRsV03.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
 
 # Box plot
 Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate)) +
   geom_boxplot() +
+  geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
+  annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
+           hjust = -0.1, vjust = -1, color = "black", fontface = "bold") +  
   theme_bw() +
   theme(aspect.ratio = 5/20) +
   ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
@@ -361,7 +367,7 @@ Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_
 # See plot
 print(Plot.SRs.boxplot)
 # Save plot
-ggsave("Output/Plots/SRsBoxplotV02.png",
+ggsave("Output/Plots/SRsBoxplotV03.png",
        plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
 
 # Potential regressions ---------------------------------------------------
