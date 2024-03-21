@@ -406,7 +406,6 @@ ggplot(SR.yau.nw[SR.yau.nw$Sampling_Rate > 0 & SR.yau.nw$p_value < 0.05, ],
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-
 # (2) Remove metadata from Veff.yau.w
 Veff.yau.w.2 <- Veff.yau.w[, 3:175]
 # Create matrix for sampling rate (SR)
@@ -452,6 +451,38 @@ ggplot(SR.yau.w[SR.yau.w$Sampling_Rate > 0 & SR.yau.w$p_value < 0.05, ],
 # Combine the all data frames
 combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r, SR.yau.1st,
                      SR.yau.2nd, SR.yau.nw, SR.yau.w)
+
+# Look at SR and variability
+SR_averages_sd_cv <- combined_SR %>%
+  filter(p_value < 0.05, Sampling_Rate > 0) %>%
+  group_by(congener) %>%
+  summarise(
+    Average_Sampling_Rate = mean(Sampling_Rate, na.rm = TRUE),
+    SD_Sampling_Rate = sd(Sampling_Rate, na.rm = TRUE),
+    CV_Sampling_Rate = (sd(Sampling_Rate, na.rm = TRUE) / mean(Sampling_Rate, na.rm = TRUE)) * 100
+  )
+
+# Plot the average and stdev
+Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_Rate)) +
+  geom_bar(stat = "identity", fill = "black") +
+  geom_errorbar(aes(ymin = Average_Sampling_Rate,
+                    ymax = Average_Sampling_Rate + SD_Sampling_Rate), width = 0.2) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme_bw() +
+  theme(aspect.ratio = 5/20) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.x = element_text(face = "bold", size = 7,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
+
+# See plot
+print(Plot.AV.SR)
+
+# Save plot
+ggsave("Output/Plots/AvSRs.png",
+       plot = Plot.AV.SR, width = 15, height = 5, dpi = 500)
 
 # Plot the combined data with different colors for each group
 Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
