@@ -28,6 +28,8 @@ data.kay <- data.frame(read_excel("Data/Kay.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
 data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
+data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
+                                  col_names = TRUE, col_types = NULL))
 
 # Calculate personal sampling rate Amanda ---------------------------------
 # WBs were used to calculate PCB concentration
@@ -321,10 +323,135 @@ ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
+# Calculate personal sampling rate Ya'u 2nd -------------------------------
+# 3 WBs were not wiped and 3 WBs were wiped
+# WBs were used to calculate PCB concentration
+# Concentrations were calculated for each sampling day 
+# sampling rate of 0.5 m3/d was used for static WBs
+{
+  # Select WBs to calculate air concentration
+  data.yau.2 <- data.yau2[1:3, 5:177]
+  # Calculate air concentration in ng/m3
+  time <- data.yau2[1:3, 1]
+  conc <- t(sweep(data.yau.2, 1, 0.5 * time, "/"))
+  
+  # Calculate Veff for WB nw
+  mass.WD.nw <- data.yau2[4:6, 5:177]
+  Veff.yau.nw <- mass.WD.nw/t(conc)
+  # Add metadata to Veff and change format
+  Veff.yau.nw <- cbind(data.yau2[4:6, 4], data.yau2[4:6, 1], Veff.yau.nw)
+  # Transform to data.frame
+  Veff.yau.nw <- as.data.frame(Veff.yau.nw)
+  # Add names to first 2 columns
+  colnames(Veff.yau.nw)[1:2] <- c("sample", "time.day")
+  # Change characters to numbers format
+  Veff.yau.nw[, 2:175] <- apply(Veff.yau.nw[, 2:175], 2, as.numeric)
+  
+  # Calculate Veff for WB w
+  mass.WD.w <- data.yau2[7:9, 5:177]
+  Veff.yau.w <- mass.WD.w/t(conc)
+  # Add metadata to Veff and change format
+  Veff.yau.w <- cbind(data.yau2[7:9, 4], data.yau2[7:9, 1], Veff.yau.w)
+  # Transform to data.frame
+  Veff.yau.w <- as.data.frame(Veff.yau.w)
+  # Add names to first 2 columns
+  colnames(Veff.yau.w)[1:2] <- c("sample", "time.day")
+  # Change characters to numbers format
+  Veff.yau.w[, 2:175] <- apply(Veff.yau.w[, 2:175], 2, as.numeric)
+  # Select time
+  Veff.yau.nw.t <- Veff.yau.nw[, 2]
+  # Select time
+  Veff.yau.w.t <- Veff.yau.w[, 2]
+}
+
+# Calculate sampling rate (SR) for nw & w (m3/d)
+# (1) Remove metadata from Veff.yau.nw
+Veff.yau.nw.2 <- Veff.yau.nw[, 3:175]
+# Create matrix for sampling rate (SR)
+SR.yau.nw <- matrix(nrow = length(Veff.yau.nw.2[1,]), ncol = 3)
+
+for(i in 1:length(SR.yau.nw[, 1])) {
+  if (sum(!is.na(Veff.yau.nw.2[, i]) & !is.infinite(Veff.yau.nw.2[, i])) == 3) {
+    fit <- lm(Veff.yau.nw.2[, i] ~ 0 + Veff.yau.nw.t)
+    SR.yau.nw[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.nw[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.nw[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+  } else {
+    SR.yau.nw[i, 1] <- 0
+    SR.yau.nw[i, 2] <- 0
+    SR.yau.nw[i, 3] <- 0
+  }
+}
+
+colnames(SR.yau.nw) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.nw.2)[0, ])
+SR.yau.nw <- cbind(congener, SR.yau.nw)
+SR.yau.nw <- data.frame(SR.yau.nw, group = "ParticipantY.nw")
+
+# Plot
+SR.yau.nw[, 2:4] <- apply(SR.yau.nw[, 2:4], 2, as.numeric)
+# Organize PCB names
+SR.yau.nw$congener <- factor(SR.yau.nw$congener,
+                              levels = unique(SR.yau.nw$congener))
+
+ggplot(SR.yau.nw[SR.yau.nw$Sampling_Rate > 0 & SR.yau.nw$p_value < 0.05, ],
+       aes(x = congener, y = Sampling_Rate, color = group)) +
+  geom_point() +
+  theme_bw() +
+  theme(aspect.ratio = 4/16) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 5,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
+
+
+# (2) Remove metadata from Veff.yau.w
+Veff.yau.w.2 <- Veff.yau.w[, 3:175]
+# Create matrix for sampling rate (SR)
+SR.yau.w <- matrix(nrow = length(Veff.yau.w.2[1,]), ncol = 3)
+
+for(i in 1:length(SR.yau.w[, 1])) {
+  if (sum(!is.na(Veff.yau.w.2[, i ]) & !is.infinite(Veff.yau.w.2[, i])) == 3) {
+    fit <- lm(Veff.yau.w.2[, i] ~ 0 + Veff.yau.w.t)
+    SR.yau.w[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.w[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.w[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+  } else {
+    SR.yau.w[i, 1] <- 0
+    SR.yau.w[i, 2] <- 0
+    SR.yau.w[i, 3] <- 0
+  }
+}
+
+colnames(SR.yau.w) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.w.2)[0, ])
+SR.yau.w <- cbind(congener, SR.yau.w)
+SR.yau.w <- data.frame(SR.yau.w, group = "ParticipantY.w")
+
+# Plot
+SR.yau.w[, 2:4] <- apply(SR.yau.w[, 2:4], 2, as.numeric)
+# Organize PCB names
+SR.yau.w$congener <- factor(SR.yau.w$congener,
+                              levels = unique(SR.yau.w$congener))
+
+ggplot(SR.yau.w[SR.yau.w$Sampling_Rate > 0 & SR.yau.w$p_value < 0.05, ],
+       aes(x = congener, y = Sampling_Rate, color = group)) +
+  geom_point() +
+  theme_bw() +
+  theme(aspect.ratio = 4/16) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 5,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7))
+
 # Combine sampling rates --------------------------------------------------
-# Combine the three data frames
+# Combine the all data frames
 combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r, SR.yau.1st,
-                     SR.yau.2nd)
+                     SR.yau.2nd, SR.yau.nw, SR.yau.w)
 
 # Plot the combined data with different colors for each group
 Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
@@ -345,8 +472,36 @@ Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_val
 
 # See plot
 print(Plot.SRs)
+
 # Save plot
-ggsave("Output/Plots/SRsV03.png",
+ggsave("Output/Plots/SRsV04.png",
+       plot = Plot.SRs, width = 15, height = 5, dpi = 500)
+
+# Only Yau
+combined_SR.2 <- rbind(SR.yau.1st, SR.yau.2nd, SR.yau.nw, SR.yau.w)
+
+# Plot the combined data with different colors for each group
+Plot.SRs <- ggplot(combined_SR.2[combined_SR.2$Sampling_Rate > 0 & combined_SR.2$p_value < 0.05, ],
+                   aes(x = congener, y = Sampling_Rate, color = group)) +
+  geom_point(size = 1) +
+  geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
+  annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
+           hjust = -0.1, vjust = -1, color = "black", fontface = "bold") +  
+  theme_bw() +
+  theme(aspect.ratio = 5/20) +
+  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.x = element_text(face = "bold", size = 7,
+                                   angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7)) +
+  scale_color_discrete(name = "Participants")
+
+# See plot
+print(Plot.SRs)
+
+# Save plot
+ggsave("Output/Plots/SRsV05.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
 
 # Box plot
@@ -366,6 +521,7 @@ Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_
 
 # See plot
 print(Plot.SRs.boxplot)
+
 # Save plot
 ggsave("Output/Plots/SRsBoxplotV03.png",
        plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
@@ -441,6 +597,7 @@ Plot.exp.regr.all <- ggplot(subset(combined_data, Sampling_Rate > 0 & p_value < 
 
 # See plot
 print(Plot.exp.regr.all)
+
 # Save plot
 ggsave("Output/Plots/SRExpRegresionAllV02.png",
        plot = Plot.exp.regr.all, width = 8, height = 8, dpi = 500)
@@ -1087,4 +1244,413 @@ print(Plot.prof.yau)
 # Save plot
 ggsave("Output/Plots/ProfYau2nd5dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
+
+# Profiles Ya'u nw & w ----------------------------------------------------
+tmp <- rowSums(data.yau2[, 5:177], na.rm = TRUE)
+profile.yau <- sweep(data.yau2[, 5:177], 1, tmp, FUN = "/")
+profile.yau <- cbind(data.yau2$congeners, profile.yau)
+profile.yau <- cbind(data.yau2$wiped, profile.yau)
+profile.yau <- cbind(data.yau2$static, profile.yau)
+names(profile.yau)[1] <- "static"
+names(profile.yau)[2] <- "wiped"
+names(profile.yau)[3] <- "sample"
+# Select static and days
+# profile.yau.st <- profile.yau[profile.yau$static == 'y', ]
+profile.yau <- t(profile.yau)
+profile.yau <- profile.yau[-c(1:3), ]
+rownames_data <- rownames(profile.yau)
+rownames(profile.yau) <- NULL
+profile.yau <- cbind(Row_Name = rownames_data, profile.yau)
+{
+  colnames(profile.yau)[1] <- "congeners"
+  colnames(profile.yau)[2] <- "Air.day1"
+  colnames(profile.yau)[3] <- "Air.day3"
+  colnames(profile.yau)[4] <- "Air.day5"
+  colnames(profile.yau)[5] <- "WB Personal Y (nw) day 1"
+  colnames(profile.yau)[6] <- "WB Personal Y (nw) day 3"
+  colnames(profile.yau)[7] <- "WB Personal Y (nw) day 5"
+  colnames(profile.yau)[8] <- "WB Personal Y (w) day 1"
+  colnames(profile.yau)[9] <- "WB Personal Y (w) day 3"
+  colnames(profile.yau)[10] <- "WB Personal Y (w) day 5"
+}
+
+profile_long <- profile.yau %>%
+  as.data.frame() %>%
+  pivot_longer(cols = -congeners, 
+               names_to = "Samples", 
+               values_to = "Value")
+
+# Day 1
+selected_samples <- c("Air.day1", "WB Personal Y (nw) day 1",
+                      "WB Personal Y (w) day 1")
+profile_long_filtered <- profile_long %>%
+  filter(Samples %in% selected_samples)
+profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
+profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
+                                          levels = unique(profile_long_filtered$congeners))
+
+# Bar plot
+Plot.prof.yau <- ggplot(profile_long_filtered,
+                        aes(x = congeners, y = Value, fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  ylim(0, max(profile_long_filtered$Value, na.rm = TRUE) * 1.1) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2day1BarV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plot
+prof.yau.1st <- data.frame(profile.yau.1st)
+prof.yau.1st[, 2:7] <- lapply(prof.yau.1st[, 2:7],
+                              as.numeric)
+threshold <- 0.005  # Define the threshold for labeling
+
+Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day1,
+                                          y = WB.Personal.Y..1st..day.1,
+                                          label = congeners)) +
+  geom_point(size = 3) +
+  geom_text(data = subset(prof.yau.1st,
+                          abs(Air.day1 - WB.Personal.Y..1st..day.1) > threshold),
+            size = 5, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air Day 1"))) +
+  xlab(expression(bold("WB Personal Y (1st) day 1")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1st1dayDotV01.png",
+       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
+# Day 3
+selected_samples <- c("Air.day3", "WB Personal Y (nw) day 3",
+                      "WB Personal Y (w) day 3")
+profile_long_filtered <- profile_long %>%
+  filter(Samples %in% selected_samples)
+profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
+profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
+                                          levels = unique(profile_long_filtered$congeners))
+
+# Bar plot
+Plot.prof.yau <- ggplot(profile_long_filtered,
+                        aes(x = congeners, y = Value, fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2day3BarV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plot
+Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
+                                          y = WB.Personal.Y..1st..day.3,
+                                          label = congeners)) +
+  geom_point(size = 3) +
+  geom_text(data = subset(prof.yau.1st,
+                          abs(Air.day3 - WB.Personal.Y..1st..day.3) > threshold),
+            size = 5, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air Day 3"))) +
+  xlab(expression(bold("WB Personal Y (1st) Day 3")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1st2dayDotV01.png",
+       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
+# Day 5
+selected_samples <- c("Air.day5", "WB Personal Y (nw) day 5",
+                      "WB Personal Y (w) day 5")
+profile_long_filtered <- profile_long %>%
+  filter(Samples %in% selected_samples)
+profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
+profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
+                                          levels = unique(profile_long_filtered$congeners))
+
+# Bar plot
+Plot.prof.yau <- ggplot(profile_long_filtered,
+                        aes(x = congeners, y = Value, fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2day5BarV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plot
+Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
+                                          y = WB.Personal.Y..1st..day.5,
+                                          label = congeners)) +
+  geom_point(size = 3) +
+  geom_text(data = subset(prof.yau.1st,
+                          abs(Air.day5 - WB.Personal.Y..1st..day.5) > threshold),
+            size = 5, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air day 5"))) +
+  xlab(expression(bold("WB Personal Y (1st) day 5")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau1st5dayDotV01.png",
+       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
+# Week 2
+profile.yau.2nd <- profile.yau[profile.yau$week == 2, ]
+profile.yau.2nd <- t(profile.yau.2nd)
+profile.yau.2nd <- profile.yau.2nd[-1, ]
+colnames(profile.yau.2nd) <- profile.yau.2nd[1,]
+profile.yau.2nd <- profile.yau.2nd[-1, ]
+rownames_data <- rownames(profile.yau.2nd)
+rownames(profile.yau.2nd) <- NULL
+profile.yau.2nd <- cbind(Row_Name = rownames_data, profile.yau.2nd)
+colnames(profile.yau.2nd)[1] <- "congeners"
+colnames(profile.yau.2nd)[2] <- "Air.day1"
+colnames(profile.yau.2nd)[3] <- "Air.day3"
+colnames(profile.yau.2nd)[4] <- "Air.day5"
+colnames(profile.yau.2nd)[5] <- "WB Personal Y (2nd) day 1"
+colnames(profile.yau.2nd)[6] <- "WB Personal Y (2nd) day 3"
+colnames(profile.yau.2nd)[7] <- "WB Personal Y (2nd) day 5"
+
+profile_long <- profile.yau.2nd %>%
+  as.data.frame() %>%
+  pivot_longer(cols = -congeners, 
+               names_to = "Samples", 
+               values_to = "Value")
+
+# Day 1
+selected_samples <- c("Air.day1", "WB Personal Y (2nd) day 1")
+profile_long_filtered <- profile_long %>%
+  filter(Samples %in% selected_samples)
+profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
+profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
+                                          levels = unique(profile_long_filtered$congeners))
+
+# Bar plot
+Plot.prof.yau <- ggplot(profile_long_filtered,
+                        aes(x = congeners, y = Value, fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2nd1dayBarV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plot
+prof.yau.2nd <- data.frame(profile.yau.2nd)
+prof.yau.2nd[, 2:7] <- lapply(prof.yau.2nd[, 2:7],
+                              as.numeric)
+threshold <- 0.005  # Define the threshold for labeling
+
+Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day1,
+                                          y = WB.Personal.Y..2nd..day.1,
+                                          label = congeners)) +
+  geom_point(size = 3) +
+  geom_text(data = subset(prof.yau.2nd,
+                          abs(Air.day1 - WB.Personal.Y..2nd..day.1) > threshold),
+            size = 5, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air Day 1"))) +
+  xlab(expression(bold("WB Personal Y (2nd) day 1")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2nd1dayDotV01.png",
+       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
+# Day 3
+selected_samples <- c("Air.day3", "WB Personal Y (2nd) day 3")
+profile_long_filtered <- profile_long %>%
+  filter(Samples %in% selected_samples)
+profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
+profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
+                                          levels = unique(profile_long_filtered$congeners))
+
+# Bar plot
+Plot.prof.yau <- ggplot(profile_long_filtered,
+                        aes(x = congeners, y = Value, fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2nd3dayBarV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plot
+Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day3,
+                                          y = WB.Personal.Y..2nd..day.3,
+                                          label = congeners)) +
+  geom_point(size = 3) +
+  geom_text(data = subset(prof.yau.2nd,
+                          abs(Air.day3 - WB.Personal.Y..2nd..day.3) > threshold),
+            size = 5, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air Day 3"))) +
+  xlab(expression(bold("WB Personal Y (2nd) Day 3")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2nd3dayDotV01.png",
+       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
+# Day 5
+selected_samples <- c("Air.day5", "WB Personal Y (2nd) day 5")
+profile_long_filtered <- profile_long %>%
+  filter(Samples %in% selected_samples)
+profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
+profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
+                                          levels = unique(profile_long_filtered$congeners))
+
+# Bar plot
+Plot.prof.yau <- ggplot(profile_long_filtered,
+                        aes(x = congeners, y = Value, fill = Samples)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
+  xlab("") +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12,
+        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
+        axis.title.x = element_text(face = "bold", size = 7),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2nd5dayBarV01.png",
+       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
+
+# 1:1 plot
+Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day5,
+                                          y = WB.Personal.Y..2nd..day.5,
+                                          label = congeners)) +
+  geom_point(size = 3) +
+  geom_text(data = subset(prof.yau.2nd,
+                          abs(Air.day5 - WB.Personal.Y..2nd..day.5) > threshold),
+            size = 5, vjust = 1.5) +
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  xlim(0, 0.15) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 10/10,
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  ylab(expression(bold("Air Day 5"))) +
+  xlab(expression(bold("WB Personal Y (2nd) Day 5")))
+
+# see plot
+print(Plot.prof.yau)
+
+# Save plot
+ggsave("Output/Plots/ProfYau2nd5dayDotV01.png",
+       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
+
 
