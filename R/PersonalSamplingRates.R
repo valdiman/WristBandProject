@@ -8,7 +8,6 @@ install.packages("ggplot2")
 install.packages("tidyr")
 install.packages("dplyr")
 install.packages("RColorBrewer")
-install.packages("gridExtra")
 
 # Load libraries
 {
@@ -18,7 +17,6 @@ install.packages("gridExtra")
   library(tidyr)
   library(dplyr)
   library(RColorBrewer)
-  library(gridExtra)
 }
 
 # Read data from excel ----------------------------------------------------
@@ -408,6 +406,7 @@ ggplot(SR.yau.nw[SR.yau.nw$Sampling_Rate > 0 & SR.yau.nw$p_value < 0.05, ],
 
 # (2) Remove metadata from Veff.yau.w
 Veff.yau.w.2 <- Veff.yau.w[, 3:175]
+
 # Create matrix for sampling rate (SR)
 SR.yau.w <- matrix(nrow = length(Veff.yau.w.2[1,]), ncol = 3)
 
@@ -461,6 +460,10 @@ SR_averages_sd_cv <- combined_SR %>%
     SD_Sampling_Rate = sd(Sampling_Rate, na.rm = TRUE),
     CV_Sampling_Rate = (sd(Sampling_Rate, na.rm = TRUE) / mean(Sampling_Rate, na.rm = TRUE)) * 100
   )
+
+# Export results
+write.csv(SR_averages_sd_cv,
+          file = "Output/Data/csv/Ave.SRs.csv", row.names = FALSE)
 
 # Plot the average and stdev
 Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_Rate)) +
