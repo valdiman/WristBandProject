@@ -2,6 +2,8 @@
 
 # Install packages
 install.packages("readxl") #say no!
+install.packages("ggplot2")
+install.packages("gridExtra")
 
 # Load libraries
 {
@@ -107,9 +109,12 @@ tPCB.conc.wb <- rowSums(conc.wb, na.rm = TRUE)
 conc_air_common_numeric <- as.data.frame(sapply(conc_air_common, as.numeric))
 tPCB.conc.air <- colSums(conc_air_common_numeric, na.rm = TRUE)
 
+print(tPCB.conc.wb)
+print(tPCB.conc.air)
+
 # Plot tPCBs --------------------------------------------------------------
 # (1) Amanda
-selected_values <- c(Air_Amanda = t.PCB.conc.air['Conc.Air.Amanda'],
+selected_values <- c(Air_Amanda = tPCB.conc.air['Conc.Air.Amanda'],
                      WB_Amanda_R = tPCB.conc.wb['wb.amanda.r'],
                      WB_Amanda_L = tPCB.conc.wb['wb.amanda.l'])
 
@@ -124,12 +129,14 @@ plot.amanda <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) 
   geom_bar(stat = "identity") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_blank())
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
 
 # (2) Kay
-selected_values <- c(Air_Kay = t.PCB.conc.air['Conc.Air.Kay'],
+selected_values <- c(Air_Kay = tPCB.conc.air['Conc.Air.Kay'],
                      WB_Kay = tPCB.conc.wb['wb.kay'])
 
 # Rename the categories directly within the vector for clarity
@@ -142,12 +149,14 @@ plot.kay <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_blank())
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
 
 # (3) Yau
-selected_values <- c(Air_Yau.1 = t.PCB.conc.air['Conc.Air.Yau.1st'],
+selected_values <- c(Air_Yau.1 = tPCB.conc.air['Conc.Air.Yau.1st'],
                      WB_Yau_1st = tPCB.conc.wb['wb.yau.1st'])
 
 # Rename the categories directly within the vector for clarity
@@ -160,11 +169,13 @@ plot.yau.1 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_blank())
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
 
-selected_values <- c(Air_Yau.2 = t.PCB.conc.air['Conc.Air.Yau.2nd'],
+selected_values <- c(Air_Yau.2 = tPCB.conc.air['Conc.Air.Yau.2nd'],
                      WB_Yau_1st = tPCB.conc.wb['wb.yau.2nd'])
 
 # Rename the categories directly within the vector for clarity
@@ -177,11 +188,13 @@ plot.yau.2 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_blank())
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
 
-selected_values <- c(Air_Yau.w = t.PCB.conc.air['Conc.Air.Yau.w'],
+selected_values <- c(Air_Yau.w = tPCB.conc.air['Conc.Air.Yau.w'],
                      WB_Yau_nw = tPCB.conc.wb['wb.yau.nw'],
                      WB_Yau_w = tPCB.conc.wb['wb.yau.w'])
 
@@ -196,13 +209,136 @@ plot.yau.3 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_blank())
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
 
 # Plot all at the same time
-grid.arrange(plot.amanda, plot.kay, plot.yau.1, plot.yau.2, plot.yau.3, ncol = 3)
+tPCB <- grid.arrange(plot.amanda, plot.kay, plot.yau.1, plot.yau.2, plot.yau.3,
+             ncol = 3, top = "SumPCBs")
 
+# Save plot in folder
+ggsave("Output/Plots/ComparisontPCB.png",
+       plot = tPCB, width = 15, height = 10, dpi = 500)
 
+# Select congeners --------------------------------------------------------
+tPCB.conc.wb <- rowSums(conc.wb[1:50], na.rm = TRUE)
+# Convert list column to numeric, replacing NA values with 0
+conc_air_common_numeric <- as.data.frame(sapply(conc_air_common, as.numeric))
+tPCB.conc.air <- colSums(conc_air_common_numeric[1:50, ], na.rm = TRUE)
 
+print(tPCB.conc.wb)
+print(tPCB.conc.air)
 
+# Plot selected PCBs ------------------------------------------------------
+# (1) Amanda
+selected_values <- c(Air_Amanda = tPCB.conc.air['Conc.Air.Amanda'],
+                     WB_Amanda_R = tPCB.conc.wb['wb.amanda.r'],
+                     WB_Amanda_L = tPCB.conc.wb['wb.amanda.l'])
+
+# Rename the categories directly within the vector for clarity
+names(selected_values) <- c("Air Concentration", "Sample 1: WB Amanda R",
+                            "Sample 2: WB Amanda L")
+
+plot_data <- data.frame(Category = names(selected_values),
+                        Value = as.numeric(selected_values))
+
+plot.amanda <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+# (2) Kay
+selected_values <- c(Air_Kay = tPCB.conc.air['Conc.Air.Kay'],
+                     WB_Kay = tPCB.conc.wb['wb.kay'])
+
+# Rename the categories directly within the vector for clarity
+names(selected_values) <- c("Air Concentration", "Sample 1: WB Kay")
+
+plot_data <- data.frame(Category = names(selected_values),
+                        Value = as.numeric(selected_values))
+
+plot.kay <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+# (3) Yau
+selected_values <- c(Air_Yau.1 = tPCB.conc.air['Conc.Air.Yau.1st'],
+                     WB_Yau_1st = tPCB.conc.wb['wb.yau.1st'])
+
+# Rename the categories directly within the vector for clarity
+names(selected_values) <- c("Air Concentration 1st", "Sample 1: WB Yau 1st")
+
+plot_data <- data.frame(Category = names(selected_values),
+                        Value = as.numeric(selected_values))
+
+plot.yau.1 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+selected_values <- c(Air_Yau.2 = tPCB.conc.air['Conc.Air.Yau.2nd'],
+                     WB_Yau_1st = tPCB.conc.wb['wb.yau.2nd'])
+
+# Rename the categories directly within the vector for clarity
+names(selected_values) <- c("Air Concentration 2nd", "Sample 1: WB Yau 2nd")
+
+plot_data <- data.frame(Category = names(selected_values),
+                        Value = as.numeric(selected_values))
+
+plot.yau.2 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+selected_values <- c(Air_Yau.w = tPCB.conc.air['Conc.Air.Yau.w'],
+                     WB_Yau_nw = tPCB.conc.wb['wb.yau.nw'],
+                     WB_Yau_w = tPCB.conc.wb['wb.yau.w'])
+
+# Rename the categories directly within the vector for clarity
+names(selected_values) <- c("Air Concentration", "Sample 1: WB Yau nw",
+                            "Sample 2: WB Yau w")
+
+plot_data <- data.frame(Category = names(selected_values),
+                        Value = as.numeric(selected_values))
+
+plot.yau.3 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank())
+
+# Plot all at the same time
+PCBn <- grid.arrange(plot.amanda, plot.kay, plot.yau.1, plot.yau.2, plot.yau.3,
+             ncol = 3, top = "Sum 50 PCBs")
+
+# Save plot in folder
+ggsave("Output/Plots/ComparisontPCB50.png",
+       plot = PCBn, width = 15, height = 10, dpi = 500)
