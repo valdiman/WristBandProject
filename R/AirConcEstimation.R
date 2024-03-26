@@ -48,19 +48,21 @@ colnames(conc.kay) <- "Conc.Air.Kay"
 data.yau.1st <- data.yau[3, 4:176]
 data.yau.2nd <- data.yau[6, 4:176]
 data.yau.w <- data.yau2[3, 5:177]
+# Calculate air concentration in ng/m3 for Ya'u
+conc.yau.1st <- as.data.frame(data.yau.1st / (0.5 * data.yau[3, 1]))
+conc.yau.2nd <- as.data.frame(data.yau.2nd / (0.5 * data.yau[6, 1]))
+conc.yau.w <- as.data.frame(data.yau.w / (0.5 * data.yau2[3, 1]))
+# Transpose data frames
+conc.yau.1st <- as.data.frame(t(conc.yau.1st))
+conc.yau.2nd <- as.data.frame(t(conc.yau.2nd))
+conc.yau.w <- as.data.frame(t(conc.yau.w))
 
-# Calculate air concentration in ng/m3
-conc.yau.1st <- as.data.frame(matrix(data.yau.1st/(0.5*data.yau[3, 1]), ncol = 1))
-rownames(conc.yau.1st) <- colnames(data.yau.1st)
-colnames(conc.yau.1st) <- "Conc.Air.Yau.1st"
-conc.yau.2nd <- as.data.frame(matrix(data.yau.2nd/(0.5*data.yau[6, 1]), ncol = 1))
-rownames(conc.yau.2nd) <- colnames(data.yau.2nd)
-colnames(conc.yau.2nd) <- "Conc.Air.Yau.2nd"
-conc.yau.w <- as.data.frame(matrix(data.yau.w/(0.5*data.yau2[3, 1]), ncol = 1))
-rownames(conc.yau.w) <- colnames(data.yau.w)
-colnames(conc.yau.w) <- "Conc.Air.Yau.w"
 # Combine concentrations
 conc.air <- cbind(conc.amamda, conc.kay, conc.yau.1st, conc.yau.2nd, conc.yau.w)
+# Change column names of the last three columns
+colnames(conc.air)[(ncol(conc.air)-2):ncol(conc.air)] <- c("Conc.Air.Yau.1st",
+                                                           "Conc.Air.Yau.2nd",
+                                                           "Conc.Air.Yau.w")
 
 # Read calculated average sampling rates ----------------------------------
 sr <- read.csv("Output/Data/csv/Ave.SRs.csv")
@@ -125,8 +127,13 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Amanda R",
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.amanda <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
@@ -145,9 +152,14 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Kay")
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.kay <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -165,9 +177,14 @@ names(selected_values) <- c("Air Concentration 1st", "Sample 1: WB Yau 1st")
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.1 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -184,9 +201,14 @@ names(selected_values) <- c("Air Concentration 2nd", "Sample 1: WB Yau 2nd")
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.2 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -205,9 +227,14 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Yau nw",
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.3 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -244,9 +271,13 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Amanda R",
 
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
 
 plot.amanda <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
@@ -265,9 +296,14 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Kay")
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.kay <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -285,9 +321,14 @@ names(selected_values) <- c("Air Concentration 1st", "Sample 1: WB Yau 1st")
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.1 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -304,9 +345,14 @@ names(selected_values) <- c("Air Concentration 2nd", "Sample 1: WB Yau 2nd")
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.2 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -325,9 +371,14 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Yau nw",
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.3 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -345,7 +396,7 @@ ggsave("Output/Plots/ComparisontPCB50.png",
 
 # Concentration calculation using cte SR ----------------------------------
 # Divide each element in wb_common cte SR
-wb_div_sr <- wb_common/0.35
+wb_div_sr <- wb_common/0.5
 # Divide further by corresponding value in wb.5d$time.day
 conc.wb.cte <- wb_div_sr/wb_time_day
 rownames(conc.wb.cte) <- c('wb.amanda.r', 'wb.amanda.l', 'wb.kay', 'wb.yau.1st',
@@ -380,9 +431,13 @@ names(selected_values) <- c("Air Concentration", "Sample 1: WB Amanda R cte",
 
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
 
 plot.amanda <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   theme_minimal() +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
@@ -393,17 +448,22 @@ plot.amanda <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) 
 
 # (2) Kay
 selected_values <- c(Air_Kay = tPCB.conc.air['Conc.Air.Kay'],
-                     WB_Kay = tPCB.conc.wb.cte['wb.kay'])
+                     WB_Kay = tPCB.conc.wb['wb.kay'])
 
 # Rename the categories directly within the vector for clarity
-names(selected_values) <- c("Air Concentration", "Sample 1: WB Kay cte")
+names(selected_values) <- c("Air Concentration", "Sample 1: WB Kay")
 
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.kay <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -413,17 +473,22 @@ plot.kay <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
 
 # (3) Yau
 selected_values <- c(Air_Yau.1 = tPCB.conc.air['Conc.Air.Yau.1st'],
-                     WB_Yau_1st = tPCB.conc.wb.cte['wb.yau.1st'])
+                     WB_Yau_1st = tPCB.conc.wb['wb.yau.1st'])
 
 # Rename the categories directly within the vector for clarity
-names(selected_values) <- c("Air Concentration 1st", "Sample 1: WB Yau 1st cte")
+names(selected_values) <- c("Air Concentration 1st", "Sample 1: WB Yau 1st")
 
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.1 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -432,17 +497,22 @@ plot.yau.1 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
         legend.title = element_blank())
 
 selected_values <- c(Air_Yau.2 = tPCB.conc.air['Conc.Air.Yau.2nd'],
-                     WB_Yau_1st = tPCB.conc.wb.cte['wb.yau.2nd'])
+                     WB_Yau_1st = tPCB.conc.wb['wb.yau.2nd'])
 
 # Rename the categories directly within the vector for clarity
-names(selected_values) <- c("Air Concentration 2nd", "Sample 1: WB Yau 2nd cte")
+names(selected_values) <- c("Air Concentration 2nd", "Sample 1: WB Yau 2nd")
 
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.2 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -451,19 +521,24 @@ plot.yau.2 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
         legend.title = element_blank())
 
 selected_values <- c(Air_Yau.w = tPCB.conc.air['Conc.Air.Yau.w'],
-                     WB_Yau_nw = tPCB.conc.wb.cte['wb.yau.nw'],
-                     WB_Yau_w = tPCB.conc.wb.cte['wb.yau.w'])
+                     WB_Yau_nw = tPCB.conc.wb['wb.yau.nw'],
+                     WB_Yau_w = tPCB.conc.wb['wb.yau.w'])
 
 # Rename the categories directly within the vector for clarity
-names(selected_values) <- c("Air Concentration", "Sample 1: WB Yau nw cte",
-                            "Sample 2: WB Yau w cte")
+names(selected_values) <- c("Air Concentration", "Sample 1: WB Yau nw",
+                            "Sample 2: WB Yau w")
 
 plot_data <- data.frame(Category = names(selected_values),
                         Value = as.numeric(selected_values))
 
+# Calculate %
+plot_data$Percentage <- round(abs((1 - plot_data$Value/plot_data$Value[1])*100), 2)
+
 plot.yau.3 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%"), vjust = 0.5),
+            size = 5, color = "black") +
   ylab(expression(bold("Air "*Sigma*"PCB (ng/m3)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12),
@@ -473,12 +548,10 @@ plot.yau.3 <- ggplot(plot_data, aes(x = Category, y = Value, fill = Category)) +
 
 # Plot all at the same time
 tPCB <- grid.arrange(plot.amanda, plot.kay, plot.yau.1, plot.yau.2, plot.yau.3,
-                     ncol = 3, top = "Sum25PCBs (SR = 1.5 m3/d)")
+                     ncol = 3, top = "SumtPCB (SR = 0.5 m3/d)")
 
 # Save plot in folder
-ggsave("Output/Plots/Comparison25PCBcte1-5.png",
+ggsave("Output/Plots/ComparisontPCBcte05.png",
        plot = tPCB, width = 15, height = 10, dpi = 500)
-
-
 
 
