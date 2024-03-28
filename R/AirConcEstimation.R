@@ -4,12 +4,14 @@
 install.packages("readxl") #say no!
 install.packages("ggplot2")
 install.packages("gridExtra")
+install.packages("RColorBrewer")
 
 # Load libraries
 {
   library(readxl)
   library(ggplot2)
   library(gridExtra)
+  library(RColorBrewer)
 }
 
 # Read measured values from excel -----------------------------------------
@@ -25,37 +27,43 @@ data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
 # Calculate air PCB concentration from static WBs -------------------------
 # Select WB to estimate airborne concentration & WB wore 5 days
 # (1) Amanda
-data.amanda.1 <- data.amanda[1:3, ]
-# Average 3 WBs
-data.amanda.2 <- colMeans(data.amanda.1[, 3:175])
-# Calculate air concentration in ng/m3
-# = massWB/(0.5*time.day)
-conc.amamda <- as.data.frame(data.amanda.2/(0.5*data.amanda[1,1]))
-colnames(conc.amamda) <- "Conc.Air.Amanda"
+{
+  data.amanda.1 <- data.amanda[1:3, ]
+  # Average 3 WBs
+  data.amanda.2 <- colMeans(data.amanda.1[, 3:175])
+  # Calculate air concentration in ng/m3
+  # = massWB/(0.5*time.day)
+  conc.amamda <- as.data.frame(data.amanda.2/(0.5*data.amanda[1,1]))
+  colnames(conc.amamda) <- "Conc.Air.Amanda"
+}
 
 # (2) Kay
-# Select WBs to calculate air concentration
-data.kay.1 <- data.kay[1:3, ]
-# Average 3 WBs
-data.kay.2 <- colMeans(data.kay.1[, 3:175])
-# Calculate air concentration in ng/m3
-# = massWB/(0.5*time.day)
-conc.kay <- as.data.frame(data.kay.2/(0.5*data.kay[1,1]))
-colnames(conc.kay) <- "Conc.Air.Kay"
+{
+  # Select WBs to calculate air concentration
+  data.kay.1 <- data.kay[1:3, ]
+  # Average 3 WBs
+  data.kay.2 <- colMeans(data.kay.1[, 3:175])
+  # Calculate air concentration in ng/m3
+  # = massWB/(0.5*time.day)
+  conc.kay <- as.data.frame(data.kay.2/(0.5*data.kay[1,1]))
+  colnames(conc.kay) <- "Conc.Air.Kay"
+}
 
 # (3) Ya'u
-# Select WBs to calculate air concentration
-data.yau.1st <- data.yau[3, 4:176]
-data.yau.2nd <- data.yau[6, 4:176]
-data.yau.w <- data.yau2[3, 5:177]
-# Calculate air concentration in ng/m3 for Ya'u
-conc.yau.1st <- as.data.frame(data.yau.1st / (0.5 * data.yau[3, 1]))
-conc.yau.2nd <- as.data.frame(data.yau.2nd / (0.5 * data.yau[6, 1]))
-conc.yau.w <- as.data.frame(data.yau.w / (0.5 * data.yau2[3, 1]))
-# Transpose data frames
-conc.yau.1st <- as.data.frame(t(conc.yau.1st))
-conc.yau.2nd <- as.data.frame(t(conc.yau.2nd))
-conc.yau.w <- as.data.frame(t(conc.yau.w))
+{
+  # Select WBs to calculate air concentration
+  data.yau.1st <- data.yau[3, 4:176]
+  data.yau.2nd <- data.yau[6, 4:176]
+  data.yau.w <- data.yau2[3, 5:177]
+  # Calculate air concentration in ng/m3 for Ya'u
+  conc.yau.1st <- as.data.frame(data.yau.1st / (0.5 * data.yau[3, 1]))
+  conc.yau.2nd <- as.data.frame(data.yau.2nd / (0.5 * data.yau[6, 1]))
+  conc.yau.w <- as.data.frame(data.yau.w / (0.5 * data.yau2[3, 1]))
+  # Transpose data frames
+  conc.yau.1st <- as.data.frame(t(conc.yau.1st))
+  conc.yau.2nd <- as.data.frame(t(conc.yau.2nd))
+  conc.yau.w <- as.data.frame(t(conc.yau.w))
+}
 
 # Combine concentrations
 conc.air <- cbind(conc.amamda, conc.kay, conc.yau.1st, conc.yau.2nd, conc.yau.w)
@@ -79,7 +87,6 @@ sr <- sr[, 1:2]
   wb.yau.5d.nw <- data.yau2[6, c(1, 5:177)]
   wb.yau.5d.w <- data.yau2[9, c(1, 5:177)]
 }
-
 # Combined wore WB 5 days
 wb.5d <- rbind(wb.amamda.5d.r, wb.amamda.5d.l, wb.kay.5d, wb.yau.5d.1st,
                wb.yau.5d.2nd, wb.yau.5d.nw, wb.yau.5d.w)
@@ -94,9 +101,9 @@ sr_common <- sr[sr$congener %in% colnames(wb_common), ]
 # Extract time.day from wb.5d
 wb_time_day <- wb.5d$time.day
 # Divide each element in wb_common by corresponding element in sr_common$Average_Sampling_Rate
-# wb_div_sr <- wb_common/sr_common$Average_Sampling_Rate
-# Use cte SR
-wb_div_sr <- wb_common/1.5
+wb_div_sr <- wb_common/sr_common$Average_Sampling_Rate
+# Use cte SR (0.5 and 1)
+# wb_div_sr <- wb_common/1
 # Divide further by corresponding value in wb.5d$time.day
 conc.wb <- wb_div_sr/wb_time_day
 rownames(conc.wb) <- c('wb.amanda.r', 'wb.amanda.l', 'wb.kay', 'wb.yau.1st',
@@ -198,9 +205,14 @@ combined_data$factor2 <- combined_data$Conc.WB/combined_data$Conc.Air
 factor2_percentage <- nrow(combined_data[combined_data$factor2 > 0.5 & combined_data$factor2 < 2, ])/nrow(combined_data)*100
 
 # Plot --------------------------------------------------------------------
+# Choose a color palette from ColorBrewer
+num_groups <- length(unique(combined_data$Group))
+color_palette <- brewer.pal(num_groups, "Set1")
+
 # Plot with different colors for each group
 plotWB <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB, color = Group)) +
-  geom_point() +
+  geom_point(size = 3) +
+  theme_bw() +
   theme(aspect.ratio = 15/15) +
   annotation_logticks(sides = "bl") +
   scale_y_log10(limits = c(10, 10^4),
@@ -211,18 +223,23 @@ plotWB <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB, color = Group)) +
                 labels = trans_format("log10", math_format(10^.x))) +
   xlab(expression(bold("Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
   ylab(expression(bold("WB Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14)) +
   geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
-  theme_bw() +
-  labs(color = "Participants") +
-  annotate("text", x = 10000, y = 20, hjust = 1, vjust = 1,
-           label = expression("Sampling rate = 1.5 (m"^3*"/d)"),
-           size = 3, color = "black")
+  scale_color_manual(values = color_palette) +
+  labs(color = "Participants") 
+# If text needs to be included in the plot
+#annotate("text", x = 10000, y = 20, hjust = 1, vjust = 1,
+#           label = expression("Sampling rate = 1.0 (m"^3*"/d)"),
+#           size = 3, color = "black")
 
 # Print the plot. Warning message. No worries
 print(plotWB)
 
 # Save plot in folder
-ggsave("Output/Plots/tPCB_SR=1.5.png", plot = plotWB, width = 6, height = 5, dpi = 500)
+ggsave("Output/Plots/tPCB.png", plot = plotWB, width = 6, height = 5, dpi = 500)
 
