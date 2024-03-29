@@ -5,6 +5,7 @@ install.packages("readxl") #say no!
 install.packages("ggplot2")
 install.packages("gridExtra")
 install.packages("RColorBrewer")
+install.packages("scales")
 
 # Load libraries
 {
@@ -12,6 +13,7 @@ install.packages("RColorBrewer")
   library(ggplot2)
   library(gridExtra)
   library(RColorBrewer)
+  library(scales)
 }
 
 # Read measured values from excel -----------------------------------------
@@ -203,6 +205,13 @@ combined_data$factor2 <- combined_data$Conc.WB/combined_data$Conc.Air
 
 # Calculate the percentage of observations within the factor of 2
 factor2_percentage <- nrow(combined_data[combined_data$factor2 > 0.5 & combined_data$factor2 < 2, ])/nrow(combined_data)*100
+
+# Estimate RMSE and MAE ---------------------------------------------------
+# log10 scale
+rmse <- sqrt(mean((log10(combined_data$Conc.Air) - log10(combined_data$Conc.WB))^2))
+mae <- mean(abs(log10(combined_data$Conc.Air) - log10(combined_data$Conc.WB)))
+print(paste("RMSE:", rmse))
+print(paste("MAE:", mae))
 
 # Plot --------------------------------------------------------------------
 # Choose a color palette from ColorBrewer
