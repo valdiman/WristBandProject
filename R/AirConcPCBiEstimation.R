@@ -5,6 +5,7 @@ install.packages("readxl") #say no!
 install.packages("ggplot2")
 install.packages("gridExtra")
 install.packages("RColorBrewer")
+install.packages("scales")
 
 # Load libraries
 {
@@ -12,6 +13,7 @@ install.packages("RColorBrewer")
   library(ggplot2)
   library(gridExtra)
   library(RColorBrewer)
+  library(scales)
 }
 
 # Read measured values from excel -----------------------------------------
