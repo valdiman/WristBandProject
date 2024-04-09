@@ -188,6 +188,8 @@ result <- t.test(log10.all_differences, mu = 0)
 # View the result
 print(result) # Not significant, p-value = 0.65
 
+# Not sure yet if log10 is needed!
+
 # t test for individual PCBs ----------------------------------------------
 # Transpose the conc_air_common data frame
 conc_air_common_transposed <- t(conc_air_common)
