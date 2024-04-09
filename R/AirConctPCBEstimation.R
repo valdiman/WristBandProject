@@ -17,14 +17,16 @@ install.packages("scales")
 }
 
 # Read measured values from excel -----------------------------------------
-data.amanda <- data.frame(read_excel("Data/Amanda.xlsx", sheet = "Sheet1",
-                                     col_names = TRUE, col_types = NULL))
-data.kay <- data.frame(read_excel("Data/Kay.xlsx", sheet = "Sheet1",
-                                  col_names = TRUE, col_types = NULL))
-data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
-                                  col_names = TRUE, col_types = NULL))
-data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
-                                   col_names = TRUE, col_types = NULL))
+{
+  data.amanda <- data.frame(read_excel("Data/Amanda.xlsx", sheet = "Sheet1",
+                                       col_names = TRUE, col_types = NULL))
+  data.kay <- data.frame(read_excel("Data/Kay.xlsx", sheet = "Sheet1",
+                                    col_names = TRUE, col_types = NULL))
+  data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
+                                    col_names = TRUE, col_types = NULL))
+  data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
+                                     col_names = TRUE, col_types = NULL)) 
+}
 
 # Calculate air PCB concentration from static WBs -------------------------
 # Select WB to estimate airborne concentration & WB wore 5 days
