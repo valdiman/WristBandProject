@@ -3,11 +3,20 @@
 # Install packages
 install.packages("readxl") #say no!
 install.packages("ggplot2")
+install.packages("lme4")
+install.packages("Matrix")
+install.packages("Matrix", type = "binary")
+install.packages("lmerTest")
+install.packages("tidyverse")
 
 # Load libraries
 {
   library(readxl)
   library(ggplot2)
+  library(lme4) # performs lme
+  library(Matrix)
+  library(lmerTest) # gets the p-value from lme
+  library(tidyverse)
 }
 
 # Read measured values from excel -----------------------------------------
@@ -124,8 +133,7 @@ tPCB.conc.air <- colSums(conc_air_common_numeric, na.rm = TRUE)
 print(tPCB.conc.wb)
 print(tPCB.conc.air)
 
-# t test for tPCB ---------------------------------------------------------
-# Checking normality
+# Normality check ---------------------------------------------------------
 # Plots
 # (1) Histograms
 hist(tPCB.conc.air)
@@ -148,7 +156,6 @@ shapiro.test(log10(tPCB.conc.air)) # no needs but to be consistent
 shapiro.test(log10(tPCB.conc.wb)) # needs to be log10 transformed
 
 # Merge data
-
 # Create data frames for tPCB.conc.wb and tPCB.conc.air
 tPCB.conc.wb_df <- data.frame(
   Description = c("1.wb.amanda.r", "1.wb.amanda.l", "2.wb.kay", "3.wb.yau.1st", "4.wb.yau.2nd", "5.wb.yau.nw", "5.wb.yau.w"),
@@ -175,206 +182,152 @@ merged_df$ID <- as.integer(gsub("\\D*(\\d+).*", "\\1", merged_df$Description))
 # Print the modified data frame
 print(merged_df)
 
-fit = lmer(Value ~ (1|ID) + method, data = merged_df)
+# Anova for tPCB ----------------------------------------------------------
+# Anova (1)
+fit = lmer(Value ~ method + (1|ID), data = merged_df)
 summary(fit)
-anova(fit)
+anova(fit) # p-value = 0.9981!
+
+# Anova (2)
+fit = lmer(log10(Value) ~ method + (1|ID), data = merged_df)
+summary(fit)
+anova(fit) # p-value = 0.6592!
+
+# Anova for individual PCBs -----------------------------------------------
+# Convert row names to a new column, typically named 'rowname'
+conc_air_v02 <- tibble::rownames_to_column(conc_air_common, var = "ID")
+
+# Reshape data
+long_data_conc_air <- pivot_longer(
+  conc_air_v02,
+  cols = -ID,  # Select all columns except the ID for pivoting
+  names_to = "Description",  # This will hold the original column names as descriptions
+  values_to = "Value"  # This will hold the numerical values
+)
+
+# Add method 1
+long_data_conc_air$method <- 1  # Add a method column with all values set to 1
+
+unique_descriptions <- unique(long_data_conc_air$Description)
+
+description_to_number <- data.frame(
+  Description = unique_descriptions,
+  Number = seq_along(unique_descriptions)
+)
+
+long_data_conc_air <- merge(long_data_conc_air, description_to_number,
+                            by = "Description", all.x = TRUE)
 
 
-# two-sample t test
-# (1) tPCB
-tPCB.ttest <- t.test(log10(tPCB.conc.air), log10(tPCB.conc.wb))
-print(tPCB.ttest) # No significant, p-value = 0.714
+long_data_conc_air$Description <- paste0(long_data_conc_air$Number, ".",
+                                         long_data_conc_air$Description)
 
-# Test if the difference is equal to 0
-# Compute the differences
-# Calculate differences for Amanda
-diff_amanda.1 <- tPCB.conc.wb[1] - tPCB.conc.air[1]
-diff_amanda.2 <- tPCB.conc.wb[2] - tPCB.conc.air[1]
-# Calculate differences for Kay
-diff_kay <- tPCB.conc.wb[3] - tPCB.conc.air[2]
-# Calculate differences for Yau.weeks
-diff_yau_1st <- tPCB.conc.wb[4] - tPCB.conc.air[3]
-diff_yau_2nd <- tPCB.conc.wb[5] - tPCB.conc.air[4]
-# Calculate differences for Yau.nw
-diff_yau_nw <- tPCB.conc.wb[6] - tPCB.conc.air[5]
-diff_yau_w <- tPCB.conc.wb[7] - tPCB.conc.air[5]
-# Combine all differences into a single vector
-all_differences <- c(diff_amanda.1, diff_amanda.2, diff_kay, diff_yau_1st,
-                     diff_yau_2nd, diff_yau_nw, diff_yau_w)
+long_data_conc_air$Number <- NULL
 
-# Print the combined differences
-print(all_differences)
-# Perform one-sample t-test
-result <- t.test(all_differences, mu = 0)
-# View the result
-print(result) # Not significant, p-value = 0.975
+conc_wb_v02 <- tibble::rownames_to_column(conc.wb, var = "Description")
 
-# Using log10 transformation
-log10.tPCB.conc.air <- log10(tPCB.conc.air)
-log10.tPCB.conc.wb <- log10(tPCB.conc.wb)
+long_data_conc_wb <- pivot_longer(
+  conc_wb_v02,
+  cols = -Description,    # Select all columns except the Description for pivoting
+  names_to = "ID",        # This will hold the Congeners names (column names)
+  values_to = "Value"     # This will hold the numerical values
+)
 
-# Test if the difference is equal to 0
-# Compute the differences
-# Calculate differences for Amanda
-log10.diff_amanda.1 <- log10.tPCB.conc.wb[1] - log10.tPCB.conc.air[1]
-log10.diff_amanda.2 <- log10.tPCB.conc.wb[2] - log10.tPCB.conc.air[1]
-# Calculate differences for Kay
-log10.diff_kay <- log10.tPCB.conc.wb[3] - log10.tPCB.conc.air[2]
-# Calculate differences for Yau.weeks
-log10.diff_yau_1st <- log10.tPCB.conc.wb[4] - log10.tPCB.conc.air[3]
-log10.diff_yau_2nd <- log10.tPCB.conc.wb[5] - log10.tPCB.conc.air[4]
-# Calculate differences for Yau.nw
-log10.diff_yau_nw <- log10.tPCB.conc.wb[6] - log10.tPCB.conc.air[5]
-log10.diff_yau_w <- log10.tPCB.conc.wb[7] - log10.tPCB.conc.air[5]
-# Combine all differences into a single vector
-log10.all_differences <- c(log10.diff_amanda.1, log10.diff_amanda.2,
-                           log10.diff_kay, log10.diff_yau_1st,
-                           log10.diff_yau_2nd, log10.diff_yau_nw,
-                           log10.diff_yau_w)
+long_data_conc_wb$method <- 2  # Add a method column with all values set to 2
 
-# Print the combined differences
-print(log10.all_differences)
-# Perform one-sample t-test
-result <- t.test(log10.all_differences, mu = 0)
-# View the result
-print(result) # Not significant, p-value = 0.65
+# Manually add the front number based on the pattern you described
+long_data_conc_wb$Description <- paste0(
+  ifelse(grepl("wb\\.amanda", long_data_conc_wb$Description), "1", 
+         ifelse(grepl("wb\\.kay", long_data_conc_wb$Description), "2",
+                ifelse(grepl("wb\\.yau\\.1st", long_data_conc_wb$Description), "3",
+                       ifelse(grepl("wb\\.yau\\.2nd", long_data_conc_wb$Description), "4",
+                              ifelse(grepl("wb\\.yau\\.[nw]", long_data_conc_wb$Description), "5", NA)
+                       )
+                )
+         )
+  ),
+  ".", long_data_conc_wb$Description
+)
 
-# Not sure yet if log10 is needed!
+# If you have multiple occurrences of "wb.yau.nw" and "wb.yau.w", adjust them manually
+long_data_conc_wb$Description[long_data_conc_wb$Description == "5.wb.yau.nw"] <- "5.wb.yau.nw"
+long_data_conc_wb$Description[long_data_conc_wb$Description == "5.wb.yau.w"] <- "5.wb.yau.w"
 
-# t test for individual PCBs ----------------------------------------------
-# Transpose the conc_air_common data frame
-conc_air_common_transposed <- t(conc_air_common)
-# Check normality
-# Apply Shapiro-Wilk test to each column
-shapiro_results.1 <- lapply(log10(conc.wb), shapiro.test)
+# Change the column name from "ID" to "congener"
+names(long_data_conc_wb)[names(long_data_conc_wb) == "ID"] <- "congener"
+names(long_data_conc_air)[names(long_data_conc_air) == "ID"] <- "congener"
 
-# Extract p-values from Shapiro-Wilk test results
-p_values.wb <- sapply(shapiro_results.1, function(x) x$p.value)
+# Combine the datasets longitudinally
+merged_df <- rbind(long_data_conc_wb, long_data_conc_air)
 
-# Create data frame with congener names and p-values
-p_values_wb <- data.frame(p_value.wb = p_values)
+# Extract the first number from the left in the "Description" column
+merged_df$ID <- as.integer(gsub("\\D*(\\d+).*", "\\1", merged_df$Description))
 
-# Count how many rows have p-values above 0.05
-above_threshold_count <- sum(p_values.wb > 0.05, na.rm = TRUE)
+# Split the dataframe by congener
+congener_list <- split(merged_df, merged_df$congener)
 
-# Print the count
-print(above_threshold_count)
+# Initialize a data frame to store the results
+p_values <- data.frame(congener = character(), p_value = numeric())
 
-# Initialize an empty data frame with a single column for p-values and appropriate row names
-shapiro_results.2 <- data.frame(p_value = rep(NA, ncol(conc_air_common_transposed)), 
-                                row.names = colnames(conc_air_common_transposed))
-
-# Populate the data frame with p-values
-for (congener in colnames(conc_air_common_transposed)) {
-  x <- log10(conc_air_common_transposed[, congener])
-  if (sum(!is.na(x)) >= 3 && sum(is.na(x)) == 0) {
-    result <- shapiro.test(x)
-    shapiro_results.2[congener, "p_value"] <- result$p.value
-  } else {
-    shapiro_results.2[congener, "p_value"] <- NA
-  }
+# Loop over each congener dataframe
+for (congener_df in congener_list) {
+  # Fit the model
+  fit <- lmer(Value ~ method + (1|ID), data = congener_df)
+  
+  # Get the ANOVA table
+  anova_table <- anova(fit)
+  
+  # Extract the p-value
+  p_value <- anova_table$'Pr(>F)'[1]
+  
+  # Store the congener name and p-value
+  p_values <- rbind(p_values,
+                    data.frame(congener = congener_df$congener[1],
+                               p_value = p_value))
 }
 
-# Replace 0 with NA in the p_value column
-shapiro_results.2$p_value[shapiro_results$p_value == 0] <- NA
+# Print the results
+print(p_values)
 
-p_values_air <- shapiro_results.2
+# Calculate the percentage of p-values above 0.05
+percentage_above_005 <- (sum(p_values$p_value > 0.05) / nrow(p_values)) * 100
 
-# Count how many rows have p-values above 0.05
-above_threshold_count <- sum(p_values_air > 0.05, na.rm = TRUE)
+# log10
+# Initialize a data frame to store the results
+p_values <- data.frame(congener = character(), p_value = numeric())
 
-# Print the count
-print(above_threshold_count)
-
-# Compute the differences. NA values are not included in this analysis.
-# (1.1) Calculate differences for Amanda
-diff_amanda.1 <- conc.wb[1, ] - conc_air_common_transposed[1, ]
-diff_amanda.1 <- ifelse(is.na(diff_amanda.1) | is.na(conc_air_common_transposed[1, ]) | is.na(conc.wb[1, ]),
-                        NA, diff_amanda.1)
-# Change to data frame
-diff_amanda.1 <- as.data.frame(diff_amanda.1)
-# Add congener names to the columns
-colnames(diff_amanda.1) <- colnames(conc_air_common_transposed)
-
-# (1.2) Calculate differences for Amanda
-diff_amanda.2 <- conc.wb[2, ] - conc_air_common_transposed[1, ]
-diff_amanda.2 <- ifelse(is.na(diff_amanda.2) | is.na(conc_air_common_transposed[1, ]) | is.na(conc.wb[2, ]), NA, diff_amanda.2)
-# Change to data frame
-diff_amanda.2 <- as.data.frame(diff_amanda.2)
-# Add congener names to the columns
-colnames(diff_amanda.2) <- colnames(conc_air_common_transposed)
-
-# (2) Calculate differences for Kay
-diff_kay <- conc.wb[3, ] - conc_air_common_transposed[2, ]
-diff_kay <- ifelse(is.na(diff_kay) | is.na(conc_air_common_transposed[2, ]) | is.na(conc.wb[3, ]), NA, diff_kay)
-# Change to data frame
-diff_kay <- as.data.frame(diff_kay)
-# Add congener names to the columns
-colnames(diff_kay) <- colnames(conc_air_common_transposed)
-
-# (3.1) Calculate differences for Yau.weeks
-diff_yau_1st <- conc.wb[4, ] - conc_air_common_transposed[3, ]
-diff_yau_1st <- ifelse(is.na(diff_yau_1st) | is.na(conc_air_common_transposed[3, ]) | is.na(conc.wb[4, ]), NA, diff_yau_1st)
-# Change to data frame
-diff_yau_1st <- as.data.frame(diff_yau_1st)
-# Add congener names to the columns
-colnames(diff_yau_1st) <- colnames(conc_air_common_transposed)
-
-# (3.2) Calculate differences for Yau.weeks
-diff_yau_2nd <- conc.wb[5, ] - conc_air_common_transposed[4, ]
-diff_yau_2nd <- ifelse(is.na(diff_yau_2nd) | is.na(conc_air_common_transposed[4, ]) | is.na(conc.wb[5, ]), NA, diff_yau_2nd)
-# Change to data frame
-diff_yau_2nd <- as.data.frame(diff_yau_2nd)
-# Add congener names to the columns
-colnames(diff_yau_2nd) <- colnames(conc_air_common_transposed)
-
-# (4.1) Calculate differences for Yau.nw
-diff_yau_nw <- conc.wb[6, ] - conc_air_common_transposed[5, ]
-diff_yau_nw <- ifelse(is.na(diff_yau_nw) | is.na(conc_air_common_transposed[5, ]) | is.na(conc.wb[6, ]), NA, diff_yau_nw)
-# Change to data frame
-diff_yau_nw <- as.data.frame(diff_yau_nw)
-# Add congener names to the columns
-colnames(diff_yau_nw) <- colnames(conc_air_common_transposed)
-
-# (4.2) Calculate differences for Yau.w
-diff_yau_w <- conc.wb[7, ] - conc_air_common_transposed[5, ]
-diff_yau_w <- ifelse(is.na(diff_yau_w) | is.na(conc_air_common_transposed[5, ]) | is.na(conc.wb[7, ]), NA, diff_yau_w)
-# Change to data frame
-diff_yau_w <- as.data.frame(diff_yau_w)
-# Add congener names to the columns
-colnames(diff_yau_w) <- colnames(conc_air_common_transposed)
-
-# Combine all differences
-all_differences <- rbind(diff_amanda.1, diff_amanda.2, diff_kay, diff_yau_1st,
-                     diff_yau_2nd, diff_yau_nw, diff_yau_w)
-
-# Create an empty data frame to store p-values
-p_values <- data.frame(PCB = colnames(all_differences), p_value = NA)
-
-# Iterate over each column of all_differences
-for (i in seq_along(colnames(all_differences))) {
-  col <- colnames(all_differences)[i]
-  # Perform t-test for the current column
-  t_test_result <- try(t.test(all_differences[[col]], mu = 0), silent = TRUE)
+# Loop over each congener dataframe
+for (congener_df in congener_list) {
+  # Replace 0 and NA values with a small positive value
+  congener_df$Value <- ifelse(congener_df$Value <= 0 | is.na(congener_df$Value),
+                              1e-6, congener_df$Value)
   
-  # Extract the p-value if t-test was successful
-  if (!inherits(t_test_result, "try-error")) {
-    p_value <- t_test_result$p.value
-  } else {
-    # If t-test was not performed due to insufficient data or error, store NA
-    p_value <- NA
-  }
+  # Calculate log10 of the "Value" column
+  congener_df$log_Value <- log10(congener_df$Value)
   
-  # Store the p-value in the data frame
-  p_values$p_value[i] <- p_value
+  # Fit the model
+  fit <- lmer(log_Value ~ method + (1|ID), data = congener_df)
+  
+  # Get the ANOVA table
+  anova_table <- anova(fit)
+  
+  # Extract the p-value
+  p_value <- anova_table$'Pr(>F)'[1]
+  
+  # Store the congener name and p-value
+  p_values <- rbind(p_values,
+                    data.frame(congener = congener_df$congener[1],
+                               p_value = p_value))
 }
+
+# Print the results
+print(p_values)
+
+# Calculate the percentage of p-values above 0.05
+percentage_above_005 <- (sum(p_values$p_value > 0.05) / nrow(p_values)) * 100
 
 # Plot p-values of PCBs ---------------------------------------------------
-# Convert data frame to long format
-data_long <- reshape2::melt(p_values)
-
-# Reorder levels of the "PCB" column
-data_long$PCB <- factor(data_long$PCB, levels = unique((p_values$PCB)))
+# Need to reorganize the PCB congenes to be plotted.
 
 # Calculate the number above and below -log10(0.05)
 # Calculate the number of values greater than -log10(0.05)
@@ -397,7 +350,7 @@ below_threshold_percentage <- round((below_threshold_percentage * 100),
                                     digits = 0)
 
 # Create the ggplot
-p <- ggplot(data_long, aes(x = PCB, y = -log10(value))) +
+p <- ggplot(plot_data, aes(x = congener, y = -log10(value))) +
   geom_point(shape = 19, size = 1.5) +
   geom_hline(yintercept = -log10(0.05), color = "red") +
   labs(x = NULL, y = "-log10(p-value)") +
