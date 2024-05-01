@@ -143,6 +143,7 @@ ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ]
         axis.title.x = element_text(face = "bold", size = 7))
 
 # Calculate personal sampling rate Kay ------------------------------------
+# might need to run it again!!
 # WBs were used to calculate PCB concentration
 # triplicates for 4.27 days were deployed
 # sampling rate of 0.5 m3/d was used for static WBs
