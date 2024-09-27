@@ -1,8 +1,10 @@
 ## Code to calculate individual PCB "personal" sampling rates
 # for silicone wristbands.
+# nd non-dominant hand
+# d dominant hand
 
 # Install packages
-install.packages("readxl") #say no!
+install.packages("readxl")
 install.packages("gridExtra")
 install.packages("ggplot2")
 install.packages("tidyr")
@@ -31,6 +33,7 @@ data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
 
 # Calculate personal sampling rate Amanda ---------------------------------
 # WBs were used to calculate PCB concentration
+# Both hands (d and nd)
 # triplicates for 4.3 days were deployed
 # sampling rate of 0.5 m3/d was used for static WBs
 {
@@ -53,66 +56,74 @@ data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
   # Change characters to numbers format
   Veff.amanda[, 2:175] <- apply(Veff.amanda[, 2:175], 2, as.numeric)
   # Select right, remove metadata
-  Veff.amanda.r <- Veff.amanda[1:5, 3:175]
+  Veff.amanda.nd <- Veff.amanda[1:5, 3:175]
   # Select time
-  Veff.amanda.r.t <- Veff.amanda[1:5, 2]
+  Veff.amanda.nd.t <- Veff.amanda[1:5, 2]
   # Select left, remove metadata
-  Veff.amanda.l <- Veff.amanda[6:10, 3:175]
+  Veff.amanda.d <- Veff.amanda[6:10, 3:175]
   # Select time
-  Veff.amanda.l.t <- Veff.amanda[6:10, 2]
+  Veff.amanda.d.t <- Veff.amanda[6:10, 2]
 }
 
 # Calculate sampling rate (SR) for right and left hands (m3/d)
 # Create matrix for sampling rate (SR)
-SR.amanda.r <- matrix(nrow = length(Veff.amanda.r[1,]), ncol = 3)
+SR.amanda.nd <- matrix(nrow = length(Veff.amanda.nd[1,]), ncol = 3)
 
-for(i in 1:length(SR.amanda.r[, 1])) {
-  if (length(unique(Veff.amanda.r[, i])) >= 3) {
-    fit <- lm(Veff.amanda.r[, i] ~ 0 + Veff.amanda.r.t)
-    SR.amanda.r[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.amanda.r[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.amanda.r[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.amanda.nd[, 1])) {
+  if (length(unique(Veff.amanda.nd[, i])) >= 3) {
+    fit <- lm(Veff.amanda.nd[, i] ~ 0 + Veff.amanda.nd.t)
+    SR.amanda.nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.amanda.nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.amanda.nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.amanda.r[i, 1] <- 0
-    SR.amanda.r[i, 2] <- 0
-    SR.amanda.r[i, 3] <- 0
+    SR.amanda.nd[i, 1] <- 0
+    SR.amanda.nd[i, 2] <- 0
+    SR.amanda.nd[i, 3] <- 0
   }
 }
 
-colnames(SR.amanda.r) <-c("Sampling_Rate", "R2", "p_value")
-congener <- names(head(Veff.amanda.r)[0, ])
-SR.amanda.r <- cbind(congener, SR.amanda.r)
-SR.amanda.r <- data.frame(SR.amanda.r, group = "ParticipantA.r")
+colnames(SR.amanda.nd) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.amanda.nd)[0, ])
+SR.amanda.nd <- cbind(congener, SR.amanda.nd)
+SR.amanda.nd <- data.frame(SR.amanda.nd, group = "ParticipantA.nd")
+
+# Export results
+write.csv(SR.amanda.nd,
+          file = "Output/Data/csv/SR.amanda.nd.csv", row.names = FALSE)
 
 # Create matrix for sampling rate (SR)
-SR.amanda.l <- matrix(nrow = length(Veff.amanda.l[1,]), ncol = 3)
+SR.amanda.d <- matrix(nrow = length(Veff.amanda.d[1,]), ncol = 3)
 
-for(i in 1:length(SR.amanda.l[, 1])) {
-  if (length(unique(Veff.amanda.l[, i])) >= 3) {
-    fit <- lm(Veff.amanda.l[, i] ~ 0 + Veff.amanda.l.t)
-    SR.amanda.l[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.amanda.l[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.amanda.l[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.amanda.d[, 1])) {
+  if (length(unique(Veff.amanda.d[, i])) >= 3) {
+    fit <- lm(Veff.amanda.d[, i] ~ 0 + Veff.amanda.d.t)
+    SR.amanda.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.amanda.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.amanda.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.amanda.l[i, 1] <- 0
-    SR.amanda.l[i, 2] <- 0
-    SR.amanda.l[i, 3] <- 0
+    SR.amanda.d[i, 1] <- 0
+    SR.amanda.d[i, 2] <- 0
+    SR.amanda.d[i, 3] <- 0
   }
 }
 
-colnames(SR.amanda.l) <-c("Sampling_Rate", "R2", "p_value")
-SR.amanda.l <- cbind(congener, SR.amanda.l)
-SR.amanda.l <- data.frame(SR.amanda.l, group = "ParticipantA.l")
+colnames(SR.amanda.d) <-c("Sampling_Rate", "R2", "p_value")
+SR.amanda.d <- cbind(congener, SR.amanda.d)
+SR.amanda.d <- data.frame(SR.amanda.d, group = "ParticipantA.d")
+
+# Export results
+write.csv(SR.amanda.d,
+          file = "Output/Data/csv/SR.amanda.d.csv", row.names = FALSE)
 
 # Plot
 # Convert numerical columns to numeric
-SR.amanda.r[, 2:4] <- apply(SR.amanda.r[, 2:4], 2, as.numeric)
+SR.amanda.nd[, 2:4] <- apply(SR.amanda.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.amanda.r$congener <- factor(SR.amanda.r$congener,
-                            levels = unique(SR.amanda.r$congener))
+SR.amanda.nd$congener <- factor(SR.amanda.nd$congener,
+                            levels = unique(SR.amanda.nd$congener))
 
 # Plot with legend
-ggplot(SR.amanda.r[SR.amanda.r$Sampling_Rate > 0 & SR.amanda.r$p_value < 0.05, ],
+ggplot(SR.amanda.nd[SR.amanda.nd$Sampling_Rate > 0 & SR.amanda.nd$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -125,12 +136,12 @@ ggplot(SR.amanda.r[SR.amanda.r$Sampling_Rate > 0 & SR.amanda.r$p_value < 0.05, ]
         axis.title.x = element_text(face = "bold", size = 7))
 
 # Convert numerical columns to numeric
-SR.amanda.l[, 2:4] <- apply(SR.amanda.l[, 2:4], 2, as.numeric)
+SR.amanda.d[, 2:4] <- apply(SR.amanda.d[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.amanda.l$congener <- factor(SR.amanda.l$congener,
-                               levels = unique(SR.amanda.l$congener))
+SR.amanda.d$congener <- factor(SR.amanda.d$congener,
+                               levels = unique(SR.amanda.d$congener))
 
-ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ],
+ggplot(SR.amanda.d[SR.amanda.d$Sampling_Rate > 0 & SR.amanda.d$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -144,6 +155,7 @@ ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ]
 
 # Calculate personal sampling rate Kay ------------------------------------
 # WBs were used to calculate PCB concentration
+# Dominant hand (d)
 # triplicates for 4.27 days were deployed
 # sampling rate of 0.5 m3/d was used for static WBs
 {
@@ -166,39 +178,39 @@ ggplot(SR.amanda.l[SR.amanda.l$Sampling_Rate > 0 & SR.amanda.l$p_value < 0.05, ]
   # Change characters to numbers format
   Veff.kay[, 2:175] <- apply(Veff.kay[, 2:175], 2, as.numeric)
   # Select right, remove metadata
-  Veff.kay.r <- Veff.kay[1:5, 3:175]
+  Veff.kay.d <- Veff.kay[1:5, 3:175]
   # Select time
-  Veff.kay.r.t <- Veff.kay[1:5, 2]
+  Veff.kay.d.t <- Veff.kay[1:5, 2]
 }
 
 # Calculate sampling rate (SR) for right and left hands (m3/d)
 # Create matrix for sampling rate (SR)
-SR.kay.r <- matrix(nrow = length(Veff.kay.r[1,]), ncol = 3)
+SR.kay.d <- matrix(nrow = length(Veff.kay.d[1,]), ncol = 3)
 
-for(i in 1:length(SR.kay.r[, 1])) {
-  if (length(unique(Veff.kay.r[, i])) >= 3) {
-    fit <- lm(Veff.kay.r[, i] ~ 0 + Veff.kay.r.t)
-    SR.kay.r[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.kay.r[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.kay.r[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.kay.d[, 1])) {
+  if (length(unique(Veff.kay.d[, i])) >= 3) {
+    fit <- lm(Veff.kay.d[, i] ~ 0 + Veff.kay.d.t)
+    SR.kay.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.kay.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.kay.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.kay.r[i, 1] <- 0
-    SR.kay.r[i, 2] <- 0
-    SR.kay.r[i, 3] <- 0
+    SR.kay.d[i, 1] <- 0
+    SR.kay.d[i, 2] <- 0
+    SR.kay.d[i, 3] <- 0
   }
 }
 
-colnames(SR.kay.r) <-c("Sampling_Rate", "R2", "p_value")
-SR.kay.r <- cbind(congener, SR.kay.r)
-SR.kay.r <- data.frame(SR.kay.r, group = "ParticipantK.r")
+colnames(SR.kay.d) <-c("Sampling_Rate", "R2", "p_value")
+SR.kay.d <- cbind(congener, SR.kay.d)
+SR.kay.d <- data.frame(SR.kay.d, group = "ParticipantK.d")
 
 # Plot
-SR.kay.r[, 2:4] <- apply(SR.kay.r[, 2:4], 2, as.numeric)
+SR.kay.d[, 2:4] <- apply(SR.kay.d[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.kay.r$congener <- factor(SR.kay.r$congener,
-                               levels = unique(SR.kay.r$congener))
+SR.kay.d$congener <- factor(SR.kay.d$congener,
+                               levels = unique(SR.kay.d$congener))
 
-ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
+ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -212,6 +224,7 @@ ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
 
 # Calculate personal sampling rate Ya'u -----------------------------------
 # WBs were used to calculate PCB concentration
+# Non-dominant hand (nd)
 # Concentrations were calculated for each sampling day 
 # sampling rate of 0.5 m3/d was used for static WBs
 {
@@ -233,44 +246,48 @@ ggplot(SR.kay.r[SR.kay.r$Sampling_Rate > 0 & SR.kay.r$p_value < 0.05, ],
   # Change characters to numbers format
   Veff.yau[, 2:173] <- apply(Veff.yau[, 2:173], 2, as.numeric)
   # Select 1st week, remove metadata
-  Veff.yau.1st <- Veff.yau[1:3, 3:173]
+  Veff.yau.1st.nd <- Veff.yau[1:3, 3:173]
   # Select time
-  Veff.yau.1st.t <- Veff.yau[1:3, 2]
+  Veff.yau.1st.nd.t <- Veff.yau[1:3, 2]
   # Select left, remove metadata
-  Veff.yau.2nd <- Veff.yau[4:6, 3:173]
+  Veff.yau.2nd.nd <- Veff.yau[4:6, 3:173]
   # Select time
-  Veff.yau.2nd.t <- Veff.yau[4:6, 2]
+  Veff.yau.2nd.nd.t <- Veff.yau[4:6, 2]
 }
 
 # Calculate sampling rate (SR) for 1st and 2nd weeks (m3/d)
 # Create matrix for sampling rate (SR)
-SR.yau.1st <- matrix(nrow = length(Veff.yau.1st[1,]), ncol = 3)
+SR.yau.1st.nd <- matrix(nrow = length(Veff.yau.1st.nd[1,]), ncol = 3)
 
-for(i in 1:length(SR.yau.1st[, 1])) {
-  if (sum(!is.na(Veff.yau.1st[, i ]) & !is.infinite(Veff.yau.1st[, i])) == 3) {
-    fit <- lm(Veff.yau.1st[, i] ~ 0 + Veff.yau.1st.t)
-    SR.yau.1st[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.yau.1st[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.yau.1st[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.yau.1st.nd[, 1])) {
+  if (sum(!is.na(Veff.yau.1st.nd[, i ]) & !is.infinite(Veff.yau.1st.nd[, i])) == 3) {
+    fit <- lm(Veff.yau.1st.nd[, i] ~ 0 + Veff.yau.1st.nd.t)
+    SR.yau.1st.nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.1st.nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.1st.nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.yau.1st[i, 1] <- 0
-    SR.yau.1st[i, 2] <- 0
-    SR.yau.1st[i, 3] <- 0
+    SR.yau.1st.nd[i, 1] <- 0
+    SR.yau.1st.nd[i, 2] <- 0
+    SR.yau.1st.nd[i, 3] <- 0
   }
 }
 
-colnames(SR.yau.1st) <-c("Sampling_Rate", "R2", "p_value")
-congener <- names(head(Veff.yau.1st)[0, ])
-SR.yau.1st <- cbind(congener, SR.yau.1st)
-SR.yau.1st <- data.frame(SR.yau.1st, group = "ParticipantY.1st")
+colnames(SR.yau.1st.nd) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.1st.nd)[0, ])
+SR.yau.1st.nd <- cbind(congener, SR.yau.1st.nd)
+SR.yau.1st.nd <- data.frame(SR.yau.1st.nd, group = "ParticipantY.1st.nd")
+
+# Export results
+write.csv(SR.yau.1st.nd,
+          file = "Output/Data/csv/SR.yau.1st.nd.csv", row.names = FALSE)
 
 # Plot
-SR.yau.1st[, 2:4] <- apply(SR.yau.1st[, 2:4], 2, as.numeric)
+SR.yau.1st.nd[, 2:4] <- apply(SR.yau.1st.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.yau.1st$congener <- factor(SR.yau.1st$congener,
-                            levels = unique(SR.yau.1st$congener))
+SR.yau.1st.nd$congener <- factor(SR.yau.1st.nd$congener,
+                            levels = unique(SR.yau.1st.nd$congener))
 
-ggplot(SR.yau.1st[SR.yau.1st$Sampling_Rate > 0 & SR.yau.1st$p_value < 0.05, ],
+ggplot(SR.yau.1st.nd[SR.yau.1st.nd$Sampling_Rate > 0 & SR.yau.1st.nd$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -283,33 +300,37 @@ ggplot(SR.yau.1st[SR.yau.1st$Sampling_Rate > 0 & SR.yau.1st$p_value < 0.05, ],
         axis.title.x = element_text(face = "bold", size = 7))
 
 # Create matrix for sampling rate (SR)
-SR.yau.2nd <- matrix(nrow = length(Veff.yau.2nd[1,]), ncol = 3)
+SR.yau.2nd.nd <- matrix(nrow = length(Veff.yau.2nd.nd[1,]), ncol = 3)
 
-for(i in 1:length(SR.yau.2nd[, 1])) {
-  if (sum(!is.na(Veff.yau.2nd[, i ]) & !is.infinite(Veff.yau.2nd[, i])) == 3) {
-    fit <- lm(Veff.yau.2nd[, i] ~ 0 + Veff.yau.2nd.t)
-    SR.yau.2nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.yau.2nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.yau.2nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.yau.2nd.nd[, 1])) {
+  if (sum(!is.na(Veff.yau.2nd.nd[, i ]) & !is.infinite(Veff.yau.2nd.nd[, i])) == 3) {
+    fit <- lm(Veff.yau.2nd.nd[, i] ~ 0 + Veff.yau.2nd.nd.t)
+    SR.yau.2nd.nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.2nd.nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.2nd.nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.yau.2nd[i, 1] <- 0
-    SR.yau.2nd[i, 2] <- 0
-    SR.yau.2nd[i, 3] <- 0
+    SR.yau.2nd.nd[i, 1] <- 0
+    SR.yau.2nd.nd[i, 2] <- 0
+    SR.yau.2nd.nd[i, 3] <- 0
   }
 }
 
-colnames(SR.yau.2nd) <-c("Sampling_Rate", "R2", "p_value")
-congener <- names(head(Veff.yau.2nd)[0, ])
-SR.yau.2nd <- cbind(congener, SR.yau.2nd)
-SR.yau.2nd <- data.frame(SR.yau.2nd, group = "ParticipantY.2nd")
+colnames(SR.yau.2nd.nd) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.2nd.nd)[0, ])
+SR.yau.2nd.nd <- cbind(congener, SR.yau.2nd.nd)
+SR.yau.2nd.nd <- data.frame(SR.yau.2nd.nd, group = "ParticipantY.2nd.nd")
+
+# Export results
+write.csv(SR.yau.2nd.nd,
+          file = "Output/Data/csv/SR.yau.2nd.nd.csv", row.names = FALSE)
 
 # Plot
-SR.yau.2nd[, 2:4] <- apply(SR.yau.2nd[, 2:4], 2, as.numeric)
+SR.yau.2nd.nd[, 2:4] <- apply(SR.yau.2nd.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.yau.2nd$congener <- factor(SR.yau.2nd$congener,
-                              levels = unique(SR.yau.2nd$congener))
+SR.yau.2nd.nd$congener <- factor(SR.yau.2nd.nd$congener,
+                              levels = unique(SR.yau.2nd.nd$congener))
 
-ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
+ggplot(SR.yau.2nd.nd[SR.yau.2nd.nd$Sampling_Rate > 0 & SR.yau.2nd.nd$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -323,6 +344,7 @@ ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
 
 # Calculate personal sampling rate Ya'u 2nd -------------------------------
 # 3 WBs were not wiped and 3 WBs were wiped
+# Dominant hand used here
 # WBs were used to calculate PCB concentration
 # Concentrations were calculated for each sampling day 
 # sampling rate of 0.5 m3/d was used for static WBs
@@ -335,64 +357,68 @@ ggplot(SR.yau.2nd[SR.yau.2nd$Sampling_Rate > 0 & SR.yau.2nd$p_value < 0.05, ],
   
   # Calculate Veff for WB nw
   mass.WD.nw <- data.yau2[4:6, 5:177]
-  Veff.yau.nw <- mass.WD.nw/t(conc)
+  Veff.yau.nw.d <- mass.WD.nw/t(conc)
   # Add metadata to Veff and change format
-  Veff.yau.nw <- cbind(data.yau2[4:6, 4], data.yau2[4:6, 1], Veff.yau.nw)
+  Veff.yau.nw.d <- cbind(data.yau2[4:6, 4], data.yau2[4:6, 1], Veff.yau.nw.d)
   # Transform to data.frame
-  Veff.yau.nw <- as.data.frame(Veff.yau.nw)
+  Veff.yau.nw.d <- as.data.frame(Veff.yau.nw.d)
   # Add names to first 2 columns
-  colnames(Veff.yau.nw)[1:2] <- c("sample", "time.day")
+  colnames(Veff.yau.nw.d)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.yau.nw[, 2:175] <- apply(Veff.yau.nw[, 2:175], 2, as.numeric)
+  Veff.yau.nw.d[, 2:175] <- apply(Veff.yau.nw.d[, 2:175], 2, as.numeric)
   
   # Calculate Veff for WB w
   mass.WD.w <- data.yau2[7:9, 5:177]
   Veff.yau.w <- mass.WD.w/t(conc)
   # Add metadata to Veff and change format
-  Veff.yau.w <- cbind(data.yau2[7:9, 4], data.yau2[7:9, 1], Veff.yau.w)
+  Veff.yau.w.d <- cbind(data.yau2[7:9, 4], data.yau2[7:9, 1], Veff.yau.w)
   # Transform to data.frame
-  Veff.yau.w <- as.data.frame(Veff.yau.w)
+  Veff.yau.w.d <- as.data.frame(Veff.yau.w.d)
   # Add names to first 2 columns
-  colnames(Veff.yau.w)[1:2] <- c("sample", "time.day")
+  colnames(Veff.yau.w.d)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.yau.w[, 2:175] <- apply(Veff.yau.w[, 2:175], 2, as.numeric)
+  Veff.yau.w.d[, 2:175] <- apply(Veff.yau.w.d[, 2:175], 2, as.numeric)
   # Select time
-  Veff.yau.nw.t <- Veff.yau.nw[, 2]
+  Veff.yau.nw.d.t <- Veff.yau.nw.d[, 2]
   # Select time
-  Veff.yau.w.t <- Veff.yau.w[, 2]
+  Veff.yau.w.d.t <- Veff.yau.w.d[, 2]
 }
 
 # Calculate sampling rate (SR) for nw & w (m3/d)
 # (1) Remove metadata from Veff.yau.nw
-Veff.yau.nw.2 <- Veff.yau.nw[, 3:175]
+Veff.yau.nw.d.2 <- Veff.yau.nw.d[, 3:175]
 # Create matrix for sampling rate (SR)
-SR.yau.nw <- matrix(nrow = length(Veff.yau.nw.2[1,]), ncol = 3)
+SR.yau.nw.d <- matrix(nrow = length(Veff.yau.nw.d.2[1,]), ncol = 3)
 
-for(i in 1:length(SR.yau.nw[, 1])) {
-  if (sum(!is.na(Veff.yau.nw.2[, i]) & !is.infinite(Veff.yau.nw.2[, i])) == 3) {
-    fit <- lm(Veff.yau.nw.2[, i] ~ 0 + Veff.yau.nw.t)
-    SR.yau.nw[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.yau.nw[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.yau.nw[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.yau.nw.d[, 1])) {
+  if (sum(!is.na(Veff.yau.nw.d.2[, i]) & !is.infinite(Veff.yau.nw.d.2[, i])) == 3) {
+    fit <- lm(Veff.yau.nw.d.2[, i] ~ 0 + Veff.yau.nw.d.t)
+    SR.yau.nw.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.nw.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.nw.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.yau.nw[i, 1] <- 0
-    SR.yau.nw[i, 2] <- 0
-    SR.yau.nw[i, 3] <- 0
+    SR.yau.nw.d[i, 1] <- 0
+    SR.yau.nw.d[i, 2] <- 0
+    SR.yau.nw.d[i, 3] <- 0
   }
 }
 
-colnames(SR.yau.nw) <-c("Sampling_Rate", "R2", "p_value")
-congener <- names(head(Veff.yau.nw.2)[0, ])
-SR.yau.nw <- cbind(congener, SR.yau.nw)
-SR.yau.nw <- data.frame(SR.yau.nw, group = "ParticipantY.nw")
+colnames(SR.yau.nw.d) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.nw.d.2)[0, ])
+SR.yau.nw.d <- cbind(congener, SR.yau.nw.d)
+SR.yau.nw.d <- data.frame(SR.yau.nw.d, group = "ParticipantY.nw.d")
+
+# Export results
+write.csv(SR.yau.nw.d,
+          file = "Output/Data/csv/SR.yau.nw.csv", row.names = FALSE)
 
 # Plot
-SR.yau.nw[, 2:4] <- apply(SR.yau.nw[, 2:4], 2, as.numeric)
+SR.yau.nw.d[, 2:4] <- apply(SR.yau.nw.d[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.yau.nw$congener <- factor(SR.yau.nw$congener,
-                              levels = unique(SR.yau.nw$congener))
+SR.yau.nw.d$congener <- factor(SR.yau.nw.d$congener,
+                              levels = unique(SR.yau.nw.d$congener))
 
-ggplot(SR.yau.nw[SR.yau.nw$Sampling_Rate > 0 & SR.yau.nw$p_value < 0.05, ],
+ggplot(SR.yau.nw.d[SR.yau.nw.d$Sampling_Rate > 0 & SR.yau.nw.d$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -405,36 +431,40 @@ ggplot(SR.yau.nw[SR.yau.nw$Sampling_Rate > 0 & SR.yau.nw$p_value < 0.05, ],
         axis.title.x = element_text(face = "bold", size = 7))
 
 # (2) Remove metadata from Veff.yau.w
-Veff.yau.w.2 <- Veff.yau.w[, 3:175]
+Veff.yau.w.d.2 <- Veff.yau.w.d[, 3:175]
 
 # Create matrix for sampling rate (SR)
-SR.yau.w <- matrix(nrow = length(Veff.yau.w.2[1,]), ncol = 3)
+SR.yau.w.d <- matrix(nrow = length(Veff.yau.w.d.2[1,]), ncol = 3)
 
-for(i in 1:length(SR.yau.w[, 1])) {
-  if (sum(!is.na(Veff.yau.w.2[, i ]) & !is.infinite(Veff.yau.w.2[, i])) == 3) {
-    fit <- lm(Veff.yau.w.2[, i] ~ 0 + Veff.yau.w.t)
-    SR.yau.w[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.yau.w[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.yau.w[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.yau.w.d[, 1])) {
+  if (sum(!is.na(Veff.yau.w.d.2[, i ]) & !is.infinite(Veff.yau.w.d.2[, i])) == 3) {
+    fit <- lm(Veff.yau.w.d.2[, i] ~ 0 + Veff.yau.w.d.t)
+    SR.yau.w.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.yau.w.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.yau.w.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.yau.w[i, 1] <- 0
-    SR.yau.w[i, 2] <- 0
-    SR.yau.w[i, 3] <- 0
+    SR.yau.w.d[i, 1] <- 0
+    SR.yau.w.d[i, 2] <- 0
+    SR.yau.w.d[i, 3] <- 0
   }
 }
 
-colnames(SR.yau.w) <-c("Sampling_Rate", "R2", "p_value")
-congener <- names(head(Veff.yau.w.2)[0, ])
-SR.yau.w <- cbind(congener, SR.yau.w)
-SR.yau.w <- data.frame(SR.yau.w, group = "ParticipantY.w")
+colnames(SR.yau.w.d) <-c("Sampling_Rate", "R2", "p_value")
+congener <- names(head(Veff.yau.w.d.2)[0, ])
+SR.yau.w.d <- cbind(congener, SR.yau.w.d)
+SR.yau.w.d <- data.frame(SR.yau.w.d, group = "ParticipantY.w")
+
+# Export results
+write.csv(SR.yau.w.d,
+          file = "Output/Data/csv/SR.yau.w.csv", row.names = FALSE)
 
 # Plot
-SR.yau.w[, 2:4] <- apply(SR.yau.w[, 2:4], 2, as.numeric)
+SR.yau.w.d[, 2:4] <- apply(SR.yau.w.d[, 2:4], 2, as.numeric)
 # Organize PCB names
-SR.yau.w$congener <- factor(SR.yau.w$congener,
-                              levels = unique(SR.yau.w$congener))
+SR.yau.w.d$congener <- factor(SR.yau.w.d$congener,
+                              levels = unique(SR.yau.w.d$congener))
 
-ggplot(SR.yau.w[SR.yau.w$Sampling_Rate > 0 & SR.yau.w$p_value < 0.05, ],
+ggplot(SR.yau.w.d[SR.yau.w.d$Sampling_Rate > 0 & SR.yau.w.d$p_value < 0.05, ],
        aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point() +
   theme_bw() +
@@ -446,14 +476,433 @@ ggplot(SR.yau.w[SR.yau.w$Sampling_Rate > 0 & SR.yau.w$p_value < 0.05, ],
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
+# Plot individual congeners -----------------------------------------------
+# Combine plot
+# Combine data, padding shorter dataset with NA
+max_len <- max(length(Veff.amanda.d.t), length(Veff.amanda.nd.t),
+               length(Veff.kay.d.t), length(Veff.yau.1st.nd.t),
+               length(Veff.yau.2nd.nd.t), length(Veff.yau.w.d.t),
+               length(Veff.yau.nw.d.t))
+
+# PCBs 18+30
+up.Amanda.d <- data.frame(
+  time = c(Veff.amanda.d.t, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  veff = c(Veff.amanda.d$PCB18.30, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  group = rep("Vol. 1 d")
+)
+
+up.Amanda.nd <- data.frame(
+  time = c(Veff.amanda.nd.t, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  veff = c(Veff.amanda.nd$PCB18.30, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  group = rep("Vol. 1 nd")
+)
+
+up.kay.d <- data.frame(
+  time = c(Veff.kay.d.t, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  veff = c(Veff.kay.d$PCB18.30, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  group = rep("Vol. 2 d")
+)
+
+up.yau.1st.nd <- data.frame(
+  time = c(Veff.yau.1st.nd.t, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  veff = c(Veff.yau.1st.nd$PCB18.30, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  group = rep("Vol. 3 1st nd")
+)
+
+up.yau.2nd.nd <- data.frame(
+  time = c(Veff.yau.2nd.nd.t, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  veff = c(Veff.yau.2nd.nd$PCB18.30, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  group = rep("Vol. 3 2nd nd")
+)
+
+up.yau.w.d <- data.frame(
+  time = c(Veff.yau.w.d.t, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  veff = c(Veff.yau.w.d$PCB18.30, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  group = rep("Vol. 3 w d")
+)
+
+up.yau.nw.d <- data.frame(
+  time = c(Veff.yau.nw.d.t, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  veff = c(Veff.yau.nw.d$PCB18.30, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  group = rep("Vol. 3 nw d")
+)
+
+combined_data <- rbind(up.Amanda.d, up.Amanda.nd, up.kay.d, up.yau.1st.nd,
+                       up.yau.2nd.nd, up.yau.w.d, up.yau.nw.d)
+
+combined_data <- rbind(up.Amanda.d, up.Amanda.nd, up.kay.d)
+
+slopes <- combined_data %>%
+  group_by(group) %>%
+  summarize(slope = coef(lm(veff ~ 0 + time))[1]) # [m3/d]
+
+# Define colors for groups
+group_colors <- c("Vol. 1 d" = "#E65C00",
+                  "Vol. 1 nd" = "#0072B2",
+                  "Vol. 2 d" = "#009E73")
+
+# Plot with defined colors
+plot.18.30 <- ggplot(combined_data, aes(x = time * 24, y = veff,
+                                        color = group, fill = group)) +
+  geom_point(shape = 21, size = 6, color = "black") +
+  stat_smooth(method = "lm", se = FALSE, aes(group = group),
+              formula = y ~ 0 + x, fullrange = TRUE) +
+  theme_bw() +
+  xlim(0, 45) +
+  ylim(0, 2.0) +
+  xlab(expression(bold("Deployment time (h)"))) +
+  ylab(expression(bold("Effective Volume PCBs 18+30 (m"^"3"*")"))) +
+  scale_color_manual(values = group_colors) +
+  scale_fill_manual(values = group_colors) +
+  theme(axis.text.y = element_text(face = "bold", size = 22),
+        axis.title.y = element_text(face = "bold", size = 24),
+        axis.text.x = element_text(face = "bold", size = 22),
+        axis.title.x = element_text(face = "bold", size = 24),
+        legend.position = "none",  # Remove the existing legend
+        aspect.ratio = 1.5)
+
+# Adding color symbols before text with increased spacing
+plot.18.30 <- plot.18.30 + 
+  geom_point(aes(x = 1, y = 2.0), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 2.0,
+           label = bquote(Vol. ~ "1 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 1.85), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 nd"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 1.85,
+           label = bquote(Vol. ~ "1 nd" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 nd"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 1.7), size = 6, shape = 21,
+             fill = group_colors["Vol. 2 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 1.7,
+           label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black")
+
+# See plot
+plot.18.30
+
+# Save plot
+ggsave("Output/Plots/SamplingRates/PCB18.30VoluntSamplingRates.png",
+       plot = plot.18.30, width = 8, height = 10, dpi = 1300)
+
+# PCB 52
+up.Amanda.d <- data.frame(
+  time = c(Veff.amanda.d.t, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  veff = c(Veff.amanda.d$PCB52, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  group = rep("Vol. 1 d")
+)
+
+up.Amanda.nd <- data.frame(
+  time = c(Veff.amanda.nd.t, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  veff = c(Veff.amanda.nd$PCB52, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  group = rep("Vol. 1 nd")
+)
+
+up.kay.d <- data.frame(
+  time = c(Veff.kay.d.t, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  veff = c(Veff.kay.d$PCB52, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  group = rep("Vol. 2 d")
+)
+
+up.yau.1st.nd <- data.frame(
+  time = c(Veff.yau.1st.nd.t, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  veff = c(Veff.yau.1st.nd$PCB52, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  group = rep("Vol. 3 1st nd")
+)
+
+up.yau.2nd.nd <- data.frame(
+  time = c(Veff.yau.2nd.nd.t, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  veff = c(Veff.yau.2nd.nd$PCB52, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  group = rep("Vol. 3 2nd nd")
+)
+
+up.yau.w.d <- data.frame(
+  time = c(Veff.yau.w.d.t, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  veff = c(Veff.yau.w.d$PCB52, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  group = rep("Vol. 3 w d")
+)
+
+up.yau.nw.d <- data.frame(
+  time = c(Veff.yau.nw.d.t, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  veff = c(Veff.yau.nw.d$PCB52, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  group = rep("Vol. 3 nw d")
+)
+
+combined_data <- rbind(up.Amanda.d, up.Amanda.nd, up.kay.d)
+
+slopes <- combined_data %>%
+  group_by(group) %>%
+  summarize(slope = coef(lm(veff ~ 0 + time))[1]) # [m3/d]
+
+# Define colors for groups
+group_colors <- c("Vol. 1 d" = "#E65C00",
+                  "Vol. 1 nd" = "#0072B2",
+                  "Vol. 2 d" = "#009E73")
+
+# Plot with defined colors
+plot.52 <- ggplot(combined_data, aes(x = time * 24, y = veff,
+                                     color = group, fill = group)) +
+  geom_point(shape = 21, size = 6, color = "black") +
+  stat_smooth(method = "lm", se = FALSE, aes(group = group),
+              formula = y ~ 0 + x, fullrange = TRUE) +
+  theme_bw() +
+  xlim(0, 45) +
+  ylim(0, 3.1) +
+  xlab(expression(bold("Deployment time (h)"))) +
+  ylab(expression(bold("Effective Volume PCB 52 (m"^"3"*")"))) +
+  scale_color_manual(values = group_colors) +
+  scale_fill_manual(values = group_colors) +
+  theme(axis.text.y = element_text(face = "bold", size = 22),
+        axis.title.y = element_text(face = "bold", size = 24),
+        axis.text.x = element_text(face = "bold", size = 22),
+        axis.title.x = element_text(face = "bold", size = 24),
+        legend.position = "none",
+        aspect.ratio = 1.5)
+
+# Adding color symbols before text with increased spacing
+plot.52 <- plot.52 + 
+  geom_point(aes(x = 1, y = 3.1), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 3.1,
+           label = bquote(Vol. ~ "1 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 2.9), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 nd"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 2.9,
+           label = bquote(Vol. ~ "1 nd" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 nd"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 2.7), size = 6, shape = 21,
+             fill = group_colors["Vol. 2 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 2.7,
+           label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black")
+
+# See plot
+plot.52
+
+# Save plot
+ggsave("Output/Plots/SamplingRates/PCB52VoluntSamplingRates.png",
+       plot = plot.52, width = 8, height = 10, dpi = 1300)
+
+# PCB 118
+up.Amanda.d <- data.frame(
+  time = c(Veff.amanda.d.t, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  veff = c(Veff.amanda.d$PCB118, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  group = rep("Vol. 1 d")
+)
+
+up.Amanda.nd <- data.frame(
+  time = c(Veff.amanda.nd.t, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  veff = c(Veff.amanda.nd$PCB118, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  group = rep("Vol. 1 nd")
+)
+
+up.kay.d <- data.frame(
+  time = c(Veff.kay.d.t, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  veff = c(Veff.kay.d$PCB118, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  group = rep("Vol. 2 d")
+)
+
+up.yau.1st.nd <- data.frame(
+  time = c(Veff.yau.1st.nd.t, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  veff = c(Veff.yau.1st.nd$PCB118, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  group = rep("Vol. 3 1st nd")
+)
+
+up.yau.2nd.nd <- data.frame(
+  time = c(Veff.yau.2nd.nd.t, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  veff = c(Veff.yau.2nd.nd$PCB118, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  group = rep("Vol. 3 2nd nd")
+)
+
+up.yau.w.d <- data.frame(
+  time = c(Veff.yau.w.d.t, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  veff = c(Veff.yau.w.d$PCB118, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  group = rep("Vol. 3 w d")
+)
+
+up.yau.nw.d <- data.frame(
+  time = c(Veff.yau.nw.d.t, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  veff = c(Veff.yau.nw.d$PCB118, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  group = rep("Vol. 3 nw d")
+)
+
+combined_data <- rbind(up.Amanda.d, up.Amanda.nd, up.kay.d)
+
+slopes <- combined_data %>%
+  group_by(group) %>%
+  summarize(slope = coef(lm(veff ~ 0 + time))[1]) # [m3/d]
+
+# Define colors for groups
+group_colors <- c("Vol. 1 d" = "#E65C00",
+                  "Vol. 1 nd" = "#0072B2",
+                  "Vol. 2 d" = "#009E73")
+
+# Plot with defined colors
+plot.118 <- ggplot(combined_data, aes(x = time * 24, y = veff,
+                                     color = group, fill = group)) +
+  geom_point(shape = 21, size = 6, color = "black") +
+  stat_smooth(method = "lm", se = FALSE, aes(group = group),
+              formula = y ~ 0 + x, fullrange = TRUE) +
+  theme_bw() +
+  xlim(0, 45) +
+  ylim(0, 10) +
+  xlab(expression(bold("Deployment time (h)"))) +
+  ylab(expression(bold("Effective Volume PCB 118 (m"^"3"*")"))) +
+  scale_color_manual(values = group_colors) +
+  scale_fill_manual(values = group_colors) +
+  theme(axis.text.y = element_text(face = "bold", size = 22),
+        axis.title.y = element_text(face = "bold", size = 24),
+        axis.text.x = element_text(face = "bold", size = 22),
+        axis.title.x = element_text(face = "bold", size = 24),
+        legend.position = "none",
+        aspect.ratio = 1.5)
+
+# Adding color symbols before text with increased spacing
+plot.118 <- plot.118 + 
+  geom_point(aes(x = 1, y = 10.0), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 10.0,
+           label = bquote(Vol. ~ "1 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 9.25), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 nd"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 9.25,
+           label = bquote(Vol. ~ "1 nd" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 nd"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 8.5), size = 6, shape = 21,
+             fill = group_colors["Vol. 2 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 8.5,
+           label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black")
+
+# See plot
+plot.118
+
+# Save plot
+ggsave("Output/Plots/SamplingRates/PCB118VoluntSamplingRates.png",
+       plot = plot.118, width = 8, height = 10, dpi = 1300)
+
+# PCB 187
+up.Amanda.d <- data.frame(
+  time = c(Veff.amanda.d.t, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  veff = c(Veff.amanda.d$PCB187, rep(NA, max_len - length(Veff.amanda.d[, 1]))),
+  group = rep("Vol. 1 d")
+)
+
+up.Amanda.nd <- data.frame(
+  time = c(Veff.amanda.nd.t, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  veff = c(Veff.amanda.nd$PCB187, rep(NA, max_len - length(Veff.amanda.nd[, 1]))),
+  group = rep("Vol. 1 nd")
+)
+
+up.kay.d <- data.frame(
+  time = c(Veff.kay.d.t, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  veff = c(Veff.kay.d$PCB187, rep(NA, max_len - length(Veff.kay.d[, 1]))),
+  group = rep("Vol. 2 d")
+)
+
+up.yau.1st.nd <- data.frame(
+  time = c(Veff.yau.1st.nd.t, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  veff = c(Veff.yau.1st.nd$PCB187, rep(NA, max_len - length(Veff.yau.1st.nd[, 1]))),
+  group = rep("Vol. 3 1st nd")
+)
+
+up.yau.2nd.nd <- data.frame(
+  time = c(Veff.yau.2nd.nd.t, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  veff = c(Veff.yau.2nd.nd$PCB187, rep(NA, max_len - length(Veff.yau.2nd.nd[, 1]))),
+  group = rep("Vol. 3 2nd nd")
+)
+
+up.yau.w.d <- data.frame(
+  time = c(Veff.yau.w.d.t, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  veff = c(Veff.yau.w.d$PCB187, rep(NA, max_len - length(Veff.yau.w.d[, 1]))),
+  group = rep("Vol. 3 w d")
+)
+
+up.yau.nw.d <- data.frame(
+  time = c(Veff.yau.nw.d.t, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  veff = c(Veff.yau.nw.d$PCB187, rep(NA, max_len - length(Veff.yau.nw.d[, 1]))),
+  group = rep("Vol. 3 nw d")
+)
+
+combined_data <- rbind(up.Amanda.d, up.Amanda.nd, up.kay.d)
+
+slopes <- combined_data %>%
+  group_by(group) %>%
+  summarize(slope = coef(lm(veff ~ 0 + time))[1]) # [m3/d]
+
+# Define colors for groups
+group_colors <- c("Vol. 1 d" = "#E65C00",
+                  "Vol. 1 nd" = "#0072B2",
+                  "Vol. 2 d" = "#009E73")
+
+# Plot with defined colors
+plot.187 <- ggplot(combined_data, aes(x = time * 24, y = veff,
+                                      color = group, fill = group)) +
+  geom_point(shape = 21, size = 6, color = "black") +
+  stat_smooth(method = "lm", se = FALSE, aes(group = group),
+              formula = y ~ 0 + x, fullrange = TRUE) +
+  theme_bw() +
+  xlim(0, 45) +
+  ylim(0, 16) +
+  xlab(expression(bold("Deployment time (h)"))) +
+  ylab(expression(bold("Effective Volume PCB 187 (m"^"3"*")"))) +
+  scale_color_manual(values = group_colors) +
+  scale_fill_manual(values = group_colors) +
+  theme(axis.text.y = element_text(face = "bold", size = 22),
+        axis.title.y = element_text(face = "bold", size = 24),
+        axis.text.x = element_text(face = "bold", size = 22),
+        axis.title.x = element_text(face = "bold", size = 24),
+        legend.position = "none",
+        aspect.ratio = 1.5)
+
+# Adding color symbols before text with increased spacing
+plot.187 <- plot.187 + 
+  geom_point(aes(x = 1, y = 16.0), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 16.0,
+           label = bquote(Vol. ~ "1 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 15.0), size = 6, shape = 21,
+             fill = group_colors["Vol. 1 nd"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 15.0,
+           label = bquote(Vol. ~ "1 nd" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 nd"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  geom_point(aes(x = 1, y = 14.0), size = 6, shape = 21,
+             fill = group_colors["Vol. 2 d"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 2, y = 14.0,
+           label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black")
+
+# See plot
+plot.187
+
+# Save plot
+ggsave("Output/Plots/SamplingRates/PCB187VoluntSamplingRates.png",
+       plot = plot.187, width = 8, height = 10, dpi = 1300)
+
 # Combine sampling rates --------------------------------------------------
 # Combine the all data frames
-combined_SR <- rbind(SR.amanda.r, SR.amanda.l, SR.kay.r, SR.yau.1st,
-                     SR.yau.2nd, SR.yau.nw, SR.yau.w)
+combined_SR <- rbind(SR.amanda.nd, SR.amanda.d, SR.kay.d, SR.yau.1st.nd,
+                     SR.yau.2nd.nd, SR.yau.nw.d, SR.yau.w.d)
 
 # Look at SR and variability
 SR_averages_sd_cv <- combined_SR %>%
-  filter(p_value < 0.05, Sampling_Rate > 0) %>%
+  filter(p_value < 0.05, R2 >= 0.9) %>%
   group_by(congener) %>%
   summarise(
     Average_Sampling_Rate = mean(Sampling_Rate, na.rm = TRUE),
@@ -461,9 +910,13 @@ SR_averages_sd_cv <- combined_SR %>%
     CV_Sampling_Rate = (sd(Sampling_Rate, na.rm = TRUE) / mean(Sampling_Rate, na.rm = TRUE)) * 100
   )
 
+# Remove PCB (rows) with only one SR measurement, i.e., SD and CV = NA
+SR_averages_sd_cv <- SR_averages_sd_cv %>%
+  filter(!is.na(SD_Sampling_Rate))
+
 # Export results
 write.csv(SR_averages_sd_cv,
-          file = "Output/Data/csv/Ave.SRs.csv", row.names = FALSE)
+          file = "Output/Data/csv/ParticipantSRV02.csv", row.names = FALSE)
 
 # Plot the average and stdev
 Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_Rate)) +
@@ -572,7 +1025,7 @@ logKoa_long <- logKoa %>%
 # Combine the datasets based on the 'congener' column
 combined_data <- merge(combined_SR, logKoa_long, by = "congener")
 
-# Analisys all data
+# Analysis all data
 # Perform exponential regression with the specified condition
 exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
                data = subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
@@ -691,6 +1144,7 @@ Plot.exp.regr <- ggplot(subset(selected_data, Sampling_Rate > 0 & p_value < 0.05
 
 # See plot
 print(Plot.exp.regr)
+
 # Save plot
 ggsave("Output/Plots/SRExpRegresionV01.png",
        plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
