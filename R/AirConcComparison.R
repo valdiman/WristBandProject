@@ -184,11 +184,10 @@ log10.all_differences <- c(log10.diff_amanda.1, log10.diff_amanda.2,
 # Print the combined differences
 print(log10.all_differences)
 # Perform one-sample t-test
+# Not usre if this makes sense, using a mu = 0 when log10 is used
 result <- t.test(log10.all_differences, mu = 0)
 # View the result
 print(result) # Not significant, p-value = 0.65
-
-# Not sure yet if log10 is needed!
 
 # t test for individual PCBs ----------------------------------------------
 # Transpose the conc_air_common data frame
@@ -201,7 +200,7 @@ shapiro_results.1 <- lapply(log10(conc.wb), shapiro.test)
 p_values.wb <- sapply(shapiro_results.1, function(x) x$p.value)
 
 # Create data frame with congener names and p-values
-p_values_wb <- data.frame(p_value.wb = p_values)
+p_values_wb <- data.frame(p_value.wb = p_values.wb)
 
 # Count how many rows have p-values above 0.05
 above_threshold_count <- sum(p_values.wb > 0.05, na.rm = TRUE)
@@ -225,7 +224,7 @@ for (congener in colnames(conc_air_common_transposed)) {
 }
 
 # Replace 0 with NA in the p_value column
-shapiro_results.2$p_value[shapiro_results$p_value == 0] <- NA
+shapiro_results.2$p_value[shapiro_results.2$p_value == 0] <- NA
 
 p_values_air <- shapiro_results.2
 
