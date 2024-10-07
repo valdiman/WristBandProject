@@ -38,11 +38,14 @@ data <- data.frame(read_excel("Data/Volunteers.xlsx", sheet = "Sheet1",
   mass.Hu.Stat <- data[13, 4:176]
   # For Xu
   mass.Xu.Stat <- data.frame(t(colMeans(data[19:21, 4:176])))
+  # For Gift
+  mass.Gi.Stat <- data.frame(t(colMeans(data[22:23, 4:176])))
   # Combine concentrations
-  wb.stat <- rbind(mass.Mi.Ya.Stat, mass.Ea.Stat, mass.Cr.Stat, mass.Hu.Stat, mass.Xu.Stat)
+  wb.stat <- rbind(mass.Mi.Ya.Stat, mass.Ea.Stat, mass.Cr.Stat, mass.Hu.Stat, mass.Xu.Stat,
+                   mass.Gi.Stat)
   # Add row names
   rownames(wb.stat) <- c("Mass.Air.Mi.Ya.Stat", "Mass.Air.Ea.Stat", "Mass.Air.Cr.Stat",
-                          "Mass.Air.Hu.Stat", "Mass.Air.Xu.Stat")
+                          "Mass.Air.Hu.Stat", "Mass.Air.Xu.Stat", "Mass.Air.Gi.Stat")
 }
 
 # Mass accumulated in wore WBs --------------------------------------------
@@ -59,13 +62,17 @@ data <- data.frame(read_excel("Data/Volunteers.xlsx", sheet = "Sheet1",
   wb.Hu.r <- data[12, 4:176]
   wb.Xu.l <- data[17, 4:176]
   wb.Xu.r <- data[18, 4:176]
+  wb.Gi.l <- data[25, 4:176]
+  wb.Gi.r <- data[24, 4:176]
   # Combined wore WBs
   wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ya.l, wb.Ya.r, wb.Ea.l, wb.Ea.r,
-                 wb.Cr.l, wb.Cr.r, wb.Hu.l, wb.Hu.r, wb.Xu.l, wb.Xu.r)
+                 wb.Cr.l, wb.Cr.r, wb.Hu.l, wb.Hu.r, wb.Xu.l, wb.Xu.r,
+                 wb.Gi.l, wb.Gi.r)
   # Add row names
   rownames(wb.wr) <- c("Mass.Mi.l.wr", "Mass.Mi.r.wr", "Mass.Ya.l.wr", "Mass.Ya.r.wr",
                        "Mass.Ea.l.wr", "Mass.Ea.r.wr", "Mass.Cr.l.wr", "Mass.Cr.r.wr",
-                       "Mass.Hu.l.wr", "Mass.Hu.r.wr", "Mass.Xu.l.wr", "Mass.Xu.r.wr")
+                       "Mass.Hu.l.wr", "Mass.Hu.r.wr", "Mass.Xu.l.wr", "Mass.Xu.r.wr",
+                       "Mass.Gi.l.wr", "Mass.Gi.r.wr")
 }
 
 # Create mass PCB congener profiles ---------------------------------------
@@ -249,6 +256,38 @@ ggplot(prof_combined.Hu, aes(x = congener, y = Mass, fill = Source)) +
                                "prof.wb.wr.Hu.l" = "#E69F00",  # Orange
                                "prof.wb.wr.Hu.r" = "#009E73")) # Green
 
+# Gi
+prof_combined.Gi <- prof.wb.stat %>%
+  select(congener, Mass.Air.Gi.Stat) %>%
+  rename(Mass = Mass.Air.Gi.Stat) %>%
+  mutate(Source = "prof.wb.stat.Gi") %>%
+  bind_rows(prof.wb.wr %>%
+              select(congener, Mass.Gi.l.wr) %>%
+              rename(Mass = Mass.Gi.l.wr) %>%
+              mutate(Source = "prof.wb.wr.Gi.l")) %>%
+  bind_rows(prof.wb.wr %>%
+              select(congener, Mass.Gi.r.wr) %>%
+              rename(Mass = Mass.Gi.r.wr) %>%
+              mutate(Source = "prof.wb.wr.Gi.r"))
+
+# Plots
+ggplot(prof_combined.Gi, aes(x = congener, y = Mass, fill = Source)) +
+  geom_bar(position = position_dodge(), stat = "identity", width = 1) +
+  xlab("") +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/12) +
+  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13)) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  scale_fill_manual(values = c("prof.wb.stat.Gi" = "#0072B2",  # Blue
+                               "prof.wb.wr.Gi.l" = "#E69F00",  # Orange
+                               "prof.wb.wr.Gi.r" = "#009E73")) # Green
+
+
 # Xu
 prof_combined.Xu <- prof.wb.stat %>%
   select(congener, Mass.Air.Xu.Stat) %>%
@@ -290,11 +329,12 @@ ggsave("Output/Plots/Profiles/MassProfXu.png", plot = pXu, width = 6,
 # Create concentration PCB congener profiles ------------------------------
 # (1) Air WBs
 # = massWB/(0.5*time.day)
-time <- data$time.day[c(8, 7, 14, 13, 19)]
+time <- data$time.day[c(8, 7, 14, 13, 19, 22)]
 conc.wb.air <- as.data.frame(wb.stat/(0.5*time))
 rownames(conc.wb.air) <- c("Conc.Air.Mi.Ya.Stat",
-                                "Conc.Air.Ea.Stat", "Conc.Air.Cr.Stat",
-                                "Conc.Air.Hu.Stat", "Conc.Air.Xu.Stat")
+                           "Conc.Air.Ea.Stat", "Conc.Air.Cr.Stat",
+                           "Conc.Air.Hu.Stat", "Conc.Air.Xu.Stat",
+                           "Conc.Air.Gi.Stat")
 # Check total PCB
 tPCB.conc.air <- rowSums(conc.wb.air, na.rm = TRUE)
 # See
@@ -319,14 +359,14 @@ wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
 # !!! Use a constant sampling rate
 # wb_div_sr <- sweep(wb_common, 2, 1.5, FUN = "/")
 # Extract time.day from wb.wr
-wb_time_day <- data$time.day[c(1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 17, 18)]
+wb_time_day <- data$time.day[c(1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 17, 18, 24, 25)]
 # Divide wb_div_sr further by corresponding value in wb_time_day
 conc.wb.wr <- sweep(wb_div_sr, 1, wb_time_day, FUN = "/")
 rownames(conc.wb.wr) <- c("Conc.Mi.l.wr", "Conc.Mi.r.wr", "Conc.Ya.l.wr",
-                          "Conc.Ya.r.wr", "Conc.Ea.l.wr",
-                               "Conc.Ea.r.wr", "Conc.Cr.l.wr", "Conc.Cr.r.wr",
-                               "Conc.Hu.l.wr", "Conc.Hu.r.wr", "Conc.Xu.l.wr",
-                               "Conc.Xu.r.wr")
+                          "Conc.Ya.r.wr", "Conc.Ea.l.wr", "Conc.Ea.r.wr",
+                          "Conc.Cr.l.wr", "Conc.Cr.r.wr", "Conc.Hu.l.wr",
+                          "Conc.Hu.r.wr", "Conc.Xu.l.wr", "Conc.Xu.r.wr",
+                          "Conc.Gi.l.wr", "Conc.Gi.r.wr")
 # Check total PCB
 tPCB.conc.wb.wr <- rowSums(conc.wb.wr, na.rm = TRUE)
 # See
@@ -351,12 +391,12 @@ prof.wb.air.conc <- data.frame(t(prof.wb.air.conc))
 congener <- rownames(prof.wb.air.conc)
 prof.wb.air.conc <- cbind(congener, prof.wb.air.conc)
 rownames(prof.wb.air.conc) <- NULL
-prof.wb.air.conc[, 2:6] <- lapply(prof.wb.air.conc[, 2:6], as.numeric)
+prof.wb.air.conc[, 2:7] <- lapply(prof.wb.air.conc[, 2:7], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.air.conc$congener <- factor(prof.wb.air.conc$congener,
                                 levels = unique(prof.wb.air.conc$congener))
 # Check sum of all PCBs (i.e., = 1)
-colSums(prof.wb.air.conc[, 2:6], na.rm = TRUE)
+colSums(prof.wb.air.conc[, 2:7], na.rm = TRUE)
 
 # (2) Wore WBs
 tmp.wb.wr <- rowSums(conc.wb.wr, na.rm = TRUE)
@@ -365,12 +405,12 @@ prof.wb.wr.conc <- data.frame(t(prof.wb.wr.conc))
 congener <- rownames(prof.wb.wr.conc)
 prof.wb.wr.conc <- cbind(congener, prof.wb.wr.conc)
 rownames(prof.wb.wr.conc) <- NULL
-prof.wb.wr.conc[, 2:13] <- lapply(prof.wb.wr.conc[, 2:13], as.numeric)
+prof.wb.wr.conc[, 2:15] <- lapply(prof.wb.wr.conc[, 2:15], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.wr.conc$congener <- factor(prof.wb.wr.conc$congener,
                                levels = unique(prof.wb.wr.conc$congener))
 # Check sum of all PCBs (i.e., = 1)
-colSums(prof.wb.wr.conc[, 2:13], na.rm = TRUE)
+colSums(prof.wb.wr.conc[, 2:15], na.rm = TRUE)
 
 # Concentration profile plots ---------------------------------------------
 # Mi (1)
@@ -654,6 +694,53 @@ print(prof_combined.Xu)
 ggsave("Output/Plots/Profiles/prof_combined.Vol6.png", plot = prof_combined.Xu,
        width = 10, height = 5, dpi = 500)
 
+# Gift
+prof_combined.Gi <- prof.wb.air.conc %>%
+  select(congener, Conc.Air.Gi.Stat) %>%
+  rename(Conc = Conc.Air.Gi.Stat) %>%
+  mutate(Source = "Air PCB") %>%
+  bind_rows(prof.wb.wr.conc %>%
+              select(congener, Conc.Gi.l.wr) %>%
+              rename(Conc = Conc.Gi.l.wr) %>%
+              mutate(Source = "Vol. 7 nd")) %>%
+  bind_rows(prof.wb.wr.conc %>%
+              select(congener, Conc.Gi.r.wr) %>%
+              rename(Conc = Conc.Gi.r.wr) %>%
+              mutate(Source = "Vol. 7 d"))
+
+# Plots
+prof_combined.Gi <- ggplot(prof_combined.Gi, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
+           color = "black",  # Add black edges to the bars
+           size = 0.2) +  # Set the thickness of the black edges (fine line)
+  xlab("") +
+  ylim(0, 0.7) +
+  theme_bw() +
+  theme(aspect.ratio = 5/20) +
+  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  scale_fill_manual(values = c("Air PCB" = "blue",
+                               "Vol. 7 nd" = "#009E73",
+                               "Vol. 7 d" = "#E69F00"),
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
+  theme(legend.position = c(0.93, 0.8),  # Inside the plot
+        legend.background = element_rect(fill = "white", color = NA),
+        legend.title = element_blank(),  # Removes the legend title
+        legend.text = element_text(size = 8, face = "bold"))
+
+# Print the plots
+print(prof_combined.Gi)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/prof_combined.Vol7.png", plot = prof_combined.Gi,
+       width = 10, height = 5, dpi = 500)
+
 # Calculate cosine theta --------------------------------------------------
 # Need to change the format of prof_combined...
 # Create a term-document matrix from the 'Source' variable
@@ -716,4 +803,14 @@ cosine_matrix <- as.matrix(prof_combined_wide.Xu[, -1])
 cosine_similarity.Xu <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.Xu
+
+# Gift
+prof_combined_wide.Gi  <- prof_combined.Gi %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+# Create a matrix from the concentration values (excluding the congener column)
+cosine_matrix <- as.matrix(prof_combined_wide.Gi[, -1])
+# Calculate cosine similarity between the columns (now rows after transposing)
+cosine_similarity.Gi <- cosine(cosine_matrix)
+# View the resulting cosine similarity matrix
+cosine_similarity.Gi
 
