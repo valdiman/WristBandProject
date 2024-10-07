@@ -34,6 +34,8 @@ data <- data.frame(read_excel("Data/Volunteers.xlsx", sheet = "Sheet1",
   data.Hu.Stat <- data[13, 4:176]
   # For Xu
   data.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
+  # For Gift
+  data.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
   
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
@@ -42,12 +44,13 @@ data <- data.frame(read_excel("Data/Volunteers.xlsx", sheet = "Sheet1",
   conc.Cr <- as.data.frame(data.Cr.Stat/(0.5*data$time.day[14]))
   conc.Hu <- as.data.frame(t(data.Hu.Stat/(0.5*data$time.day[13])))
   conc.Xu <- as.data.frame(data.Xu.Stat/(0.5*data$time.day[19]))
+  conc.Gi <- as.data.frame(data.Gi.Stat/(0.5*data$time.day[22]))
   
   # Combine concentrations
-  conc.air <- cbind(conc.Mi.Ya, conc.Ea, conc.Cr, conc.Hu, conc.Xu)
+  conc.air <- cbind(conc.Mi.Ya, conc.Ea, conc.Cr, conc.Hu, conc.Xu, conc.Gi)
   # Change column names of the last three columns
   colnames(conc.air) <- c("Conc.Air.Mi.Ya", "Conc.Air.Ea", "Conc.Air.Cr",
-                          "Conc.Air.Hu", "Conc.Air.Xu")
+                          "Conc.Air.Hu", "Conc.Air.Xu", "Conc.Air.Gi")
 }
 
 # Read calculated average sampling rates ----------------------------------
@@ -69,10 +72,13 @@ sr <- sr[, 1:2]
   wb.Hu.r <- data[12, c(2, 4:176)]
   wb.Xu.l <- data[17, c(2, 4:176)]
   wb.Xu.r <- data[18, c(2, 4:176)]
+  wb.Gi.l <- data[25, c(2, 4:176)]
+  wb.Gi.r <- data[24, c(2, 4:176)]
 }
 # Combined wore WBs
 wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ya.l, wb.Ya.r, wb.Ea.l, wb.Ea.r,
-               wb.Cr.l, wb.Cr.r, wb.Hu.l, wb.Hu.r, wb.Xu.l, wb.Xu.r)
+               wb.Cr.l, wb.Cr.r, wb.Hu.l, wb.Hu.r, wb.Xu.l, wb.Xu.r,
+               wb.Gi.l, wb.Gi.r)
 
 # Estimate air concentration using SR, mass of wore WBs & time ------------
 # Extract congener names from sr
@@ -93,7 +99,7 @@ wb_time_day <- wb.wr$time.day
 conc.wb <- sweep(wb_div_sr, 1, wb_time_day, FUN = "/")
 rownames(conc.wb) <- c('wb.Mi.l', 'wb.Mi.r', 'wb.Ya.l', 'wb.Ya.r', 'wb.Ea.l',
                        'wb.Ea.r', 'wb.Cr.l', 'wb.Cr.r', 'wb.Hu.l', 'wb.Hu.r',
-                       'wb.Xu.l', 'wb.Xu.r')
+                       'wb.Xu.l', 'wb.Xu.r', 'wb.Gi.l', 'wb.Gi.r')
 
 # Match congeners in both dataset -----------------------------------------
 # Ensure both data frames have matching congener order
@@ -117,7 +123,7 @@ print(tPCB.conc.air)
 # Create a data frame with the combined data
 data <- data.frame(
   Wb_Concentration = tPCB.conc.wb,
-  Air_Concentration = rep(tPCB.conc.air, times = c(4, 2, 2, 2, 2)),
+  Air_Concentration = rep(tPCB.conc.air, times = c(4, 2, 2, 2, 2,2)),
   Volunteer = names(tPCB.conc.wb)
 )
 
@@ -135,17 +141,19 @@ data$Volunteer2 <- case_when(
   data$Volunteer == "wb.Hu.r" ~ "Vol. 5 nd",
   data$Volunteer == "wb.Xu.l" ~ "Vol. 6 nd",
   data$Volunteer == "wb.Xu.r" ~ "Vol. 6 d",
+  data$Volunteer == "wb.Gi.l" ~ "Vol. 7 nd",
+  data$Volunteer == "wb.Gi.r" ~ "Vol. 7 d",
   TRUE ~ NA_character_  # This handles any unmatched cases
 )
 
 # Define a color palette with enough distinct colors for the number of volunteers
 color_palette <- c(
   "#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
-  "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#e41a1c", "#264c73"
-)
+  "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#e41a1c", "#264c73",
+  "#f781bf", "#a65628")
 
 # Define a shape palette with enough distinct shapes for the number of volunteers
-shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21)
+shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22)
 
 # Create the plot
 plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
@@ -154,10 +162,10 @@ plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
   theme_bw() +
   theme(aspect.ratio = 15/15) +
   annotation_logticks(sides = "bl") +
-  scale_y_log10(limits = c(10, 10^3),
+  scale_y_log10(limits = c(1, 10^3),
                 breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
-  scale_x_log10(limits = c(10, 10^3),
+  scale_x_log10(limits = c(1, 10^3),
                 breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   xlab(expression(bold("Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
@@ -292,7 +300,6 @@ cat("Number of values above", threshold, ":", count_above_threshold, "\n")
 cat("Total number of values:", total_values, "\n")
 cat("Proportion of values above", threshold, ":", proportion_above_threshold, "\n")
 
-
 # Color and shapes from tPCB plot
 # Change names for legend
 filtered_data$Volunteer.y <- case_when(
@@ -308,6 +315,8 @@ filtered_data$Volunteer.y <- case_when(
   filtered_data$Volunteer.y == "Hu.r" ~ "Vol. 5 nd",
   filtered_data$Volunteer.y == "Xu.l" ~ "Vol. 6 nd",
   filtered_data$Volunteer.y == "Xu.r" ~ "Vol. 6 d",
+  filtered_data$Volunteer.y == "Gi.l" ~ "Vol. 7 nd",
+  filtered_data$Volunteer.y == "Gi.r" ~ "Vol. 7 d",
   TRUE ~ NA_character_  # Handles any unmatched cases
 )
 
