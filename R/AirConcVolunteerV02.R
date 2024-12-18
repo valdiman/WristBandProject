@@ -25,23 +25,19 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # Stat samples
-  data.Stat.1 <- data.frame(data[1, 3:175])
-  data.Stat.2 <- data.frame(data[2, 3:175])
-  data.Stat.3 <- data.frame(data[3, 3:175])
+  #data.Stat.1 <- data[1, 3:175]
+  #data.Stat.2 <- data[2, 3:175]
+  data.Stat.1 <- data.frame(colMeans(data[1:2, 3:175]))
+  data.Stat.3 <- data[3, 3:175]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
-  conc.air.1 <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[1])))
-  conc.air.2 <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[2])))
-  conc.air.3 <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[3])))
-  # Combine the three conc.air data frames into a list
-  conc.air <- list(conc.air.1, conc.air.2, conc.air.3)
+  conc.air.i <- as.data.frame(data.Stat.1/(0.5*data$time.day[1]))
+  conc.air.ii <- as.data.frame(t(data.Stat.3/(0.5*data$time.day[3])))
+  #conc.air.iii <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[3])))
   # Bind the data frames together row-wise
-  conc.air <- do.call(cbind, conc.air)
-  # Calculate the row means for each column and create a new data frame
-  conc.air.avg <- as.data.frame(rowMeans(conc.air))
-  
+  conc.air <- cbind(conc.air.i, conc.air.ii)
   # Change column names of the last three columns
-  colnames(conc.air.avg) <- c("Conc.Air")
+  colnames(conc.air) <- c("Conc.Air.1", "Conc.Air.2")
 }
 
 # Read calculated average sampling rates ----------------------------------
