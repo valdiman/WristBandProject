@@ -25,17 +25,20 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # Stat samples
-  #data.Stat.1 <- data[1, 3:175]
-  #data.Stat.2 <- data[2, 3:175]
-  data.Stat.1 <- data.frame(colMeans(data[1:2, 3:175]))
+  data.Stat.1 <- data[1, 3:175]
+  data.Stat.2 <- data[2, 3:175]
   data.Stat.3 <- data[3, 3:175]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
-  conc.air.i <- as.data.frame(data.Stat.1/(0.5*data$time.day[1]))
-  conc.air.ii <- as.data.frame(t(data.Stat.3/(0.5*data$time.day[3])))
-  #conc.air.iii <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[3])))
+  conc.air.i <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[1])))
+  conc.air.ii <- as.data.frame(t(data.Stat.2/(0.5*data$time.day[2])))
+  conc.air.iii <- as.data.frame(t(data.Stat.3/(0.5*data$time.day[3])))
   # Bind the data frames together row-wise
-  conc.air <- cbind(conc.air.i, conc.air.ii)
+  conc.air.i.2 <- cbind(conc.air.i, conc.air.ii)
+  # Average i and ii
+  conc.air.i.2 <- as.data.frame(colMeans(t(conc.air.i.2)))
+  # Bind the data frames together row-wise
+  conc.air <- cbind(conc.air.i.2, conc.air.iii)
   # Change column names of the last three columns
   colnames(conc.air) <- c("Conc.Air.1", "Conc.Air.2")
 }
@@ -47,20 +50,20 @@ sr <- sr[, 1:2]
 
 # Select wore WBs ---------------------------------------------------------
 {
-  wb.Mi.l <- data[4, c(2, 3:175)]
-  wb.Mi.r <- data[5, c(2, 3:175)]
-  wb.Ea.r <- data[6, c(2, 3:175)]
-  wb.Ea.l <- data[7, c(2, 3:175)]
-  wb.Ya.r <- data[8, c(2, 3:175)]
-  wb.Ya.l <- data[9, c(2, 3:175)]
-  wb.An.r <- data[10, c(2, 3:175)]
-  wb.An.l <- data[11, c(2, 3:175)]
-  wb.Xu.r <- data[12, c(2, 3:175)]
-  wb.Xu.l <- data[13, c(2, 3:175)]
+  wb.Mi.o <- data[4, c(2, 3:175)]
+  wb.Mi.h <- data[5, c(2, 3:175)]
+  wb.Ea.h <- data[6, c(2, 3:175)]
+  wb.Ea.o <- data[7, c(2, 3:175)]
+  wb.Ya.o <- data[8, c(2, 3:175)]
+  wb.Ya.h <- data[9, c(2, 3:175)]
+  wb.An.h <- data[10, c(2, 3:175)]
+  wb.An.o <- data[11, c(2, 3:175)]
+  wb.Xu.h <- data[12, c(2, 3:175)]
+  wb.Xu.o <- data[13, c(2, 3:175)]
 }
 # Combined wore WBs
-wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ea.r, wb.Ea.l, wb.Ya.r, wb.Ya.l,
-               wb.An.r, wb.An.l, wb.Xu.r, wb.Xu.l)
+wb.wr <- rbind(wb.Mi.o, wb.Mi.h, wb.Ea.o, wb.Ea.h, wb.Ya.o, wb.Ya.h,
+               wb.An.o, wb.An.h, wb.Xu.o, wb.Xu.h)
 
 # Estimate air concentration using SR, mass of wore WBs & time ------------
 # Extract congener names from sr
@@ -79,9 +82,9 @@ wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
 wb_time_day <- wb.wr$time.day
 # Divide wb_div_sr further by corresponding value in wb_time_day
 conc.wb <- sweep(wb_div_sr, 1, wb_time_day, FUN = "/")
-rownames(conc.wb) <- c('wb.Mi.l', 'wb.Mi.r', 'wb.Ea.r', 'wb.Ea.l',
-                       'wb.Ya.r', 'wb.Ya.l', 'wb.An.l', 'wb.An.r',
-                       'wb.Xu.r', 'wb.Xu.l')
+rownames(conc.wb) <- c('wb.Mi.o', 'wb.Mi.h', 'wb.Ea.o', 'wb.Ea.h',
+                       'wb.Ya.o', 'wb.Ya.h', 'wb.An.o', 'wb.An.h',
+                       'wb.Xu.o', 'wb.Xu.h')
 
 # Match congeners in both dataset -----------------------------------------
 # Ensure both data frames have matching congener order
@@ -103,67 +106,80 @@ print(tPCB.conc.air)
 # Plots -------------------------------------------------------------------
 # tPCB
 # Create a data frame with the combined data
-data <- data.frame(
+data.plot <- data.frame(
   Wb_Concentration = tPCB.conc.wb,
-  Air_Concentration = rep(tPCB.conc.air, times = c(4, 2, 2, 2, 2,2)),
+  Air_Concentration = rep(tPCB.conc.air, times = c(6, 4)),
   Volunteer = names(tPCB.conc.wb)
 )
 
 # Change names for legend
-data$Volunteer2 <- case_when(
-  data$Volunteer == "wb.Mi.l" ~ "Vol. 1 nd",
-  data$Volunteer == "wb.Mi.r" ~ "Vol. 1 d",
-  data$Volunteer == "wb.Ya.l" ~ "Vol. 2 d",
-  data$Volunteer == "wb.Ya.r" ~ "Vol. 2 nd",
-  data$Volunteer == "wb.Ea.l" ~ "Vol. 3 nd",
-  data$Volunteer == "wb.Ea.r" ~ "Vol. 3 d",
-  data$Volunteer == "wb.Cr.l" ~ "Vol. 4 nd",
-  data$Volunteer == "wb.Cr.r" ~ "Vol. 4 d",
-  data$Volunteer == "wb.Hu.l" ~ "Vol. 5 d",
-  data$Volunteer == "wb.Hu.r" ~ "Vol. 5 nd",
-  data$Volunteer == "wb.Xu.l" ~ "Vol. 6 nd",
-  data$Volunteer == "wb.Xu.r" ~ "Vol. 6 d",
-  data$Volunteer == "wb.Gi.l" ~ "Vol. 7 nd",
-  data$Volunteer == "wb.Gi.r" ~ "Vol. 7 d",
+data.plot$Volunteer2 <- case_when(
+  data.plot$Volunteer == "wb.Mi.o" ~ "Vol. 1 Of",
+  data.plot$Volunteer == "wb.Mi.h" ~ "Vol. 1 Ho",
+  data.plot$Volunteer == "wb.Ya.o" ~ "Vol. 2 Of",
+  data.plot$Volunteer == "wb.Ya.h" ~ "Vol. 2 Ho",
+  data.plot$Volunteer == "wb.Ea.o" ~ "Vol. 3 Of",
+  data.plot$Volunteer == "wb.Ea.h" ~ "Vol. 3 Ho",
+  data.plot$Volunteer == "wb.Xu.o" ~ "Vol. 4 Of",
+  data.plot$Volunteer == "wb.Xu.h" ~ "Vol. 4 Ho",
+  data.plot$Volunteer == "wb.An.o" ~ "Vol. 5 Of",
+  data.plot$Volunteer == "wb.An.h" ~ "Vol. 5 Ho",
   TRUE ~ NA_character_  # This handles any unmatched cases
 )
 
-# Define a color palette with enough distinct colors for the number of volunteers
-color_palette <- c(
-  "#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
-  "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#e41a1c", "#264c73",
-  "#f781bf", "#a65628")
+# First, let's create a new column that will group the data into Vol. 1, Vol. 2, etc.
+data.plot$Volunteer_Group <- case_when(
+  grepl("wb.Mi", data.plot$Volunteer) ~ "Vol. 1",
+  grepl("wb.Ya", data.plot$Volunteer) ~ "Vol. 2",
+  grepl("wb.Ea", data.plot$Volunteer) ~ "Vol. 3",
+  grepl("wb.Xu", data.plot$Volunteer) ~ "Vol. 4",
+  grepl("wb.An", data.plot$Volunteer) ~ "Vol. 5",
+  TRUE ~ NA_character_
+)
 
-# Define a shape palette with enough distinct shapes for the number of volunteers
-shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22)
+# Next, reshape the data into long format so that each volunteer will have three rows: Of, Ho, and Air
+data_long <- data.plot %>%
+  # Create a new "Category" column to represent the Concentration type
+  mutate(Concentration_Type = case_when(
+    grepl("Of", data.plot$Volunteer2) ~ "Of",
+    grepl("Ho", data.plot$Volunteer2) ~ "Ho",
+    TRUE ~ "Air"
+  )) %>%
+  # Reshape to long format
+  pivot_longer(cols = c(Wb_Concentration, Air_Concentration), 
+               names_to = "Concentration_Name", 
+               values_to = "Concentration") %>%
+  # Now, add a column to distinguish between the three types of concentration
+  mutate(Concentration_Category = case_when(
+    Concentration_Name == "Wb_Concentration" & Concentration_Type == "Of" ~ "Of",
+    Concentration_Name == "Wb_Concentration" & Concentration_Type == "Ho" ~ "Ho",
+    Concentration_Name == "Air_Concentration" ~ "Air",
+    TRUE ~ NA_character_
+  ))
 
-# Create the plot
-plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
-                           fill = Volunteer2, shape = Volunteer2)) +
-  geom_point(size = 3.5, color = "black", stroke = 0.5) +
+# Set the factor levels for Concentration_Category to control the order
+data_long$Concentration_Category <- factor(
+  data_long$Concentration_Category,
+  levels = c("Ho", "Of", "Air")  # Desired order
+)
+
+# Plot the data with the adjusted order
+ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
+                      fill = Concentration_Category)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
+  scale_fill_manual(
+    values = c("Ho" = "orange", "Of" = "blue", "Air" = "green"),  # Custom colors
+    labels = c("Ho" = "WB conc Home", "Of" = "WB conc Office",
+               "Air" = "Air conc Office")  # Custom labels
+  ) +
+  labs(x = '', fill = "Location") +
+  ylab(expression(bold("Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
   theme_bw() +
-  theme(aspect.ratio = 15/15) +
-  annotation_logticks(sides = "bl") +
-  scale_y_log10(limits = c(1, 10^3),
-                breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  scale_x_log10(limits = c(1, 10^3),
-                breaks = trans_breaks("log10", function(x) 10^x),
-                labels = trans_format("log10", math_format(10^.x))) +
-  xlab(expression(bold("Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
-  ylab(expression(bold("Predicted Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
-        axis.text.x = element_text(face = "bold", size = 14),
-        axis.title.x = element_text(face = "bold", size = 14)) +
-  geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
-  geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
-  geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
-  guides(fill = guide_legend(override.aes = list(color = NA))) +
-  scale_fill_manual(values = color_palette) +
-  scale_shape_manual(values = shape_palette) +
-  labs(fill = "Volunteers", shape = "Volunteers") +
-  theme(legend.position = "right") # Optional: Adjust legend position
+        axis.text.x = element_text(face = "bold", size = 14,
+                                   angle = 45, hjust =1),
+        axis.title.x = element_text(face = "bold", size = 14))
 
 # Print the plot
 print(plotAirWBtPCB)
