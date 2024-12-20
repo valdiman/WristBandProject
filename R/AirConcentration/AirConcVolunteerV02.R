@@ -124,10 +124,10 @@ data.plot$Volunteer2 <- case_when(
   data.plot$Volunteer == "wb.Xu.h" ~ "Vol. 4 Ho",
   data.plot$Volunteer == "wb.An.o" ~ "Vol. 5 Of",
   data.plot$Volunteer == "wb.An.h" ~ "Vol. 5 Ho",
-  TRUE ~ NA_character_  # This handles any unmatched cases
+  TRUE ~ NA_character_
 )
 
-# First, let's create a new column that will group the data into Vol. 1, Vol. 2, etc.
+# Create a new column that will group the data into Vol. 1, Vol. 2, etc.
 data.plot$Volunteer_Group <- case_when(
   grepl("wb.Mi", data.plot$Volunteer) ~ "Vol. 1",
   grepl("wb.Ya", data.plot$Volunteer) ~ "Vol. 2",
@@ -137,7 +137,7 @@ data.plot$Volunteer_Group <- case_when(
   TRUE ~ NA_character_
 )
 
-# Next, reshape the data into long format so that each volunteer will have three rows: Of, Ho, and Air
+# Reshape the data into long format so that each volunteer will have three rows: Of, Ho, and Air
 data_long <- data.plot %>%
   # Create a new "Category" column to represent the Concentration type
   mutate(Concentration_Type = case_when(
@@ -163,8 +163,8 @@ data_long$Concentration_Category <- factor(
   levels = c("Ho", "Of", "Air")  # Desired order
 )
 
-# Plot the data with the adjusted order
-ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
+# Plot
+plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
                       fill = Concentration_Category)) +
   geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
   scale_fill_manual(
@@ -185,15 +185,15 @@ ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirWBtPCBSR.png", plot = plotAirWBtPCB, width = 6,
+ggsave("Output/Plots/AirWBtPCBOfficeHome.png", plot = plotAirWBtPCB, width = 6,
        height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
 # Estimate a factor of 2 between observations and predictions
-data$factor2 <- data$Wb_Concentration/data$Air_Concentration
+data.plot$factor2 <- data.plot$Wb_Concentration/data.plot$Air_Concentration
 
 # Calculate the percentage of observations within the factor of 2
-factor2_percentage <- nrow(data[data$factor2 > 0.5 & data$factor2 < 2, ])/nrow(data)*100
+factor2_percentage <- nrow(data.plot[data.plot$factor2 > 0.5 & data.plot$factor2 < 2, ])/nrow(data.plot)*100
 
 # Estimate percentage error ---------------------------------------------------
 # Calculate percentage error
@@ -202,11 +202,37 @@ percentage_error <-function(observed, predicted) {
 }
 
 # Calculate percentage errors
-percentage_error <- percentage_error(data$Air_Concentration, data$Wb_Concentration)
+percentage_error <- percentage_error(data.plot$Air_Concentration,
+                                     data.plot$Wb_Concentration)
 
 # Calculate mean percent error
 mean_error <- mean(percentage_error)
 print(paste("Mean Error:", mean_error))
+
+# Ratios between home & office ------------------------------------------
+# Select data
+wb_office <- tPCB.conc.wb[grepl("\\.o$", names(tPCB.conc.wb))]
+wb_home <- tPCB.conc.wb[grepl("\\.h$", names(tPCB.conc.wb))] 
+# Remove .o and .h from names
+names(wb_office) <- gsub("\\.o$", "", names(wb_office))
+names(wb_home) <- gsub("\\.h$", "", names(wb_home))
+# Match the names to ensure alignment
+common_volunteers <- intersect(names(wb_office), names(wb_home))
+# Subset the vectors to include only common volunteers
+wb_office <- wb_office[common_volunteers]
+wb_home <- wb_home[common_volunteers]
+# Calculate the ratio of Office to Home concentrations
+ratios <- wb_office / wb_home
+# Create a data frame for comparison including the ratios
+comparison_df <- data.frame(
+  Volunteer = common_volunteers,
+  WB_Office = wb_office,
+  WB_Home = wb_home,
+  Ratio = ratios,
+  stringsAsFactors = FALSE
+)
+# Print the result
+print(comparison_df)
 
 # Individual PCB Congeners ------------------------------------------------
 # Create a data frame with the combined data
