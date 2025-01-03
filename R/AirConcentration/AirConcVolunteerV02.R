@@ -30,6 +30,7 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
   data.Stat.3 <- data[3, 3:175]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
+  # i and ii are from the same office
   conc.air.i <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[1])))
   conc.air.ii <- as.data.frame(t(data.Stat.2/(0.5*data$time.day[2])))
   conc.air.iii <- as.data.frame(t(data.Stat.3/(0.5*data$time.day[3])))
@@ -43,7 +44,7 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
   colnames(conc.air) <- c("Conc.Air.1", "Conc.Air.2")
 }
 
-# Read calculated average sampling rates ----------------------------------
+# Read calculated average sampling rates for volunteers -------------------
 sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
@@ -76,7 +77,7 @@ sr_common <- sr[sr$congener %in% colnames(wb_common), ]
 sr_common <- sr_common[match(colnames(wb_common), sr_common$congener), ]
 # Divide each element in wb_common by corresponding element in sr_common$Average_Sampling_Rate
 wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
-# !!! Use a constant sampling rate
+# Alternative method -> use a constant sampling rate
 # wb_div_sr <- sweep(wb_common, 2, 1.5, FUN = "/")
 # Extract time.day from wb.wr
 wb_time_day <- wb.wr$time.day
@@ -233,6 +234,8 @@ comparison_df <- data.frame(
 )
 # Print the result
 print(comparison_df)
+
+# until here
 
 # Individual PCB Congeners ------------------------------------------------
 # Create a data frame with the combined data
