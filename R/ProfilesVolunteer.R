@@ -359,6 +359,7 @@ ggplot(prof_combined.Xue, aes(x = congener, y = Mass, fill = Source)) +
   scale_fill_manual(values = c("prof.wb.stat.Xue" = "#0072B2",  # Blue
                                "prof.wb.wr.Xue.l" = "#E69F00"))  # Orange
 
+# Estimate air concentrations ---------------------------------------------
 # Read calculated average sampling rates for volunteers -------------------
 # (1) Air WBs
 # = massWB/(0.5*time.day)

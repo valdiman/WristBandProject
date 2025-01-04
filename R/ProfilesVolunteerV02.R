@@ -29,50 +29,35 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # Stat samples
-  data.Stat.1 <- data[1, 3:175]
-  data.Stat.2 <- data[2, 3:175]
-  data.Stat.3 <- data[3, 3:175]
-  # Calculate air concentration in ng/m3
-  # = massWB/(0.5*time.day)
-  # i and ii are from the same office
-  conc.air.i <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[1])))
-  conc.air.ii <- as.data.frame(t(data.Stat.2/(0.5*data$time.day[2])))
-  conc.air.iii <- as.data.frame(t(data.Stat.3/(0.5*data$time.day[3])))
+  # 1 and 2 are from the same space
+  # 3 is for An and Xu
+  mass.stat.12 <- data.frame(t(colMeans(data[1:2, 3:175])))
+  mass.stat.3 <- data[3, 3:175]
   # Bind the data frames together row-wise
-  conc.air.i.2 <- cbind(conc.air.i, conc.air.ii)
-  # Average i and ii
-  conc.air.i.2 <- as.data.frame(colMeans(t(conc.air.i.2)))
-  # Bind the data frames together row-wise
-  conc.air <- cbind(conc.air.i.2, conc.air.iii)
-  # Change column names of the last three columns
-  colnames(conc.air) <- c("Conc.Air.1", "Conc.Air.2")
+  wb.stat <- rbind(mass.stat.12, mass.stat.3)
+  # Change column names of the  columns
+  rownames(wb.stat) <- c("Mass.stat.1", "Mass.stat.2")
 }
 
 # Mass accumulated in wore WBs --------------------------------------------
 {
-  wb.Mi.o <- data[4, c(2, 3:175)]
-  wb.Mi.h <- data[5, c(2, 3:175)]
-  wb.Ea.h <- data[6, c(2, 3:175)]
-  wb.Ea.o <- data[7, c(2, 3:175)]
-  wb.Ya.o <- data[8, c(2, 3:175)]
-  wb.Ya.h <- data[9, c(2, 3:175)]
-  wb.An.h <- data[10, c(2, 3:175)]
-  wb.An.o <- data[11, c(2, 3:175)]
-  wb.Xu.h <- data[12, c(2, 3:175)]
-  wb.Xu.o <- data[13, c(2, 3:175)]
+  wb.Mi.o <- data[4, 3:175]
+  wb.Mi.h <- data[5, 3:175]
+  wb.Ea.h <- data[6, 3:175]
+  wb.Ea.o <- data[7, 3:175]
+  wb.Ya.o <- data[8, 3:175]
+  wb.Ya.h <- data[9, 3:175]
+  wb.An.h <- data[10, 3:175]
+  wb.An.o <- data[11, 3:175]
+  wb.Xu.h <- data[12, 3:175]
+  wb.Xu.o <- data[13, 3:175]
  # Combined wore WBs
  wb.wr <- rbind(wb.Mi.o, wb.Mi.h, wb.Ea.o, wb.Ea.h, wb.Ya.o, wb.Ya.h,
                wb.An.o, wb.An.h, wb.Xu.o, wb.Xu.h)
-
  # Add row names
- # Until here
- 
- 
- 
- rownames(wb.wr) <- c("Mass.Mi.o", "Mass.Mi.h", "Mass.Ya.l.wr", "Mass.Ya.r.wr",
-                       "Mass.Ea.l.wr", "Mass.Ea.r.wr", "Mass.Cr.l.wr", "Mass.Cr.r.wr",
-                       "Mass.Hu.l.wr", "Mass.Hu.r.wr", "Mass.Xu.l.wr", "Mass.Xu.r.wr",
-                       "Mass.Gi.l.wr", "Mass.Gi.r.wr", "Mass.Xue.l.wr")
+ rownames(wb.wr) <- c("Mass.Mi.o", "Mass.Mi.h", "Mass.Ea.o", "Mass.Ea.h",
+                       "Mass.Ya.o", "Mass.Ya.h", "Mass.An.o", "Mass.An.h",
+                       "Mass.Xu.o", "Mass.Xu.h")
 }
 
 # Create mass PCB congener profiles ---------------------------------------
@@ -83,7 +68,7 @@ prof.wb.stat <- data.frame(t(prof.wb.stat))
 congener <- rownames(prof.wb.stat)
 prof.wb.stat <- cbind(congener, prof.wb.stat)
 rownames(prof.wb.stat) <- NULL
-prof.wb.stat[, 2:6] <- lapply(prof.wb.stat[, 2:6], as.numeric)
+prof.wb.stat[, 2:3] <- lapply(prof.wb.stat[, 2:3], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.stat$congener <- factor(prof.wb.stat$congener,
                                 levels = unique(prof.wb.stat$congener))
@@ -95,7 +80,7 @@ prof.wb.wr <- data.frame(t(prof.wb.wr))
 congener <- rownames(prof.wb.wr)
 prof.wb.wr <- cbind(congener, prof.wb.wr)
 rownames(prof.wb.wr) <- NULL
-prof.wb.wr[, 2:13] <- lapply(prof.wb.wr[, 2:13], as.numeric)
+prof.wb.wr[, 2:10] <- lapply(prof.wb.wr[, 2:10], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.wr$congener <- factor(prof.wb.wr$congener,
                                 levels = unique(prof.wb.wr$congener))
@@ -103,23 +88,23 @@ prof.wb.wr$congener <- factor(prof.wb.wr$congener,
 # Mass profile plots ------------------------------------------------------
 # Mi
 prof_combined.Mi <- prof.wb.stat %>%
-  select(congener, Mass.Air.Mi.Ya.Stat) %>%
-  rename(Mass = Mass.Air.Mi.Ya.Stat) %>%
+  select(congener, Mass.stat.1) %>%
+  rename(Mass = Mass.stat.1) %>%
   mutate(Source = "prof.wb.stat.Mi") %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Mi.l.wr) %>%
-              rename(Mass = Mass.Mi.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Mi.l")) %>%
+              select(congener, Mass.Mi.o) %>%
+              rename(Mass = Mass.Mi.o) %>%
+              mutate(Source = "prof.wb.wr.Mi.o")) %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Mi.r.wr) %>%
-              rename(Mass = Mass.Mi.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Mi.r"))
+              select(congener, Mass.Mi.h) %>%
+              rename(Mass = Mass.Mi.h) %>%
+              mutate(Source = "prof.wb.wr.Mi.h"))
 
 # Plots
 ggplot(prof_combined.Mi, aes(x = congener, y = Mass, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1) +
   xlab("") +
-  ylim(0, 0.12) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12) +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
@@ -129,59 +114,28 @@ ggplot(prof_combined.Mi, aes(x = congener, y = Mass, fill = Source)) +
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("prof.wb.stat.Mi" = "#0072B2",  # Blue
-                               "prof.wb.wr.Mi.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Mi.r" = "#009E73")) # Green
-
-# Ya
-prof_combined.Ya <- prof.wb.stat %>%
-  select(congener, Mass.Air.Mi.Ya.Stat) %>%
-  rename(Mass = Mass.Air.Mi.Ya.Stat) %>%
-  mutate(Source = "prof.wb.stat.Ya") %>%
-  bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Ya.l.wr) %>%
-              rename(Mass = Mass.Ya.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Ya.l")) %>%
-  bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Ya.r.wr) %>%
-              rename(Mass = Mass.Ya.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Ya.r"))
-
-# Plots
-ggplot(prof_combined.Ya, aes(x = congener, y = Mass, fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1) +
-  xlab("") +
-  ylim(0, 0.12) +
-  theme_bw() +
-  theme(aspect.ratio = 3/12) +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13)) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("prof.wb.stat.Ya" = "#0072B2",  # Blue
-                               "prof.wb.wr.Ya.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Ya.r" = "#009E73")) # Green
+                               "prof.wb.wr.Mi.o" = "#E69F00",  # Orange
+                               "prof.wb.wr.Mi.h" = "#009E73")) # Green
 
 # Ea
 prof_combined.Ea <- prof.wb.stat %>%
-  select(congener, Mass.Air.Ea.Stat) %>%
-  rename(Mass = Mass.Air.Ea.Stat) %>%
+  select(congener, Mass.stat.1) %>%
+  rename(Mass = Mass.stat.1) %>%
   mutate(Source = "prof.wb.stat.Ea") %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Ea.l.wr) %>%
-              rename(Mass = Mass.Ea.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Ea.l")) %>%
+              select(congener, Mass.Ea.o) %>%
+              rename(Mass = Mass.Ea.o) %>%
+              mutate(Source = "prof.wb.wr.Ea.o")) %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Ea.r.wr) %>%
-              rename(Mass = Mass.Ea.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Ea.r"))
+              select(congener, Mass.Ea.h) %>%
+              rename(Mass = Mass.Ea.h) %>%
+              mutate(Source = "prof.wb.wr.Ea.h"))
 
 # Plots
 ggplot(prof_combined.Ea, aes(x = congener, y = Mass, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1) +
   xlab("") +
-  ylim(0, 0.12) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/12) +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
@@ -191,25 +145,25 @@ ggplot(prof_combined.Ea, aes(x = congener, y = Mass, fill = Source)) +
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("prof.wb.stat.Ea" = "#0072B2",  # Blue
-                               "prof.wb.wr.Ea.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Ea.r" = "#009E73")) # Green
+                               "prof.wb.wr.Ea.o" = "#E69F00",  # Orange
+                               "prof.wb.wr.Ea.h" = "#009E73")) # Green
 
-# Cr
-prof_combined.Cr <- prof.wb.stat %>%
-  select(congener, Mass.Air.Cr.Stat) %>%
-  rename(Mass = Mass.Air.Cr.Stat) %>%
-  mutate(Source = "prof.wb.stat.Cr") %>%
+# Ya
+prof_combined.Ya <- prof.wb.stat %>%
+  select(congener, Mass.stat.1) %>%
+  rename(Mass = Mass.stat.1) %>%
+  mutate(Source = "prof.wb.stat.Ya") %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Cr.l.wr) %>%
-              rename(Mass = Mass.Cr.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Cr.l")) %>%
+              select(congener, Mass.Ya.o) %>%
+              rename(Mass = Mass.Ya.o) %>%
+              mutate(Source = "prof.wb.wr.Ya.o")) %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Cr.r.wr) %>%
-              rename(Mass = Mass.Cr.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Cr.r"))
+              select(congener, Mass.Ya.h) %>%
+              rename(Mass = Mass.Ya.h) %>%
+              mutate(Source = "prof.wb.wr.Ya.h"))
 
 # Plots
-ggplot(prof_combined.Cr, aes(x = congener, y = Mass, fill = Source)) +
+ggplot(prof_combined.Ya, aes(x = congener, y = Mass, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1) +
   xlab("") +
   ylim(0, 0.15) +
@@ -221,26 +175,26 @@ ggplot(prof_combined.Cr, aes(x = congener, y = Mass, fill = Source)) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("prof.wb.stat.Cr" = "#0072B2",  # Blue
-                               "prof.wb.wr.Cr.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Cr.r" = "#009E73")) # Green
+  scale_fill_manual(values = c("prof.wb.stat.Ya" = "#0072B2",  # Blue
+                               "prof.wb.wr.Ya.o" = "#E69F00",  # Orange
+                               "prof.wb.wr.Ya.h" = "#009E73")) # Green
 
-# Hu
-prof_combined.Hu <- prof.wb.stat %>%
-  select(congener, Mass.Air.Hu.Stat) %>%
-  rename(Mass = Mass.Air.Hu.Stat) %>%
-  mutate(Source = "prof.wb.stat.Hu") %>%
+# An
+prof_combined.An <- prof.wb.stat %>%
+  select(congener, Mass.stat.2) %>%
+  rename(Mass = Mass.stat.2) %>%
+  mutate(Source = "prof.wb.stat.An") %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Hu.l.wr) %>%
-              rename(Mass = Mass.Hu.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Hu.l")) %>%
+              select(congener, Mass.An.o) %>%
+              rename(Mass = Mass.An.o) %>%
+              mutate(Source = "prof.wb.wr.An.o")) %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Hu.r.wr) %>%
-              rename(Mass = Mass.Hu.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Hu.r"))
+              select(congener, Mass.An.h) %>%
+              rename(Mass = Mass.An.h) %>%
+              mutate(Source = "prof.wb.wr.An.h"))
 
 # Plots
-ggplot(prof_combined.Hu, aes(x = congener, y = Mass, fill = Source)) +
+ggplot(prof_combined.An, aes(x = congener, y = Mass, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1) +
   xlab("") +
   ylim(0, 0.15) +
@@ -252,54 +206,23 @@ ggplot(prof_combined.Hu, aes(x = congener, y = Mass, fill = Source)) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("prof.wb.stat.Hu" = "#0072B2",  # Blue
-                               "prof.wb.wr.Hu.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Hu.r" = "#009E73")) # Green
-
-# Gi
-prof_combined.Gi <- prof.wb.stat %>%
-  select(congener, Mass.Air.Gi.Stat) %>%
-  rename(Mass = Mass.Air.Gi.Stat) %>%
-  mutate(Source = "prof.wb.stat.Gi") %>%
-  bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Gi.l.wr) %>%
-              rename(Mass = Mass.Gi.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Gi.l")) %>%
-  bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Gi.r.wr) %>%
-              rename(Mass = Mass.Gi.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Gi.r"))
-
-# Plots
-ggplot(prof_combined.Gi, aes(x = congener, y = Mass, fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1) +
-  xlab("") +
-  ylim(0, 0.50) +
-  theme_bw() +
-  theme(aspect.ratio = 3/12) +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13)) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("prof.wb.stat.Gi" = "#0072B2",  # Blue
-                               "prof.wb.wr.Gi.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Gi.r" = "#009E73")) # Green
+  scale_fill_manual(values = c("prof.wb.stat.An" = "#0072B2",  # Blue
+                               "prof.wb.wr.An.o" = "#E69F00",  # Orange
+                               "prof.wb.wr.An.h" = "#009E73")) # Green
 
 # Xu
 prof_combined.Xu <- prof.wb.stat %>%
-  select(congener, Mass.Air.Xu.Stat) %>%
-  rename(Mass = Mass.Air.Xu.Stat) %>%
+  select(congener, Mass.stat.2) %>%
+  rename(Mass = Mass.stat.2) %>%
   mutate(Source = "prof.wb.stat.Xu") %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Xu.l.wr) %>%
-              rename(Mass = Mass.Xu.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Xu.l")) %>%
+              select(congener, Mass.Xu.o) %>%
+              rename(Mass = Mass.Xu.o) %>%
+              mutate(Source = "prof.wb.wr.Xu.o")) %>%
   bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Xu.r.wr) %>%
-              rename(Mass = Mass.Xu.r.wr) %>%
-              mutate(Source = "prof.wb.wr.Xu.r"))
+              select(congener, Mass.Xu.h) %>%
+              rename(Mass = Mass.Xu.h) %>%
+              mutate(Source = "prof.wb.wr.Xu.h"))
 
 # Plots
 pXu <- ggplot(prof_combined.Xu, aes(x = congener, y = Mass, fill = Source)) +
@@ -309,59 +232,42 @@ pXu <- ggplot(prof_combined.Xu, aes(x = congener, y = Mass, fill = Source)) +
   theme_bw() +
   theme(aspect.ratio = 3/12) +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 11)) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("prof.wb.stat.Xu" = "#0072B2",  # Blue
-                               "prof.wb.wr.Xu.l" = "#E69F00",  # Orange
-                               "prof.wb.wr.Xu.r" = "#009E73")) # Green
-
-# Print the plot
-print(pXu)
-
-# Save plot in folder for example
-ggsave("Output/Plots/Profiles/MassProfXu.png", plot = pXu, width = 6,
-       height = 4, dpi = 500)
-
-# Xue (only left)
-prof_combined.Xue <- prof.wb.stat %>%
-  select(congener, Mass.Air.Xue.Stat) %>%
-  rename(Mass = Mass.Air.Xue.Stat) %>%
-  mutate(Source = "prof.wb.stat.Xue") %>%
-  bind_rows(prof.wb.wr %>%
-              select(congener, Mass.Xue.l.wr) %>%
-              rename(Mass = Mass.Xue.l.wr) %>%
-              mutate(Source = "prof.wb.wr.Xue.l"))
-
-# Plots
-ggplot(prof_combined.Xue, aes(x = congener, y = Mass, fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1) +
-  xlab("") +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 3/12) +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13)) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("prof.wb.stat.Xue" = "#0072B2",  # Blue
-                               "prof.wb.wr.Xue.l" = "#E69F00"))  # Orange
+  scale_fill_manual(values = c("prof.wb.stat.Xu" = "#0072B2",  # Blue
+                               "prof.wb.wr.Xu.o" = "#E69F00",  # Orange
+                               "prof.wb.wr.Xu.h" = "#009E73")) # Green
 
-# Read calculated average sampling rates for volunteers -------------------
+# Print the plot
+print(pXu)
+
+# Save plot in folder for example
+ggsave("Output/Plots/Profiles/OfficeHome/MassProfXu.png", plot = pXu, width = 6,
+       height = 4, dpi = 500)
+
+# Estimate air concentrations ---------------------------------------------
 # (1) Air WBs
 # = massWB/(0.5*time.day)
-time.i <- data$time.day[c(8, 7, 14, 13, 19, 22)]
-conc.wb.air.i <- as.data.frame(wb.stat/(0.5*time.i))
-conc.wb.air.ii <- as.data.frame(data.2[3, 3:175]/(0.5*data.2$time.day[3]))
-conc.wb.air <- cbind(conc.wb.air.i, conc.wb.air.ii) 
-rownames(conc.wb.air) <- c("Conc.Air.Mi.Ya.Stat",
-                           "Conc.Air.Ea.Stat", "Conc.Air.Cr.Stat",
-                           "Conc.Air.Hu.Stat", "Conc.Air.Xu.Stat",
-                           "Conc.Air.Gi.Stat", "Conc.Air.Xue.Stat")
+data.Stat.1 <- data[1, 3:175]
+data.Stat.2 <- data[2, 3:175]
+data.Stat.3 <- data[3, 3:175]
+# Calculate air concentration in ng/m3
+# = massWB/(0.5*time.day)
+# i and ii are from the same office
+conc.air.i <- as.data.frame(data.Stat.1/(0.5*data$time.day[1]))
+conc.air.ii <- as.data.frame(data.Stat.2/(0.5*data$time.day[2]))
+conc.air.iii <- as.data.frame(data.Stat.3/(0.5*data$time.day[3]))
+# Bind the data frames together row-wise
+conc.air.i.2 <- rbind(conc.air.i, conc.air.ii)
+# Average i and ii
+conc.air.i.2 <- as.data.frame(t(colMeans(conc.air.i.2)))
+# Bind the data frames together row-wise
+conc.wb.air <- rbind(conc.air.i.2, conc.air.iii)
+# Change column names of the last three columns
+rownames(conc.wb.air) <- c("Conc.Air.1", "Conc.Air.2")
 # Check total PCB
 tPCB.conc.air <- rowSums(conc.wb.air, na.rm = TRUE)
 # See
@@ -375,26 +281,20 @@ sr <- sr[, 1:2]
 
 # Select wore WBs ---------------------------------------------------------
 {
-  wb.Mi.l <- data[1, c(2, 4:176)]
-  wb.Mi.r <- data[2, c(2, 4:176)]
-  wb.Ya.l <- data[3, c(2, 4:176)]
-  wb.Ya.r <- data[4, c(2, 4:176)]
-  wb.Ea.l <- data[5, c(2, 4:176)]
-  wb.Ea.r <- data[6, c(2, 4:176)]
-  wb.Cr.l <- data[9, c(2, 4:176)]
-  wb.Cr.r <- data[10, c(2, 4:176)]
-  wb.Hu.l <- data[11, c(2, 4:176)]
-  wb.Hu.r <- data[12, c(2, 4:176)]
-  wb.Xu.l <- data[17, c(2, 4:176)]
-  wb.Xu.r <- data[18, c(2, 4:176)]
-  wb.Gi.l <- data[25, c(2, 4:176)]
-  wb.Gi.r <- data[24, c(2, 4:176)]
-  wb.Xue.l <- data.2[13, c(2, 3:175)]
+  wb.Mi.o <- data[4, c(2, 3:175)]
+  wb.Mi.h <- data[5, c(2, 3:175)]
+  wb.Ea.h <- data[6, c(2, 3:175)]
+  wb.Ea.o <- data[7, c(2, 3:175)]
+  wb.Ya.o <- data[8, c(2, 3:175)]
+  wb.Ya.h <- data[9, c(2, 3:175)]
+  wb.An.h <- data[10, c(2, 3:175)]
+  wb.An.o <- data[11, c(2, 3:175)]
+  wb.Xu.h <- data[12, c(2, 3:175)]
+  wb.Xu.o <- data[13, c(2, 3:175)]
+  # Combined wore WBs
+  wb.wr <- rbind(wb.Mi.o, wb.Mi.h, wb.Ea.o, wb.Ea.h, wb.Ya.o, wb.Ya.h,
+                 wb.An.o, wb.An.h, wb.Xu.o, wb.Xu.h)
 }
-# Combined wore WBs
-wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ya.l, wb.Ya.r, wb.Ea.l, wb.Ea.r,
-               wb.Cr.l, wb.Cr.r, wb.Hu.l, wb.Hu.r, wb.Xu.l, wb.Xu.r,
-               wb.Gi.l, wb.Gi.r, wb.Xue.l)
 
 # Extract congener names from sr
 congener_names <- sr$congener
@@ -412,9 +312,9 @@ wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
 wb_time_day <- wb.wr$time.day
 # Divide wb_div_sr further by corresponding value in wb_time_day
 conc.wb.wr <- sweep(wb_div_sr, 1, wb_time_day, FUN = "/")
-rownames(conc.wb.wr) <- c('wb.Mi.l', 'wb.Mi.r', 'wb.Ya.l', 'wb.Ya.r', 'wb.Ea.l',
-                       'wb.Ea.r', 'wb.Cr.l', 'wb.Cr.r', 'wb.Hu.l', 'wb.Hu.r',
-                       'wb.Xu.l', 'wb.Xu.r', 'wb.Gi.l', 'wb.Gi.r', 'wb.Xue.l')
+rownames(conc.wb.wr) <- c('wb.Mi.o', 'wb.Mi.h', 'wb.Ea.o', 'wb.Ea.h',
+                          'wb.Ya.o', 'wb.Ya.h', 'wb.An.o', 'wb.An.h',
+                          'wb.Xu.o', 'wb.Xu.h')
 # Check total PCB
 tPCB.conc.wb.wr <- rowSums(conc.wb.wr, na.rm = TRUE)
 # See
