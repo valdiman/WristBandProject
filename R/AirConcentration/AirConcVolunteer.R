@@ -40,7 +40,7 @@ install.packages("tibble")
   data.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
   # For Gift
   data.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
-  # For An and Xue
+  # For Xue
   data.Xue.Stat <- data.2[3, 3:175]
   
   # Calculate air concentration in ng/m3
@@ -62,7 +62,7 @@ install.packages("tibble")
                           "Conc.Air.Xue")
 }
 
-# Read calculated average sampling rates ----------------------------------
+# Read calculated average sampling rates for volunteers -------------------
 sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
@@ -101,7 +101,7 @@ sr_common <- sr[sr$congener %in% colnames(wb_common), ]
 sr_common <- sr_common[match(colnames(wb_common), sr_common$congener), ]
 # Divide each element in wb_common by corresponding element in sr_common$Average_Sampling_Rate
 wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
-# !!! Use a constant sampling rate
+# Alternative method -> use a constant sampling rate
 # wb_div_sr <- sweep(wb_common, 2, 1.5, FUN = "/")
 # Extract time.day from wb.wr
 wb_time_day <- wb.wr$time.day
@@ -328,6 +328,7 @@ filtered_data$Volunteer.y <- case_when(
   filtered_data$Volunteer.y == "Xu.r" ~ "Vol. 6 d",
   filtered_data$Volunteer.y == "Gi.l" ~ "Vol. 7 nd",
   filtered_data$Volunteer.y == "Gi.r" ~ "Vol. 7 d",
+  filtered_data$Volunteer.y == "Xue.l" ~ "Vol. 8 nd",
   TRUE ~ NA_character_  # Handles any unmatched cases
 )
 
