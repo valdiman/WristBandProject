@@ -339,12 +339,12 @@ prof.wb.air.conc <- data.frame(t(prof.wb.air.conc))
 congener <- rownames(prof.wb.air.conc)
 prof.wb.air.conc <- cbind(congener, prof.wb.air.conc)
 rownames(prof.wb.air.conc) <- NULL
-prof.wb.air.conc[, 2:8] <- lapply(prof.wb.air.conc[, 2:8], as.numeric)
+prof.wb.air.conc[, 2:3] <- lapply(prof.wb.air.conc[, 2:3], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.air.conc$congener <- factor(prof.wb.air.conc$congener,
                                 levels = unique(prof.wb.air.conc$congener))
 # Check sum of all PCBs (i.e., = 1)
-colSums(prof.wb.air.conc[, 2:8], na.rm = TRUE)
+colSums(prof.wb.air.conc[, 2:3], na.rm = TRUE)
 
 # (2) Wore WBs
 tmp.wb.wr <- rowSums(conc.wb.wr, na.rm = TRUE)
@@ -353,79 +353,31 @@ prof.wb.wr.conc <- data.frame(t(prof.wb.wr.conc))
 congener <- rownames(prof.wb.wr.conc)
 prof.wb.wr.conc <- cbind(congener, prof.wb.wr.conc)
 rownames(prof.wb.wr.conc) <- NULL
-prof.wb.wr.conc[, 2:16] <- lapply(prof.wb.wr.conc[, 2:16], as.numeric)
+prof.wb.wr.conc[, 2:11] <- lapply(prof.wb.wr.conc[, 2:11], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.wr.conc$congener <- factor(prof.wb.wr.conc$congener,
                                levels = unique(prof.wb.wr.conc$congener))
 # Check sum of all PCBs (i.e., = 1)
-colSums(prof.wb.wr.conc[, 2:16], na.rm = TRUE)
+colSums(prof.wb.wr.conc[, 2:11], na.rm = TRUE)
 
 # Concentration profile plots ---------------------------------------------
 # Mi (1)
 prof_combined.Mi <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Mi.Ya.Stat) %>%
-  rename(Conc = Conc.Air.Mi.Ya.Stat) %>%
+  select(congener, Conc.Air.1) %>%
+  rename(Conc = Conc.Air.1) %>%
   mutate(Source = "Air PCB") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Mi.l) %>%
-              rename(Conc = wb.Mi.l) %>%
-              mutate(Source = "Vol. 1 nd")) %>%  # Change this label
+              select(congener, wb.Mi.o) %>%
+              rename(Conc = wb.Mi.o) %>%
+              mutate(Source = "Vol. 1 of")) %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Mi.r) %>%
-              rename(Conc = wb.Mi.r) %>%
-              mutate(Source = "Vol. 1 d"))  # Change this label
+              select(congener, wb.Mi.h) %>%
+              rename(Conc = wb.Mi.h) %>%
+              mutate(Source = "Vol. 1 ho"))  # Change this label
 
 # Plot
 # Create the plot with the legend moved inside
 p_prof_comb.Mi <- ggplot(prof_combined.Mi, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
-  xlab("") +
-  ylim(0, 0.12) +
-  theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 1 nd" = "#009E73",
-                               "Vol. 1 d" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
-
-# Print the plots
-print(p_prof_comb.Mi)
-
-# Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol1.png", plot = p_prof_comb.Mi,
-       width = 10, height = 5, dpi = 500)
-
-# Ya
-prof_combined.Ya <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Mi.Ya.Stat) %>%
-  rename(Conc = Conc.Air.Mi.Ya.Stat) %>%
-  mutate(Source = "Air PCB") %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Ya.l) %>%
-              rename(Conc = wb.Ya.l) %>%
-              mutate(Source = "Vol. 2 d")) %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Ya.r) %>%
-              rename(Conc = wb.Ya.r) %>%
-              mutate(Source = "Vol. 2 nd"))
-
-# Plots
-p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
@@ -443,8 +395,8 @@ p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc,
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 2 nd" = "#009E73",
-                               "Vol. 2 d" = "#E69F00"),
+                               "Vol. 1 of" = "#009E73",
+                               "Vol. 1 ho" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -452,28 +404,76 @@ p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc,
         legend.text = element_text(size = 8, face = "bold"))
 
 # Print the plots
-print(p_prof_comb.Ya)
+print(p_prof_comb.Mi)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol2.png", plot = p_prof_comb.Ya,
-       width = 10, height = 5, dpi = 500)
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol1.png",
+       plot = p_prof_comb.Mi, width = 10, height = 5, dpi = 500)
 
 # Ea
 prof_combined.Ea <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Ea.Stat) %>%
-  rename(Conc = Conc.Air.Ea.Stat) %>%
-  mutate(Source = "Air PCB") %>%
+  select(congener, Conc.Air.1) %>%
+  rename(Conc = Conc.Air.1) %>%
+  mutate(Source = "Air PCB") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Ea.l) %>%
-              rename(Conc = wb.Ea.l) %>%
-              mutate(Source = "Vol. 3 nd")) %>%
+              select(congener, wb.Ea.o) %>%
+              rename(Conc = wb.Ea.o) %>%
+              mutate(Source = "Vol. 2 of")) %>%
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Ea.r) %>%
-              rename(Conc = wb.Ea.r) %>%
-              mutate(Source = "Vol. 3 d"))
+              select(congener, wb.Ea.h) %>%
+              rename(Conc = wb.Ea.h) %>%
+              mutate(Source = "Vol. 2 ho"))
 
 # Plots
-p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc, fill = Source)) +
+p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc,
+                                                 fill = Source)) +
+  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
+           color = "black",  # Add black edges to the bars
+           size = 0.2) +  # Set the thickness of the black edges (fine line)
+  xlab("") +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 5/20) +
+  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  scale_fill_manual(values = c("Air PCB" = "blue",
+                               "Vol. 2 of" = "#009E73",
+                               "Vol. 2 ho" = "#E69F00"),
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
+  theme(legend.position = c(0.93, 0.8),  # Inside the plot
+        legend.background = element_rect(fill = "white", color = NA),
+        legend.title = element_blank(),  # Removes the legend title
+        legend.text = element_text(size = 8, face = "bold"))
+
+# Print the plots
+print(p_prof_comb.Ea)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol2.png",
+       plot = p_prof_comb.Ea, width = 10, height = 5, dpi = 500)
+
+# Ya
+prof_combined.Ya <- prof.wb.air.conc %>%
+  select(congener, Conc.Air.1) %>%
+  rename(Conc = Conc.Air.1) %>%
+  mutate(Source = "Air PCB") %>%  # Change this label
+  bind_rows(prof.wb.wr.conc %>%
+              select(congener, wb.Ya.o) %>%
+              rename(Conc = wb.Ya.o) %>%
+              mutate(Source = "Vol. 3 of")) %>%
+  bind_rows(prof.wb.wr.conc %>%
+              select(congener, wb.Ya.h) %>%
+              rename(Conc = wb.Ya.h) %>%
+              mutate(Source = "Vol. 3 ho"))
+
+# Plots
+p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the barshttp://127.0.0.1:8373/graphics/plot_zoom_png?width=1872&height=900
            size = 0.2) +  # Set the thickness of the black edges (fine line)
@@ -490,8 +490,8 @@ p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc, fill = So
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 3 nd" = "#009E73",
-                               "Vol. 3 d" = "#E69F00"),
+                               "Vol. 3 of" = "#009E73",
+                               "Vol. 3 ho" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -499,27 +499,27 @@ p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc, fill = So
         legend.text = element_text(size = 8, face = "bold"))
 
 # Print the plots
-print(p_prof_comb.Ea)
+print(p_prof_comb.Ya)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol3.png", plot = p_prof_comb.Ea,
-       width = 10, height = 5, dpi = 500)
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol3.png",
+       plot = p_prof_comb.Ya, width = 10, height = 5, dpi = 500)
 
-# Cr
-prof_combined.Cr <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Cr.Stat) %>%
-  rename(Conc = Conc.Air.Cr.Stat) %>%
-  mutate(Source = "Air PCB") %>%
+# An
+prof_combined.An <- prof.wb.air.conc %>%
+  select(congener, Conc.Air.2) %>%
+  rename(Conc = Conc.Air.2) %>%
+  mutate(Source = "Air PCB") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Cr.l) %>%
-              rename(Conc = wb.Cr.l) %>%
-              mutate(Source = "Vol. 4 nd")) %>%
+              select(congener, wb.An.o) %>%
+              rename(Conc = wb.An.o) %>%
+              mutate(Source = "Vol. 4 of")) %>%
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Cr.r) %>%
-              rename(Conc = wb.Cr.r) %>%
-              mutate(Source = "Vol. 4 d"))
+              select(congener, wb.An.h) %>%
+              rename(Conc = wb.An.h) %>%
+              mutate(Source = "Vol. 4 ho"))
 
-p_prof_comb.Cr <- ggplot(prof_combined.Cr, aes(x = congener, y = Conc,
+p_prof_comb.An <- ggplot(prof_combined.An, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
@@ -537,8 +537,8 @@ p_prof_comb.Cr <- ggplot(prof_combined.Cr, aes(x = congener, y = Conc,
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 4 nd" = "#009E73",
-                               "Vol. 4 d" = "#E69F00"),
+                               "Vol. 4 of" = "#009E73",
+                               "Vol. 4 ho" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -546,74 +546,26 @@ p_prof_comb.Cr <- ggplot(prof_combined.Cr, aes(x = congener, y = Conc,
         legend.text = element_text(size = 8, face = "bold"))
 
 # Print the plots
-print(p_prof_comb.Cr)
+print(p_prof_comb.An)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol4.png", plot = p_prof_comb.Cr,
-       width = 10, height = 5, dpi = 500)
-
-# Hu
-prof_combined.Hu <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Hu.Stat) %>%
-  rename(Conc = Conc.Air.Hu.Stat) %>%
-  mutate(Source = "Air PCB") %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Hu.l) %>%
-              rename(Conc = wb.Hu.l) %>%
-              mutate(Source = "Vol. 5 d")) %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Hu.r) %>%
-              rename(Conc = wb.Hu.r) %>%
-              mutate(Source = "Vol. 5 nd"))
-
-p_prof_comb.Hu <- ggplot(prof_combined.Hu, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
-  xlab("") +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 5 nd" = "#009E73",
-                               "Vol. 5 d" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
-
-# Print the plots
-print(p_prof_comb.Hu)
-
-# Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol5.png", plot = p_prof_comb.Hu,
-       width = 10, height = 5, dpi = 500)
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol4.png",
+       plot = p_prof_comb.An, width = 10, height = 5, dpi = 500)
 
 # Xu
-prof_combined.Xu <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Xu.Stat) %>%
-  rename(Conc = Conc.Air.Xu.Stat) %>%
-  mutate(Source = "Air PCB") %>%
+prof_combined.Xu <-  prof.wb.air.conc %>%
+  select(congener, Conc.Air.2) %>%
+  rename(Conc = Conc.Air.2) %>%
+  mutate(Source = "Air PCB") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Xu.l) %>%
-              rename(Conc = wb.Xu.l) %>%
-              mutate(Source = "Vol. 6 nd")) %>%
+              select(congener, wb.Xu.o) %>%
+              rename(Conc = wb.Xu.o) %>%
+              mutate(Source = "Vol. 5 of")) %>%
   bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Xu.r) %>%
-              rename(Conc = wb.Xu.r) %>%
-              mutate(Source = "Vol. 6 d"))
+              select(congener, wb.Xu.o) %>%
+              rename(Conc = wb.Xu.o) %>%
+              mutate(Source = "Vol. 5 ho"))
 
-# Plots
 p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
@@ -632,8 +584,8 @@ p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 6 nd" = "#009E73",
-                               "Vol. 6 d" = "#E69F00"),
+                               "Vol. 5 of" = "#009E73",
+                               "Vol. 5 ho" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -644,99 +596,8 @@ p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
 print(p_prof_comb.Xu)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol6.png", plot = p_prof_comb.Xu,
-       width = 10, height = 5, dpi = 500)
-
-# Gift
-prof_combined.Gi <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Gi.Stat) %>%
-  rename(Conc = Conc.Air.Gi.Stat) %>%
-  mutate(Source = "Air PCB") %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Gi.l) %>%
-              rename(Conc = wb.Gi.l) %>%
-              mutate(Source = "Vol. 7 nd")) %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Gi.r) %>%
-              rename(Conc = wb.Gi.r) %>%
-              mutate(Source = "Vol. 7 d"))
-
-# Plots
-p_prof_comb.Gi <- ggplot(prof_combined.Gi, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
-  xlab("") +
-  ylim(0, 0.7) +
-  theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 7 nd" = "#009E73",
-                               "Vol. 7 d" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
-
-# Print the plots
-print(p_prof_comb.Gi)
-
-# Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol7.png", plot = p_prof_comb.Gi,
-       width = 10, height = 5, dpi = 500)
-
-# Xuefang
-prof_combined.Xue <- prof.wb.air.conc %>%
-  select(congener, Conc.Air.Xue.Stat) %>%
-  rename(Conc = Conc.Air.Xue.Stat) %>%
-  mutate(Source = "Air PCB") %>%
-  bind_rows(prof.wb.wr.conc %>%
-              select(congener, wb.Xue.l) %>%
-              rename(Conc = wb.Xue.l) %>%
-              mutate(Source = "Vol. 8 nd"))
-
-# Plots
-p_prof_comb.Xue <- ggplot(prof_combined.Xue, aes(x = congener, y = Conc,
-                                                  fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
-  xlab("") +
-  ylim(0, 0.2) +
-  theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 8 nd" = "#009E73"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
-
-# Print the plots
-print(p_prof_comb.Xue)
-
-# Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol8.png", plot = p_prof_comb.Xue,
-       width = 10, height = 5, dpi = 500)
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol5.png",
+       plot = p_prof_comb.Xu, width = 10, height = 5, dpi = 500)
 
 # Calculate cosine theta --------------------------------------------------
 # Need to change the format of prof_combined...
@@ -751,16 +612,6 @@ cosine_similarity.Mi <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.Mi
 
-# Ya
-prof_combined_wide.Ya  <- prof_combined.Ya %>%
-  pivot_wider(names_from = Source, values_from = Conc)
-# Create a matrix from the concentration values (excluding the congener column)
-cosine_matrix <- as.matrix(prof_combined_wide.Ya[, -1])
-# Calculate cosine similarity between the columns (now rows after transposing)
-cosine_similarity.Ya <- cosine(cosine_matrix)
-# View the resulting cosine similarity matrix
-cosine_similarity.Ya
-
 # Ea
 prof_combined_wide.Ea  <- prof_combined.Ea %>%
   pivot_wider(names_from = Source, values_from = Conc)
@@ -771,25 +622,25 @@ cosine_similarity.Ea <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.Ea
 
-# Cr
-prof_combined_wide.Cr  <- prof_combined.Cr %>%
+# Ya
+prof_combined_wide.Ya  <- prof_combined.Ya %>%
   pivot_wider(names_from = Source, values_from = Conc)
 # Create a matrix from the concentration values (excluding the congener column)
-cosine_matrix <- as.matrix(prof_combined_wide.Cr[, -1])
+cosine_matrix <- as.matrix(prof_combined_wide.Ya[, -1])
 # Calculate cosine similarity between the columns (now rows after transposing)
-cosine_similarity.Cr <- cosine(cosine_matrix)
+cosine_similarity.Ya <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
-cosine_similarity.Cr
+cosine_similarity.Ya
 
-# Hu
-prof_combined_wide.Hu  <- prof_combined.Hu %>%
+# An
+prof_combined_wide.An  <- prof_combined.An %>%
   pivot_wider(names_from = Source, values_from = Conc)
 # Create a matrix from the concentration values (excluding the congener column)
-cosine_matrix <- as.matrix(prof_combined_wide.Hu[, -1])
+cosine_matrix <- as.matrix(prof_combined_wide.An[, -1])
 # Calculate cosine similarity between the columns (now rows after transposing)
-cosine_similarity.Hu <- cosine(cosine_matrix)
+cosine_similarity.An <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
-cosine_similarity.Hu
+cosine_similarity.An
 
 # Xu
 prof_combined_wide.Xu  <- prof_combined.Xu %>%
@@ -801,22 +652,3 @@ cosine_similarity.Xu <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.Xu
 
-# Gift
-prof_combined_wide.Gi  <- prof_combined.Gi %>%
-  pivot_wider(names_from = Source, values_from = Conc)
-# Create a matrix from the concentration values (excluding the congener column)
-cosine_matrix <- as.matrix(prof_combined_wide.Gi[, -1])
-# Calculate cosine similarity between the columns (now rows after transposing)
-cosine_similarity.Gi <- cosine(cosine_matrix)
-# View the resulting cosine similarity matrix
-cosine_similarity.Gi
-
-# Xuefang
-prof_combined_wide.Xue  <- prof_combined.Xue %>%
-  pivot_wider(names_from = Source, values_from = Conc)
-# Create a matrix from the concentration values (excluding the congener column)
-cosine_matrix <- as.matrix(prof_combined_wide.Xue[, -1])
-# Calculate cosine similarity between the columns (now rows after transposing)
-cosine_similarity.Xue <- cosine(cosine_matrix)
-# View the resulting cosine similarity matrix
-cosine_similarity.Xue
