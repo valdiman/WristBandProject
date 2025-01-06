@@ -161,7 +161,7 @@ data_long <- data.plot %>%
 # Set the factor levels for Concentration_Category to control the order
 data_long$Concentration_Category <- factor(
   data_long$Concentration_Category,
-  levels = c("Ho", "Of", "Air")  # Desired order
+  levels = c("Air", "Of", "Ho")  # Desired order
 )
 
 # Plot
@@ -169,9 +169,9 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
                       fill = Concentration_Category)) +
   geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
   scale_fill_manual(
-    values = c("Ho" = "orange", "Of" = "blue", "Air" = "green"),  # Custom colors
-    labels = c("Ho" = "WB conc Home", "Of" = "WB conc Office",
-               "Air" = "Air conc Office")  # Custom labels
+    values = c("Ho" = "#E69F00", "Of" = "blue", "Air" = "#009E73"),  # Custom colors
+    labels = c("Ho" = "WB home", "Of" = "WB office",
+               "Air" = "Air office")  # Custom labels
   ) +
   labs(x = '', fill = "Location") +
   ylab(expression(bold("Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
@@ -186,8 +186,8 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirWBtPCBOfficeHome.png", plot = plotAirWBtPCB, width = 6,
-       height = 5, dpi = 500)
+ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHome.png",
+       plot = plotAirWBtPCB, width = 6, height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
 # Estimate a factor of 2 between observations and predictions
@@ -235,8 +235,6 @@ comparison_df <- data.frame(
 # Print the result
 print(comparison_df)
 
-# until here
-
 # Individual PCB Congeners ------------------------------------------------
 # Create a data frame with the combined data
 # Reshape conc_air_common to long format
@@ -251,6 +249,8 @@ conc_air_long <- conc_air_common %>%
     values_to = "Conc.Air"
   ) %>%
   mutate(Volunteer = gsub("Conc.Air.", "", Volunteer))
+
+
 
 # Duplicate Mi.Ya rows and create new rows for Mi and Ya
 conc_air_long <- conc_air_long %>%
