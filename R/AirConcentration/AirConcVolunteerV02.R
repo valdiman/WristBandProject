@@ -236,6 +236,8 @@ comparison_df <- data.frame(
 print(comparison_df)
 
 # Individual PCB Congeners ------------------------------------------------
+# Not sure if this analysis is relevant
+# Potential plots: i) WB office vs. WB home, ii) Conc office vs. WB home
 # Create a data frame with the combined data
 # Reshape conc_air_common to long format
 
@@ -250,20 +252,7 @@ conc_air_long <- conc_air_common %>%
   ) %>%
   mutate(Volunteer = gsub("Conc.Air.", "", Volunteer))
 
-
-
-# Duplicate Mi.Ya rows and create new rows for Mi and Ya
-conc_air_long <- conc_air_long %>%
-  # Filter out Mi.Ya rows
-  filter(Volunteer != "Mi.Ya") %>%
-  # Create new rows for Mi and Ya
-  bind_rows(
-    conc_air_long %>%
-      filter(Volunteer == "Mi.Ya") %>%
-      # Duplicate the rows and assign Mi and Ya
-      uncount(2) %>%
-      mutate(Volunteer = ifelse(row_number() %% 2 == 1, "Mi", "Ya"))
-  )
+# Until here!
 
 conc_wb_long <- as.data.frame(conc.wb) %>%
   rownames_to_column(var = "Volunteer") %>%  # Convert row names to a column
