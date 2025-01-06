@@ -2,6 +2,7 @@
 dir.create("R")
 dir.create("R/AirConcentration")
 dir.create("R/SamplingRates")
+dir.create("R/Profiles")
 dir.create("Data")
 dir.create("Output")
 dir.create("Output/Data")
