@@ -120,10 +120,12 @@ uptakeWB3.PCB52 <- function(t, state, parms) {
                       0.5))                   # 22:00 to 24:00
   
   # Apply the conditions for Ca
-  Ca <- ifelse(hour < 8, 0.2,                 # 0:00 to 8:00
-               ifelse(hour < 9, 0.0227,       # 8:00 to 9:00
-                      ifelse(hour < 18, 1.4,         # 9:00 to 18:00
-                             0.2)))                         # 18:00 to 24:00
+  Ca <- ifelse(hour < 8, 0.2,                                # 0:00 to 8:00
+               ifelse(hour < 8.5, 0.0227,                   # 8:00 to 8:30
+                      ifelse(hour < 9, 0.2,                 # 8:30 to 9:00
+                             ifelse(hour < 18, 1.4,        # 9:00 to 18:00
+                                    ifelse(hour < 18.5, 0.0227,  # 18:00 to 18:30
+                                           0.2)))))              # 18:30 to 24:00
   
   # Differential equations
   dMwbdt <- sr * (Ca - Mwb / (Kwb * Vwb)) # [ng/d]
@@ -137,8 +139,8 @@ uptakeWB3.PCB52 <- function(t, state, parms) {
 cinit <- c(Mwb = 0, Vef = 0) # Initial values for Mwb and Vef
 
 # Time sequence for 5 days (starting at 8 AM on Monday and ending at 6 PM on Friday)
-start_time <- 8   # Starting at 8 AM on Monday (first day)
-end_time <- 5 * 24 + 18  # Ending at 6 PM on Friday (5th day)
+start_time <- 9   # Starting at 9 AM on Monday (first day)
+end_time <- 4 * 24 + 18  # Ending at 6 PM on Friday (5th day)
 
 # Generate time sequence with 0.25 hour steps
 t_seq <- seq(start_time, end_time, by = 0.25)
@@ -163,6 +165,49 @@ ggplot(data = model.df.3, aes(x = time, y = Vef)) +
 # Calculate the average Ca over the 5 days
 Ca_avg <- mean(model.df.3$Ca)
 
+# (1) Cwb, Ca vs. time (observations not included)
+# Start time: Monday, January 6th, 2025, at 09:00 AM
+start_time <- as.POSIXct("2025-01-06 09:00:00", format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+
+# Generate a sequence of times with an increment of 0.25 hours (15 minutes)
+model.df.3$new_datetime <- start_time + (0:420) * 3600 * 0.25  # 0.25 hours = 15 minutes
+
+# Format the new datetime to display only the day and hour (without minutes/seconds)
+model.df.3$new_formatted_datetime <- format(model.df.3$new_datetime, "%a %H:%M")
+
+# Subset the data to include only every 24th row
+model.df.3_subset <- model.df.3[seq(1, nrow(model.df.3), by = 32), ]
+
+# Plot the data
+plotPCB52Model <- ggplot(data = model.df.3, aes(x = time)) +
+  geom_line(aes(y = Cwb, color = "Cwb"), linetype = "dashed", linewidth  = 1) +
+  geom_line(aes(y = Ca, color = "Ca")) +
+  geom_line(aes(y = Ca_avg, color = "Ca_avg"), linetype = "dotted", linewidth = 1) +
+  scale_color_manual(name = "",
+                     values = c("Cwb" = "blue", "Ca" = "#009E73", "Ca_avg" = "black"),
+                     labels = c("Cwb" = "Estimate air concentration from WB", 
+                                "Ca" = "Air concentration",
+                                "Ca_avg" = "Average air concentration")) +
+  scale_x_continuous(name = "Time (hours)", 
+                     breaks = seq(0, 142, by = 12),  # Customize breaks for the primary axis
+                     labels = seq(0, 142, by = 12)) + 
+  geom_text(data = model.df.3_subset, aes(x = time, y = 1.6, label = new_formatted_datetime), 
+            angle = 90, hjust = 1, vjust = 0.5, size = 2.5) +
+  labs(y = "PCB 52 (ng/m3)") +
+  theme_bw() +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10),
+        axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10),
+  legend.text = element_text(size = 8, face = "bold"))
+
+# Print the plot
+print(plotPCB52Model)
+
+# Save plot in folder
+ggsave("Output/Plots/Model/PCB52Model.png",
+       plot = plotPCB52Model, width = 8, height = 5, dpi = 500)
+
 # Add Cwb from volunteers
 Cwb.obs <- c(0.58, 0.6, 2.62, 1.27, 0.88)
 time.obs <- c(3.2 * 24, 3.5 * 24, 3.3 * 24, 3.8* 24, 3.6 * 24) # [d] time
@@ -170,7 +215,7 @@ obs <- cbind(Cwb.obs, time.obs)
 # Mi, Ea, Ya, An & Xu
 rownames(obs) <- c("Vol. 1", "Vol. 2", "Vol. 3", "Vol. 4", "Vol. 5")
 
-# Cwb, Ca vs. time
+# (2) Cwb, Ca vs. time
 ggplot(data = model.df.3, aes(x = time)) +
   geom_line(aes(y = Cwb, color = "Cwb")) +
   geom_line(aes(y = Ca, color = "Ca")) +
@@ -184,13 +229,12 @@ ggplot(data = model.df.3, aes(x = time)) +
   geom_point(data = obs, aes(x = time.obs, y = Cwb.obs)) +
   geom_text(data = obs, aes(x = time.obs, y = Cwb.obs, label = rownames(obs)), 
             vjust = -1, color = "black", size = 4) +  # Adding row names as labels
-  labs(x = "Time (hours)", y = "PCB 52 (ng/m3)") +
+  scale_x_continuous(name = "Time (hours)", 
+                     breaks = seq(0, 142, by = 12), # Customize break points here
+                     labels = seq(0, 142, by = 12)) +  # Customize labels (optional)
+  labs(y = "PCB 52 (ng/m3)") +
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
         axis.text.x = element_text(face = "bold", size = 14),
         axis.title.x = element_text(face = "bold", size = 14))
-
-
-
-
 
