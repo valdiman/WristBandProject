@@ -2,21 +2,15 @@
 
 # Packages and libraries --------------------------------------------------
 # Install packages
-install.packages("dplyr")
-install.packages("reshape2")
 install.packages("ggplot2")
 install.packages("deSolve")
 install.packages("tidyr")
-install.packages("gridExtra")
 
 # Load libraries
 {
-  library(dplyr) # organize data
-  library(reshape2) # organize data
   library(ggplot2) # plotting
   library(deSolve) # solving differential equations
   library(tidyr)
-  library(gridExtra)
 }
 
 # (i) Constant sr and constant Ca -----------------------------------------
@@ -113,38 +107,53 @@ uptakeWB3.PCB52 <- function(t, state, parms) {
   Kwb <- 10^7.4 # [m3wb/m3air] from Frederiksen 2022
   Vwb <- 4.73 * 10^-6 # [m3]. Debossed adult size (www.24hourwristbands.com)
   
-  # Time-varying sampling rate (sr)
-  sr <- ifelse((t %% 1) < (16 / 24), 0.9, 0.5) # 0.9 for first 16 hours, 0.5 for next 8 hours
-  
-  # Time-varying air concentration (Ca)
-  Ca <- ifelse((t %% 1) < (8 / 24), 1.4, # 1.4 for 8 hours at work
-               ifelse((t %% 1) < (9 / 24), 0.0227, # 0.0227 for 1 hour commuting (outdoor)
-                      0.1)) # 0.1 for remaining time at home
-  
   # Variables
   Mwb <- state[1] # [ng]
   Vef <- state[2] # [m3]
+  
+  # Calculate the current hour (time in hours, 0 to 23)
+  hour <- t %% 24 # Get the current hour (0 to 23)
+  
+  # Apply the conditions for sr
+  sr <- ifelse(hour < 7, 0.5,                  # 0:00 to 7:00
+               ifelse(hour < 22, 0.9,         # 7:00 to 22:00
+                      0.5))                   # 22:00 to 24:00
+  
+  # Apply the conditions for Ca
+  Ca <- ifelse(hour < 8, 0.2,                 # 0:00 to 8:00
+               ifelse(hour < 9, 0.0227,       # 8:00 to 9:00
+                      ifelse(hour < 18, 1.4,         # 9:00 to 18:00
+                             0.2)))                         # 18:00 to 24:00
   
   # Differential equations
   dMwbdt <- sr * (Ca - Mwb / (Kwb * Vwb)) # [ng/d]
   dVefdt <- sr / Vwb * (Vwb - Vef / Kwb)  # [m3/d]
   
-  # Return computed derivatives as a list
+  # Return computed derivatives as a list, including Ca and sr
   return(list(c(dMwbdt, dVefdt), Ca = Ca, sr = sr))
 }
 
 # Initial conditions
 cinit <- c(Mwb = 0, Vef = 0) # Initial values for Mwb and Vef
-# Time sequence for 5 days (in days)
-t <- seq(0, 5, 0.01) # 5 days in days with 0.1-day steps
-# Run the ODE solver
-model.3 <- ode(y = cinit, times = t, func = uptakeWB3.PCB52, parms = NULL)
-head(model.3)
 
+# Time sequence for 5 days (starting at 8 AM on Monday and ending at 6 PM on Friday)
+start_time <- 8   # Starting at 8 AM on Monday (first day)
+end_time <- 5 * 24 + 18  # Ending at 6 PM on Friday (5th day)
+
+# Generate time sequence with 0.25 hour steps
+t_seq <- seq(start_time, end_time, by = 0.25)
+
+# Solve the differential equations using ode
+model.3 <- ode(y = cinit, times = t_seq, func = uptakeWB3.PCB52, parms = NULL)
+
+# View the result
+head(model.3)
 # Transform model to data.frame
 model.df.3 <- as.data.frame(model.3)
-colnames(model.df.3) <- c("time", "Mwb", "Vef", "Ca", "sr")
+# Add Cwb
 model.df.3$Cwb <- model.df.3$Mwb / model.df.3$Vef
+# To check hours of the day
+model.df.3$hour_of_day <- model.df.3$time %% 24
 
 # Plot Vef vs. time
 ggplot(data = model.df.3, aes(x = time, y = Vef)) +
@@ -156,8 +165,8 @@ Ca_avg <- mean(model.df.3$Ca)
 
 # Add Cwb from volunteers
 Cwb.obs <- c(0.58, 0.6, 2.62, 1.27, 0.88)
-time.obs <- c(3.2, 3.5, 3.3, 3.8, 3.6) # [d] time
-obs <- cbind(Cwb_obs, time.obs)
+time.obs <- c(3.2 * 24, 3.5 * 24, 3.3 * 24, 3.8* 24, 3.6 * 24) # [d] time
+obs <- cbind(Cwb.obs, time.obs)
 # Mi, Ea, Ya, An & Xu
 rownames(obs) <- c("Vol. 1", "Vol. 2", "Vol. 3", "Vol. 4", "Vol. 5")
 
@@ -175,7 +184,7 @@ ggplot(data = model.df.3, aes(x = time)) +
   geom_point(data = obs, aes(x = time.obs, y = Cwb.obs)) +
   geom_text(data = obs, aes(x = time.obs, y = Cwb.obs, label = rownames(obs)), 
             vjust = -1, color = "black", size = 4) +  # Adding row names as labels
-  labs(x = "Time (days)", y = "PCB 52 (ng/m3)") +
+  labs(x = "Time (hours)", y = "PCB 52 (ng/m3)") +
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
         axis.text.x = element_text(face = "bold", size = 14),
