@@ -19,52 +19,76 @@ install.packages("tibble")
 }
 
 # Read measured values from excel -----------------------------------------
-data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
-                                       col_names = TRUE, col_types = NULL))
+{
+  data <- data.frame(read_excel("Data/Volunteers.xlsx", sheet = "Sheet1",
+                                col_names = TRUE, col_types = NULL))
+  data.2 <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
+                                  col_names = TRUE, col_types = NULL))
+}
 
 # Calculate air PCB concentration from static WBs -------------------------
 {
-  # Stat samples
-  data.Stat.1 <- data.frame(data[1, 3:175])
-  data.Stat.2 <- data.frame(data[2, 3:175])
-  data.Stat.3 <- data.frame(data[3, 3:175])
+  # For MI & YA
+  data.Mi.Ya.Stat <- data[8, 4:176]
+  # For EA
+  data.Ea.Stat <- data[7, 4:176]
+  # For Cr
+  data.Cr.Stat <- data.frame(colMeans(data[14:15, 4:176]))
+  # For Hu
+  data.Hu.Stat <- data[13, 4:176]
+  # For Xu
+  data.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
+  # For Gift
+  data.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
+  # For Xue
+  data.Xue.Stat <- data.2[3, 3:175]
+  
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
-  conc.air.1 <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[1])))
-  conc.air.2 <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[2])))
-  conc.air.3 <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[3])))
-  # Combine the three conc.air data frames into a list
-  conc.air <- list(conc.air.1, conc.air.2, conc.air.3)
-  # Bind the data frames together row-wise
-  conc.air <- do.call(cbind, conc.air)
-  # Calculate the row means for each column and create a new data frame
-  conc.air.avg <- as.data.frame(rowMeans(conc.air))
+  conc.Mi.Ya <- as.data.frame(t(data.Mi.Ya.Stat/(0.5*data$time.day[8])))
+  conc.Ea <- as.data.frame(t(data.Ea.Stat/(0.5*data$time.day[7])))
+  conc.Cr <- as.data.frame(data.Cr.Stat/(0.5*data$time.day[14]))
+  conc.Hu <- as.data.frame(t(data.Hu.Stat/(0.5*data$time.day[13])))
+  conc.Xu <- as.data.frame(data.Xu.Stat/(0.5*data$time.day[19]))
+  conc.Gi <- as.data.frame(data.Gi.Stat/(0.5*data$time.day[22]))
+  conc.Xue <- as.data.frame(t(data.Xue.Stat/(0.5*data.2$time.day[3])))
   
+  # Combine concentrations
+  conc.air <- cbind(conc.Mi.Ya, conc.Ea, conc.Cr, conc.Hu, conc.Xu, conc.Gi,
+                    conc.Xue)
   # Change column names of the last three columns
-  colnames(conc.air.avg) <- c("Conc.Air")
+  colnames(conc.air) <- c("Conc.Air.Mi.Ya", "Conc.Air.Ea", "Conc.Air.Cr",
+                          "Conc.Air.Hu", "Conc.Air.Xu", "Conc.Air.Gi",
+                          "Conc.Air.Xue")
 }
 
-# Read calculated average sampling rates ----------------------------------
+# Read calculated average sampling rates for volunteers -------------------
 sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
 # Select wore WBs ---------------------------------------------------------
 {
-  wb.Mi.l <- data[4, c(2, 3:175)]
-  wb.Mi.r <- data[5, c(2, 3:175)]
-  wb.Ea.r <- data[6, c(2, 3:175)]
-  wb.Ea.l <- data[7, c(2, 3:175)]
-  wb.Ya.r <- data[8, c(2, 3:175)]
-  wb.Ya.l <- data[9, c(2, 3:175)]
-  wb.An.r <- data[10, c(2, 3:175)]
-  wb.An.l <- data[11, c(2, 3:175)]
-  wb.Xu.r <- data[12, c(2, 3:175)]
-  wb.Xu.l <- data[13, c(2, 3:175)]
+  wb.Mi.l <- data[1, c(2, 4:176)]
+  wb.Mi.r <- data[2, c(2, 4:176)]
+  wb.Ya.l <- data[3, c(2, 4:176)]
+  wb.Ya.r <- data[4, c(2, 4:176)]
+  wb.Ea.l <- data[5, c(2, 4:176)]
+  wb.Ea.r <- data[6, c(2, 4:176)]
+  wb.Cr.l <- data[9, c(2, 4:176)]
+  wb.Cr.r <- data[10, c(2, 4:176)]
+  wb.Hu.l <- data[11, c(2, 4:176)]
+  wb.Hu.r <- data[12, c(2, 4:176)]
+  wb.Xu.l <- data[17, c(2, 4:176)]
+  wb.Xu.r <- data[18, c(2, 4:176)]
+  wb.Gi.l <- data[25, c(2, 4:176)]
+  wb.Gi.r <- data[24, c(2, 4:176)]
+  wb.Xue.l <- data.2[13, c(2, 3:175)]
 }
 # Combined wore WBs
-wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ea.r, wb.Ea.l, wb.Ya.r, wb.Ya.l,
-               wb.An.r, wb.An.l, wb.Xu.r, wb.Xu.l)
+wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ya.l, wb.Ya.r, wb.Ea.l, wb.Ea.r,
+               wb.Cr.l, wb.Cr.r, wb.Hu.l, wb.Hu.r, wb.Xu.l, wb.Xu.r,
+               wb.Gi.l, wb.Gi.r, wb.Xue.l)
 
 # Estimate air concentration using SR, mass of wore WBs & time ------------
 # Extract congener names from sr
@@ -77,15 +101,15 @@ sr_common <- sr[sr$congener %in% colnames(wb_common), ]
 sr_common <- sr_common[match(colnames(wb_common), sr_common$congener), ]
 # Divide each element in wb_common by corresponding element in sr_common$Average_Sampling_Rate
 wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
-# !!! Use a constant sampling rate
+# Alternative method -> use a constant sampling rate
 # wb_div_sr <- sweep(wb_common, 2, 1.5, FUN = "/")
 # Extract time.day from wb.wr
 wb_time_day <- wb.wr$time.day
 # Divide wb_div_sr further by corresponding value in wb_time_day
 conc.wb <- sweep(wb_div_sr, 1, wb_time_day, FUN = "/")
-rownames(conc.wb) <- c('wb.Mi.l', 'wb.Mi.r', 'wb.Ea.r', 'wb.Ea.l',
-                       'wb.Ya.r', 'wb.Ya.l', 'wb.An.l', 'wb.An.r',
-                       'wb.Xu.r', 'wb.Xu.l')
+rownames(conc.wb) <- c('wb.Mi.l', 'wb.Mi.r', 'wb.Ya.l', 'wb.Ya.r', 'wb.Ea.l',
+                       'wb.Ea.r', 'wb.Cr.l', 'wb.Cr.r', 'wb.Hu.l', 'wb.Hu.r',
+                       'wb.Xu.l', 'wb.Xu.r', 'wb.Gi.l', 'wb.Gi.r', 'wb.Xue.l')
 
 # Match congeners in both dataset -----------------------------------------
 # Ensure both data frames have matching congener order
@@ -109,7 +133,7 @@ print(tPCB.conc.air)
 # Create a data frame with the combined data
 data <- data.frame(
   Wb_Concentration = tPCB.conc.wb,
-  Air_Concentration = rep(tPCB.conc.air, times = c(4, 2, 2, 2, 2,2)),
+  Air_Concentration = rep(tPCB.conc.air, times = c(4, 2, 2, 2, 2, 2, 1)),
   Volunteer = names(tPCB.conc.wb)
 )
 
@@ -129,6 +153,7 @@ data$Volunteer2 <- case_when(
   data$Volunteer == "wb.Xu.r" ~ "Vol. 6 d",
   data$Volunteer == "wb.Gi.l" ~ "Vol. 7 nd",
   data$Volunteer == "wb.Gi.r" ~ "Vol. 7 d",
+  data$Volunteer == "wb.Xue.l" ~ "Vol. 8 nd",
   TRUE ~ NA_character_  # This handles any unmatched cases
 )
 
@@ -136,23 +161,23 @@ data$Volunteer2 <- case_when(
 color_palette <- c(
   "#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b",
   "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#e41a1c", "#264c73",
-  "#f781bf", "#a65628")
+  "#f781bf", "#a65628", "#4b0082")
 
 # Define a shape palette with enough distinct shapes for the number of volunteers
-shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22)
+shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22, 25)
 
 # Create the plot
 plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
-                           fill = Volunteer2, shape = Volunteer2)) +
+                                  fill = Volunteer2, shape = Volunteer2)) +
   geom_point(size = 3.5, color = "black", stroke = 0.5) +
   theme_bw() +
   theme(aspect.ratio = 15/15) +
   annotation_logticks(sides = "bl") +
   scale_y_log10(limits = c(1, 10^3),
-                breaks = trans_breaks("log10", function(x) 10^x),
+                breaks = 10^(0:3),  # Integer powers of 10 only
                 labels = trans_format("log10", math_format(10^.x))) +
   scale_x_log10(limits = c(1, 10^3),
-                breaks = trans_breaks("log10", function(x) 10^x),
+                breaks = 10^(0:3),  # Integer powers of 10 only
                 labels = trans_format("log10", math_format(10^.x))) +
   xlab(expression(bold("Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
   ylab(expression(bold("Predicted Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
@@ -303,6 +328,7 @@ filtered_data$Volunteer.y <- case_when(
   filtered_data$Volunteer.y == "Xu.r" ~ "Vol. 6 d",
   filtered_data$Volunteer.y == "Gi.l" ~ "Vol. 7 nd",
   filtered_data$Volunteer.y == "Gi.r" ~ "Vol. 7 d",
+  filtered_data$Volunteer.y == "Xue.l" ~ "Vol. 8 nd",
   TRUE ~ NA_character_  # Handles any unmatched cases
 )
 

@@ -1,0 +1,20 @@
+# RStudio-specific files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# macOS-specific files
+.DS_Store
+
+# Ignore CSV files
+*.csv
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.tmp
+
+# Ignore PNG files
+*.png
