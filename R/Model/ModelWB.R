@@ -14,7 +14,6 @@ install.packages("tidyr")
 }
 
 # (i) Constant sr and constant Ca -----------------------------------------
-# Uptake WB function ------------------------------------------------------
 uptakeWB.PCB52 = function(t, state, parms){
   
   Kwb <- 10^7.4 # [m3wb/m3air] from Frederiksen 2022
@@ -56,10 +55,66 @@ obs <- cbind(vef.obs, time.obs)
 
 # Plot Vef vs. time
 ggplot(data = model.df, aes(x = time, y = Vef)) +
-  geom_line(linetype = "dashed") +
-  geom_point(data = obs, aes(x = time.obs, y = vef.obs)) +
-  theme_classic()
+  geom_line() +
+  geom_point(data = obs, aes(x = time.obs, y = vef.obs), size  = 4) +
+  theme_bw() +
+  labs(x = "time (days)", y = "Effective volume PCB 52 (m3)") +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14))
+
+# Same as (i) but WB rotating
+uptakeWBr.PCB52 = function(t, state, parms){
   
+  Kwb <- 10^7.4 # [m3wb/m3air] from Frederiksen 2022
+  Vwb <- 4.73 * 10^-6 # [m3]. Debossed adult size (www.24hourwristbands.com)
+  
+  # Sampling rate
+  sr <- parms$sr # [m3/d]
+  
+  # Variables
+  Mwb <- state[1] # [ng]
+  Vef <- state[2] # [m3]
+  
+  dMwbdt <- sr * (Ca - Mwb / (Kwb * Vwb)) # [ng/d]
+  dVefdt <- sr / Vwb * (Vwb - Vef / Kwb) # [m3/d]
+  
+  # The computed derivatives are returned as a list
+  return(list(c(dMwbdt, dVefdt)))
+}
+
+# Initial conditions and run function
+Ca <- 33 # [ng/m3]
+
+cinit <- c(Mwb = 0, Vef = 0) # [ng/m3]
+parms <- list(sr = 1.1) # from SamplingRates.R
+t <- seq(0, 5, 0.1) # [d]
+# Run the ODE function without specifying parms
+model.r <- ode(y = cinit, times = t, func = uptakeWBr.PCB52, parms = parms)
+head(model.r)
+
+# Transform model to data.frame and get air concentation from Mwb
+model.r.df <- as.data.frame(model.r)
+colnames(model.r.df) <- c("time", "Mwb", "Vef")
+model.r.df$Cwb <- model.r.df$Mwb / model.r.df$Vef
+
+# Include observations from uptake studies
+vef.r.obs <- c(1.188, 2.291, 3.508, 4.08) # [m3] Vef
+time.r.obs <- c(1.025, 2.03, 3.053, 4.0625) # [d] time
+obs.r <- cbind(vef.r.obs, time.r.obs)
+
+# Plot Vef vs. time
+ggplot(data = model.r.df, aes(x = time, y = Vef)) +
+  geom_line() +
+  geom_point(data = obs.r, aes(x = time.r.obs, y = vef.r.obs), size = 4) +
+  theme_bw() +
+  labs(x = "time (days)", y = "Effective volume PCB 52 (m3)") +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14))
+
 # (ii) Variable sr and constant Ca -----------------------------------------
 uptakeWB2.PCB52 <- function(t, state, parms) {
   
