@@ -198,7 +198,7 @@ plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirWBtPCBSR.png", plot = plotAirWBtPCB, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCB.png", plot = plotAirWBtPCB, width = 6,
        height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
@@ -216,10 +216,23 @@ percentage_error <-function(observed, predicted) {
 
 # Calculate percentage errors
 percentage_error <- percentage_error(data$Air_Concentration, data$Wb_Concentration)
-
+min(percentage_error)
+max(percentage_error)
 # Calculate mean percent error
 mean_error <- mean(percentage_error)
 print(paste("Mean Error:", mean_error))
+
+# Calcualte percentage errors btw left and right WBs
+# Extract the Wb_Concentration column as a vector
+Wb_Concentration <- data$Wb_Concentration
+# Remove the last row to ensure an even number of elements
+Wb_Concentration <- Wb_Concentration[-length(Wb_Concentration)]
+# Convert the remaining vector into a 2x7 matrix
+Wb_matrix <- matrix(Wb_Concentration, nrow = 7, ncol = 2, byrow = TRUE)
+colnames(Wb_matrix) <- c('WBleft', 'WBright')
+# Calculate percentage errors
+percentage_error_hand <- percentage_error(Wb_matrix[, 1], Wb_matrix[, 2])
+mean(percentage_error_hand)
 
 # Individual PCB Congeners ------------------------------------------------
 # Create a data frame with the combined data
@@ -364,7 +377,7 @@ plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
 print(plotAirWBPCBi)
 
 # Save plot in folder
-ggsave("Output/Plots/AirWBPCBi.png", plot = plotAirWBPCBi, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBi.png", plot = plotAirWBPCBi, width = 6,
        height = 5, dpi = 500)
 
 
