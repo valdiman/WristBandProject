@@ -366,7 +366,7 @@ ggplot(prof_combined.Xue, aes(x = congener, y = Mass, fill = Source)) +
 time.i <- data$time.day[c(8, 7, 14, 13, 19, 22)]
 conc.wb.air.i <- as.data.frame(wb.stat/(0.5*time.i))
 conc.wb.air.ii <- as.data.frame(data.2[3, 3:175]/(0.5*data.2$time.day[3]))
-conc.wb.air <- cbind(conc.wb.air.i, conc.wb.air.ii) 
+conc.wb.air <- rbind(conc.wb.air.i, conc.wb.air.ii) 
 rownames(conc.wb.air) <- c("Conc.Air.Mi.Ya.Stat",
                            "Conc.Air.Ea.Stat", "Conc.Air.Cr.Stat",
                            "Conc.Air.Hu.Stat", "Conc.Air.Xu.Stat",
@@ -490,7 +490,7 @@ p_prof_comb.Mi <- ggplot(prof_combined.Mi, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.12) +
   theme_bw() +
@@ -538,7 +538,7 @@ p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
@@ -585,7 +585,7 @@ prof_combined.Ea <- prof.wb.air.conc %>%
 p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the barshttp://127.0.0.1:8373/graphics/plot_zoom_png?width=1872&height=900
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
@@ -632,7 +632,7 @@ p_prof_comb.Cr <- ggplot(prof_combined.Cr, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)http://127.0.0.1:8373/graphics/plot_zoom_png?width=1856&height=861
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)http://127.0.0.1:8373/graphics/plot_zoom_png?width=1856&height=861
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
@@ -679,7 +679,7 @@ p_prof_comb.Hu <- ggplot(prof_combined.Hu, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
@@ -727,7 +727,7 @@ p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
@@ -775,7 +775,7 @@ p_prof_comb.Gi <- ggplot(prof_combined.Gi, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.7) +
   theme_bw() +
@@ -819,7 +819,7 @@ p_prof_comb.Xue <- ggplot(prof_combined.Xue, aes(x = congener, y = Conc,
                                                   fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black",  # Add black edges to the bars
-           size = 0.2) +  # Set the thickness of the black edges (fine line)
+           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
   ylim(0, 0.2) +
   theme_bw() +
@@ -929,3 +929,4 @@ cosine_matrix <- as.matrix(prof_combined_wide.Xue[, -1])
 cosine_similarity.Xue <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.Xue
+
