@@ -29,29 +29,29 @@ install.packages("tibble")
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # For MI & YA
-  data.Mi.Ya.Stat <- data[8, 4:176]
+  mass.Mi.Ya.Stat <- data[8, 4:176]
   # For EA
-  data.Ea.Stat <- data[7, 4:176]
+  mass.Ea.Stat <- data[7, 4:176]
   # For Cr
-  data.Cr.Stat <- data.frame(colMeans(data[14:15, 4:176]))
+  mass.Cr.Stat <- data.frame(colMeans(data[14:15, 4:176]))
   # For Hu
-  data.Hu.Stat <- data[13, 4:176]
+  mass.Hu.Stat <- data[13, 4:176]
   # For Xu
-  data.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
+  mass.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
   # For Gift
-  data.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
+  mass.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
   # For Xue
-  data.Xue.Stat <- data.2[3, 3:175]
+  mass.Xue.Stat <- data.2[3, 3:175]
   
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
-  conc.Mi.Ya <- as.data.frame(t(data.Mi.Ya.Stat/(0.5*data$time.day[8])))
-  conc.Ea <- as.data.frame(t(data.Ea.Stat/(0.5*data$time.day[7])))
-  conc.Cr <- as.data.frame(data.Cr.Stat/(0.5*data$time.day[14]))
-  conc.Hu <- as.data.frame(t(data.Hu.Stat/(0.5*data$time.day[13])))
-  conc.Xu <- as.data.frame(data.Xu.Stat/(0.5*data$time.day[19]))
-  conc.Gi <- as.data.frame(data.Gi.Stat/(0.5*data$time.day[22]))
-  conc.Xue <- as.data.frame(t(data.Xue.Stat/(0.5*data.2$time.day[3])))
+  conc.Mi.Ya <- as.data.frame(t(mass.Mi.Ya.Stat/(0.5*data$time.day[8])))
+  conc.Ea <- as.data.frame(t(mass.Ea.Stat/(0.5*data$time.day[7])))
+  conc.Cr <- as.data.frame(mass.Cr.Stat/(0.5*data$time.day[14]))
+  conc.Hu <- as.data.frame(t(mass.Hu.Stat/(0.5*data$time.day[13])))
+  conc.Xu <- as.data.frame(mass.Xu.Stat/(0.5*data$time.day[19]))
+  conc.Gi <- as.data.frame(mass.Gi.Stat/(0.5*data$time.day[22]))
+  conc.Xue <- as.data.frame(t(mass.Xue.Stat/(0.5*data.2$time.day[3])))
   
   # Combine concentrations
   conc.air <- cbind(conc.Mi.Ya, conc.Ea, conc.Cr, conc.Hu, conc.Xu, conc.Gi,
@@ -61,6 +61,11 @@ install.packages("tibble")
                           "Conc.Air.Hu", "Conc.Air.Xu", "Conc.Air.Gi",
                           "Conc.Air.Xue")
 }
+
+# Check total PCB
+tPCB.conc.air <- colSums(conc.air, na.rm = TRUE)
+# See
+tPCB.conc.air
 
 # Read calculated average sampling rates for volunteers -------------------
 sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
