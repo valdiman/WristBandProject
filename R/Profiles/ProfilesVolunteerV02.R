@@ -121,7 +121,7 @@ prof.wb.air.conc[, 2:3] <- lapply(prof.wb.air.conc[, 2:3], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.air.conc$congener <- factor(prof.wb.air.conc$congener,
                                 levels = unique(prof.wb.air.conc$congener))
-# Check sum of all PCBs (i.e., = 1)
+# Check sum of all PCBs (i.e. = 1)
 colSums(prof.wb.air.conc[, 2:3], na.rm = TRUE)
 
 # (2) Wore WBs
@@ -135,7 +135,7 @@ prof.wb.wr.conc[, 2:11] <- lapply(prof.wb.wr.conc[, 2:11], as.numeric)
 #Then turn it back into a factor with the levels in the correct order
 prof.wb.wr.conc$congener <- factor(prof.wb.wr.conc$congener,
                                levels = unique(prof.wb.wr.conc$congener))
-# Check sum of all PCBs (i.e., = 1)
+# Check sum of all PCBs (i.e. = 1)
 colSums(prof.wb.wr.conc[, 2:11], na.rm = TRUE)
 
 # Concentration profile plots ---------------------------------------------
@@ -143,17 +143,17 @@ colSums(prof.wb.wr.conc[, 2:11], na.rm = TRUE)
 prof_combined.Mi <- prof.wb.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air office") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Mi.o) %>%
               rename(Conc = wb.Mi.o) %>%
-              mutate(Source = "Vol. 1 office")) %>%  # Change this label
+              mutate(Source = "Vol. 1 office-only")) %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Mi.h) %>%
               rename(Conc = wb.Mi.h) %>%
-              mutate(Source = "Vol. 1 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office", "Vol. 1 office",
-                                            "Vol. 1 home")))
+              mutate(Source = "Vol. 1 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 1 office-only",
+                                            "Vol. 1 full-day")))
 
 # Plot
 # Create the plot with the legend moved inside
@@ -174,9 +174,9 @@ p_prof_comb.Mi <- ggplot(prof_combined.Mi, aes(x = congener, y = Conc,
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office" = "blue",
-                               "Vol. 1 office" = "#009E73",
-                               "Vol. 1 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 1" = "blue",
+                               "Vol. 1 office-only" = "#009E73",
+                               "Vol. 1 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -194,17 +194,17 @@ ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol1.png",
 prof_combined.Ea <- prof.wb.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air office") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Ea.o) %>%
               rename(Conc = wb.Ea.o) %>%
-              mutate(Source = "Vol. 2 office")) %>%
+              mutate(Source = "Vol. 3 office-only")) %>%
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Ea.h) %>%
               rename(Conc = wb.Ea.h) %>%
-              mutate(Source = "Vol. 2 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office", "Vol. 2 office",
-                                            "Vol. 2 home")))
+              mutate(Source = "Vol. 3 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 3 office-only",
+                                            "Vol. 3 full-day")))
 
 # Plots
 p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc,
@@ -224,9 +224,9 @@ p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc,
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office" = "blue",
-                               "Vol. 2 office" = "#009E73",
-                               "Vol. 2 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 1" = "blue",
+                               "Vol. 3 office-only" = "#009E73",
+                               "Vol. 3 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -237,24 +237,24 @@ p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc,
 print(p_prof_comb.Ea)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol2.png",
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol3.png",
        plot = p_prof_comb.Ea, width = 10, height = 5, dpi = 500)
 
 # Ya
 prof_combined.Ya <- prof.wb.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air office") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Ya.o) %>%
               rename(Conc = wb.Ya.o) %>%
-              mutate(Source = "Vol. 3 office")) %>%
+              mutate(Source = "Vol. 2 office-only")) %>%
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Ya.h) %>%
               rename(Conc = wb.Ya.h) %>%
-              mutate(Source = "Vol. 3 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office", "Vol. 3 office",
-                                            "Vol. 3 home")))
+              mutate(Source = "Vol. 2 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 2 office-only",
+                                            "Vol. 2 full-day")))
 
 # Plots
 p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc, fill = Source)) +
@@ -273,9 +273,9 @@ p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc, fill = So
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office" = "blue",
-                               "Vol. 3 office" = "#009E73",
-                               "Vol. 3 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 1" = "blue",
+                               "Vol. 2 office-only" = "#009E73",
+                               "Vol. 2 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -286,24 +286,24 @@ p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc, fill = So
 print(p_prof_comb.Ya)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol3.png",
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol2.png",
        plot = p_prof_comb.Ya, width = 10, height = 5, dpi = 500)
 
 # An
 prof_combined.An <- prof.wb.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
-  mutate(Source = "Air office") %>%  # Change this label
+  mutate(Source = "Air PCB office 2") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.An.o) %>%
               rename(Conc = wb.An.o) %>%
-              mutate(Source = "Vol. 4 office")) %>%
+              mutate(Source = "Vol. 9 office-only")) %>%
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.An.h) %>%
               rename(Conc = wb.An.h) %>%
-              mutate(Source = "Vol. 4 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office", "Vol. 4 office",
-                                            "Vol. 4 home")))
+              mutate(Source = "Vol. 9 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 2", "Vol. 9 office-only",
+                                            "Vol. 9 full-day")))
 
 p_prof_comb.An <- ggplot(prof_combined.An, aes(x = congener, y = Conc,
                                                  fill = Source)) +
@@ -322,9 +322,9 @@ p_prof_comb.An <- ggplot(prof_combined.An, aes(x = congener, y = Conc,
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office" = "blue",
-                               "Vol. 4 office" = "#009E73",
-                               "Vol. 4 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 2" = "blue",
+                               "Vol. 9 office-only" = "#009E73",
+                               "Vol. 9 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -335,24 +335,24 @@ p_prof_comb.An <- ggplot(prof_combined.An, aes(x = congener, y = Conc,
 print(p_prof_comb.An)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol4.png",
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol9.png",
        plot = p_prof_comb.An, width = 10, height = 5, dpi = 500)
 
 # Xu
 prof_combined.Xu <-  prof.wb.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
-  mutate(Source = "Air office") %>%  # Change this label
+  mutate(Source = "Air PCB office 2") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Xu.o) %>%
               rename(Conc = wb.Xu.o) %>%
-              mutate(Source = "Vol. 5 office")) %>%
+              mutate(Source = "Vol. 8 office-only")) %>%
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Xu.h) %>%
               rename(Conc = wb.Xu.h) %>%
-              mutate(Source = "Vol. 5 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office", "Vol. 5 office",
-                                            "Vol. 5 home")))
+              mutate(Source = "Vol. 8 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 2", "Vol. 8 office-only",
+                                            "Vol. 8 full-day")))
 
 p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
                                                  fill = Source)) +
@@ -371,9 +371,9 @@ p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office" = "blue",
-                               "Vol. 5 office" = "#009E73",
-                               "Vol. 5 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 2" = "blue",
+                               "Vol. 8 office-only" = "#009E73",
+                               "Vol. 8 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -384,25 +384,25 @@ p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
 print(p_prof_comb.Xu)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol5.png",
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol8.png",
        plot = p_prof_comb.Xu, width = 10, height = 5, dpi = 500)
 
 
-# Volunteers in location 1 (Conc.Air.1) Vol. 3 out
+# Volunteers in location 1 (Conc.Air.1) Vol. 2 out
 prof_combined.1 <-  prof.wb.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air office 1") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Ea.h) %>%
               rename(Conc = wb.Ea.h) %>%
-              mutate(Source = "Vol. 2 home")) %>%
+              mutate(Source = "Vol. 3 full-day")) %>%
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Mi.h) %>%
               rename(Conc = wb.Mi.h) %>%
-              mutate(Source = "Vol. 1 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office 1", "Vol. 1 home",
-                                            "Vol. 2 home")))
+              mutate(Source = "Vol. 1 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 1 full-day",
+                                            "Vol. 3 full-day")))
 
 p_prof_comb.1 <- ggplot(prof_combined.1, aes(x = congener, y = Conc,
                                                fill = Source)) +
@@ -421,11 +421,11 @@ p_prof_comb.1 <- ggplot(prof_combined.1, aes(x = congener, y = Conc,
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office 1" = "blue",
-                               "Vol. 1 home" = "#009E73",
-                               "Vol. 2 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 1" = "blue",
+                               "Vol. 1 full-day" = "#009E73",
+                               "Vol. 3 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
+  theme(legend.position = c(0.92, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
         legend.title = element_blank(),  # Removes the legend title
         legend.text = element_text(size = 8, face = "bold"))
@@ -437,21 +437,21 @@ print(p_prof_comb.1)
 ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Office1.png",
        plot = p_prof_comb.1, width = 10, height = 5, dpi = 500)
 
-# Volunteers in location 1 (Conc.Air.2)
+# Volunteers in location 2 (Conc.Air.2)
 prof_combined.2 <-  prof.wb.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
-  mutate(Source = "Air office 2") %>%  # Change this label
+  mutate(Source = "Air PCB office 2") %>%  # Change this label
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.An.h) %>%
               rename(Conc = wb.An.h) %>%
-              mutate(Source = "Vol. 4 home")) %>%
+              mutate(Source = "Vol. 9 full-day")) %>%
   bind_rows(prof.wb.wr.conc %>%
               select(congener, wb.Xu.h) %>%
               rename(Conc = wb.Xu.h) %>%
-              mutate(Source = "Vol. 5 home")) %>%
-  mutate(Source = factor(Source, levels = c("Air office 2", "Vol. 4 home",
-                                            "Vol. 5 home")))
+              mutate(Source = "Vol. 8 full-day")) %>%
+  mutate(Source = factor(Source, levels = c("Air PCB office 2", "Vol. 8 full-day",
+                                            "Vol. 9 full-day")))
 
 p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
                                              fill = Source)) +
@@ -470,9 +470,9 @@ p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air office 2" = "blue",
-                               "Vol. 4 home" = "#009E73",
-                               "Vol. 5 home" = "#E69F00"),
+  scale_fill_manual(values = c("Air PCB office 2" = "blue",
+                               "Vol. 8 full-day" = "#009E73",
+                               "Vol. 9 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
@@ -540,6 +540,7 @@ cosine_similarity.Xu <- cosine(cosine_matrix)
 cosine_similarity.Xu
 
 # Between volunteers from the same office
+# Room/office 1
 prof_combined_wide.1  <- prof_combined.1 %>%
   pivot_wider(names_from = Source, values_from = Conc)
 # Create a matrix from the concentration values (excluding the congener column)
@@ -549,6 +550,7 @@ cosine_similarity.1 <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.1
 
+# Room/office 2
 prof_combined_wide.2  <- prof_combined.2 %>%
   pivot_wider(names_from = Source, values_from = Conc)
 # Create a matrix from the concentration values (excluding the congener column)

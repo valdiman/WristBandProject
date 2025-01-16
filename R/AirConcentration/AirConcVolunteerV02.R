@@ -121,10 +121,10 @@ data.plot$Volunteer2 <- case_when(
   data.plot$Volunteer == "wb.Ya.h" ~ "Vol. 2 Ho",
   data.plot$Volunteer == "wb.Ea.o" ~ "Vol. 3 Of",
   data.plot$Volunteer == "wb.Ea.h" ~ "Vol. 3 Ho",
-  data.plot$Volunteer == "wb.Xu.o" ~ "Vol. 4 Of",
-  data.plot$Volunteer == "wb.Xu.h" ~ "Vol. 4 Ho",
-  data.plot$Volunteer == "wb.An.o" ~ "Vol. 5 Of",
-  data.plot$Volunteer == "wb.An.h" ~ "Vol. 5 Ho",
+  data.plot$Volunteer == "wb.Xu.o" ~ "Vol. 8 Of",
+  data.plot$Volunteer == "wb.Xu.h" ~ "Vol. 8 Ho",
+  data.plot$Volunteer == "wb.An.o" ~ "Vol. 9 Of",
+  data.plot$Volunteer == "wb.An.h" ~ "Vol. 9 Ho",
   TRUE ~ NA_character_
 )
 
@@ -133,8 +133,8 @@ data.plot$Volunteer_Group <- case_when(
   grepl("wb.Mi", data.plot$Volunteer) ~ "Vol. 1",
   grepl("wb.Ya", data.plot$Volunteer) ~ "Vol. 2",
   grepl("wb.Ea", data.plot$Volunteer) ~ "Vol. 3",
-  grepl("wb.Xu", data.plot$Volunteer) ~ "Vol. 4",
-  grepl("wb.An", data.plot$Volunteer) ~ "Vol. 5",
+  grepl("wb.Xu", data.plot$Volunteer) ~ "Vol. 8",
+  grepl("wb.An", data.plot$Volunteer) ~ "Vol. 9",
   TRUE ~ NA_character_
 )
 
@@ -170,8 +170,8 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
   geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
   scale_fill_manual(
     values = c("Ho" = "#E69F00", "Of" = "blue", "Air" = "#009E73"),  # Custom colors
-    labels = c("Ho" = "WB home", "Of" = "WB office",
-               "Air" = "Air office")  # Custom labels
+    labels = c("Ho" = "WB full-day", "Of" = "WB office-only",
+               "Air" = "Air PCB office")  # Custom labels
   ) +
   labs(x = '', fill = "Location") +
   ylab(expression(bold("Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
