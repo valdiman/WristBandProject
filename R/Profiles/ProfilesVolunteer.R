@@ -193,7 +193,7 @@ p_prof_comb.Mi <- ggplot(prof_combined.Mi, aes(x = congener, y = Conc,
            color = "black",  # Add black edges to the bars
            linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
-  ylim(0, 0.12) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 5/20) +
   ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
@@ -522,7 +522,7 @@ p_prof_comb.Xue <- ggplot(prof_combined.Xue, aes(x = congener, y = Conc,
            color = "black",  # Add black edges to the bars
            linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
-  ylim(0, 0.2) +
+  ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 5/20) +
   ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
