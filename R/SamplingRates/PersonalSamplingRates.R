@@ -39,8 +39,8 @@ data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
 {
   # Select WBs to calculate air concentration
   data.amanda.1 <- data.amanda[1:3, ]
-  # Average 3 WBs
-  data.amanda.2 <- colMeans(data.amanda.1[, 3:175])
+  # Average 3 WBs. NA values not included in the calculations
+  data.amanda.2 <- colMeans(data.amanda.1[, 3:175], na.rm = TRUE)
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
   conc <- data.amanda.2/(0.5*data.amanda[1,1])
@@ -82,10 +82,21 @@ for(i in 1:length(SR.amanda.nd[, 1])) {
   }
 }
 
-colnames(SR.amanda.nd) <-c("Sampling_Rate", "R2", "p_value")
+SR.amanda.nd <- data.frame(SR.amanda.nd, group = "ParticipantA.nd")
+colnames(SR.amanda.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.amanda.nd)[0, ])
 SR.amanda.nd <- cbind(congener, SR.amanda.nd)
-SR.amanda.nd <- data.frame(SR.amanda.nd, group = "ParticipantA.nd")
+
+# Convert R2 and p-value to numeric
+SR.amanda.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.amanda.nd$`Sampling_Rate (m3/d)`)
+SR.amanda.nd$R2 <- as.numeric(SR.amanda.nd$R2)
+SR.amanda.nd$p_value <- as.numeric(SR.amanda.nd$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.amanda.nd$R2 < 0.9 | SR.amanda.nd$p_value > 0.05
+SR.amanda.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.amanda.nd$R2[mask] <- NA
+SR.amanda.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.amanda.nd,
@@ -107,24 +118,32 @@ for(i in 1:length(SR.amanda.d[, 1])) {
   }
 }
 
-colnames(SR.amanda.d) <-c("Sampling_Rate", "R2", "p_value")
-SR.amanda.d <- cbind(congener, SR.amanda.d)
 SR.amanda.d <- data.frame(SR.amanda.d, group = "ParticipantA.d")
+colnames(SR.amanda.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.amanda.d)[0, ])
+SR.amanda.d <- cbind(congener, SR.amanda.d)
+
+# Convert R2 and p-value to numeric
+SR.amanda.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.amanda.d$`Sampling_Rate (m3/d)`)
+SR.amanda.d$R2 <- as.numeric(SR.amanda.d$R2)
+SR.amanda.d$p_value <- as.numeric(SR.amanda.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.amanda.d$R2 < 0.9 | SR.amanda.d$p_value > 0.05
+SR.amanda.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.amanda.d$R2[mask] <- NA
+SR.amanda.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.amanda.d,
           file = "Output/Data/csv/SR.amanda.d.csv", row.names = FALSE)
 
 # Plot
-# Convert numerical columns to numeric
-SR.amanda.nd[, 2:4] <- apply(SR.amanda.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.amanda.nd$congener <- factor(SR.amanda.nd$congener,
                             levels = unique(SR.amanda.nd$congener))
-
 # Plot with legend
-ggplot(SR.amanda.nd[SR.amanda.nd$Sampling_Rate > 0 & SR.amanda.nd$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.amanda.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -135,14 +154,11 @@ ggplot(SR.amanda.nd[SR.amanda.nd$Sampling_Rate > 0 & SR.amanda.nd$p_value < 0.05
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# Convert numerical columns to numeric
-SR.amanda.d[, 2:4] <- apply(SR.amanda.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.amanda.d$congener <- factor(SR.amanda.d$congener,
                                levels = unique(SR.amanda.d$congener))
-
-ggplot(SR.amanda.d[SR.amanda.d$Sampling_Rate > 0 & SR.amanda.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+# Plot with legend
+ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -200,18 +216,32 @@ for(i in 1:length(SR.kay.d[, 1])) {
   }
 }
 
-colnames(SR.kay.d) <-c("Sampling_Rate", "R2", "p_value")
-SR.kay.d <- cbind(congener, SR.kay.d)
 SR.kay.d <- data.frame(SR.kay.d, group = "ParticipantK.d")
+colnames(SR.kay.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.kay.d)[0, ])
+SR.kay.d <- cbind(congener, SR.kay.d)
+
+# Convert R2 and p-value to numeric
+SR.kay.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.kay.d$`Sampling_Rate (m3/d)`)
+SR.kay.d$R2 <- as.numeric(SR.kay.d$R2)
+SR.kay.d$p_value <- as.numeric(SR.kay.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.kay.d$R2 < 0.9 | SR.kay.d$p_value > 0.05
+SR.kay.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.kay.d$R2[mask] <- NA
+SR.kay.d$p_value[mask] <- NA
+
+# Export results
+write.csv(SR.kay.d,
+          file = "Output/Data/csv/SR.kay.d.csv", row.names = FALSE)
 
 # Plot
-SR.kay.d[, 2:4] <- apply(SR.kay.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.kay.d$congener <- factor(SR.kay.d$congener,
                                levels = unique(SR.kay.d$congener))
 
-ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.kay.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -229,13 +259,13 @@ ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
 # sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
-  data.yau.1 <- data.yau[1:6, 4:174]
+  data.yau.1 <- data.yau[1:6, 4:176]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
   time <- data.yau[1:6, 1]
   conc <- t(sweep(data.yau.1, 1, 0.5 * time, "/"))
   # get WB mass
-  mass.WD <- data.yau[7:12, 4:174]
+  mass.WD <- data.yau[7:12, 4:176]
   Veff.yau <- mass.WD/t(conc)
   # Add metadata to Veff.amanda and change format
   Veff.yau <- cbind(data.yau[7:12, 3], data.yau[7:12, 1], Veff.yau)
@@ -244,13 +274,13 @@ ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
   # Add names to first 2 columns
   colnames(Veff.yau)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.yau[, 2:173] <- apply(Veff.yau[, 2:173], 2, as.numeric)
+  Veff.yau[, 2:175] <- apply(Veff.yau[, 2:175], 2, as.numeric)
   # Select 1st week, remove metadata
-  Veff.yau.1st.nd <- Veff.yau[1:3, 3:173]
+  Veff.yau.1st.nd <- Veff.yau[1:3, 3:175]
   # Select time
   Veff.yau.1st.nd.t <- Veff.yau[1:3, 2]
   # Select left, remove metadata
-  Veff.yau.2nd.nd <- Veff.yau[4:6, 3:173]
+  Veff.yau.2nd.nd <- Veff.yau[4:6, 3:175]
   # Select time
   Veff.yau.2nd.nd.t <- Veff.yau[4:6, 2]
 }
@@ -272,23 +302,32 @@ for(i in 1:length(SR.yau.1st.nd[, 1])) {
   }
 }
 
-colnames(SR.yau.1st.nd) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.1st.nd <- data.frame(SR.yau.1st.nd, group = "ParticipantY.1st.nd")
+colnames(SR.yau.1st.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.1st.nd)[0, ])
 SR.yau.1st.nd <- cbind(congener, SR.yau.1st.nd)
-SR.yau.1st.nd <- data.frame(SR.yau.1st.nd, group = "ParticipantY.1st.nd")
+
+# Convert R2 and p-value to numeric
+SR.yau.1st.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.1st.nd$`Sampling_Rate (m3/d)`)
+SR.yau.1st.nd$R2 <- as.numeric(SR.yau.1st.nd$R2)
+SR.yau.1st.nd$p_value <- as.numeric(SR.yau.1st.nd$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.1st.nd$R2 < 0.75 | SR.yau.1st.nd$p_value > 0.05
+SR.yau.1st.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.1st.nd$R2[mask] <- NA
+SR.yau.1st.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.1st.nd,
           file = "Output/Data/csv/SR.yau.1st.nd.csv", row.names = FALSE)
 
 # Plot
-SR.yau.1st.nd[, 2:4] <- apply(SR.yau.1st.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.1st.nd$congener <- factor(SR.yau.1st.nd$congener,
                             levels = unique(SR.yau.1st.nd$congener))
 
-ggplot(SR.yau.1st.nd[SR.yau.1st.nd$Sampling_Rate > 0 & SR.yau.1st.nd$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.1st.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -315,23 +354,32 @@ for(i in 1:length(SR.yau.2nd.nd[, 1])) {
   }
 }
 
-colnames(SR.yau.2nd.nd) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.2nd.nd <- data.frame(SR.yau.2nd.nd, group = "ParticipantY.2nd.nd")
+colnames(SR.yau.2nd.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.2nd.nd)[0, ])
 SR.yau.2nd.nd <- cbind(congener, SR.yau.2nd.nd)
-SR.yau.2nd.nd <- data.frame(SR.yau.2nd.nd, group = "ParticipantY.2nd.nd")
+
+# Convert R2 and p-value to numeric
+SR.yau.2nd.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.2nd.nd$`Sampling_Rate (m3/d)`)
+SR.yau.2nd.nd$R2 <- as.numeric(SR.yau.2nd.nd$R2)
+SR.yau.2nd.nd$p_value <- as.numeric(SR.yau.2nd.nd$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.2nd.nd$R2 < 0.75 | SR.yau.2nd.nd$p_value > 0.05
+SR.yau.2nd.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.2nd.nd$R2[mask] <- NA
+SR.yau.2nd.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.2nd.nd,
           file = "Output/Data/csv/SR.yau.2nd.nd.csv", row.names = FALSE)
 
 # Plot
-SR.yau.2nd.nd[, 2:4] <- apply(SR.yau.2nd.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.2nd.nd$congener <- factor(SR.yau.2nd.nd$congener,
                               levels = unique(SR.yau.2nd.nd$congener))
 
-ggplot(SR.yau.2nd.nd[SR.yau.2nd.nd$Sampling_Rate > 0 & SR.yau.2nd.nd$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.2nd.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -403,23 +451,32 @@ for(i in 1:length(SR.yau.nw.d[, 1])) {
   }
 }
 
-colnames(SR.yau.nw.d) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.nw.d <- data.frame(SR.yau.nw.d, group = "ParticipantY.nw.d")
+colnames(SR.yau.nw.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.nw.d.2)[0, ])
 SR.yau.nw.d <- cbind(congener, SR.yau.nw.d)
-SR.yau.nw.d <- data.frame(SR.yau.nw.d, group = "ParticipantY.nw.d")
+
+# Convert R2 and p-value to numeric
+SR.yau.nw.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.nw.d$`Sampling_Rate (m3/d)`)
+SR.yau.nw.d$R2 <- as.numeric(SR.yau.nw.d$R2)
+SR.yau.nw.d$p_value <- as.numeric(SR.yau.nw.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.nw.d$R2 < 0.75 | SR.yau.nw.d$p_value > 0.05
+SR.yau.nw.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.nw.d$R2[mask] <- NA
+SR.yau.nw.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.nw.d,
-          file = "Output/Data/csv/SR.yau.nw.csv", row.names = FALSE)
+          file = "Output/Data/csv/SR.yau.nw.d.csv", row.names = FALSE)
 
 # Plot
-SR.yau.nw.d[, 2:4] <- apply(SR.yau.nw.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.nw.d$congener <- factor(SR.yau.nw.d$congener,
                               levels = unique(SR.yau.nw.d$congener))
 
-ggplot(SR.yau.nw.d[SR.yau.nw.d$Sampling_Rate > 0 & SR.yau.nw.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.nw.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -449,23 +506,32 @@ for(i in 1:length(SR.yau.w.d[, 1])) {
   }
 }
 
-colnames(SR.yau.w.d) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.w.d <- data.frame(SR.yau.w.d, group = "ParticipantY.w.d")
+colnames(SR.yau.w.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.w.d.2)[0, ])
 SR.yau.w.d <- cbind(congener, SR.yau.w.d)
-SR.yau.w.d <- data.frame(SR.yau.w.d, group = "ParticipantY.w")
+
+# Convert R2 and p-value to numeric
+SR.yau.w.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.w.d$`Sampling_Rate (m3/d)`)
+SR.yau.w.d$R2 <- as.numeric(SR.yau.w.d$R2)
+SR.yau.w.d$p_value <- as.numeric(SR.yau.w.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.w.d$R2 < 0.75 | SR.yau.w.d$p_value > 0.05
+SR.yau.w.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.w.d$R2[mask] <- NA
+SR.yau.w.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.w.d,
-          file = "Output/Data/csv/SR.yau.w.csv", row.names = FALSE)
+          file = "Output/Data/csv/SR.yau.w.d.csv", row.names = FALSE)
 
 # Plot
-SR.yau.w.d[, 2:4] <- apply(SR.yau.w.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.w.d$congener <- factor(SR.yau.w.d$congener,
                               levels = unique(SR.yau.w.d$congener))
 
-ggplot(SR.yau.w.d[SR.yau.w.d$Sampling_Rate > 0 & SR.yau.w.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.w.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -902,12 +968,12 @@ combined_SR <- rbind(SR.amanda.nd, SR.amanda.d, SR.kay.d, SR.yau.1st.nd,
 
 # Look at SR and variability
 SR_averages_sd_cv <- combined_SR %>%
-  filter(p_value < 0.05, R2 >= 0.9) %>%
   group_by(congener) %>%
   summarise(
-    Average_Sampling_Rate = mean(Sampling_Rate, na.rm = TRUE),
-    SD_Sampling_Rate = sd(Sampling_Rate, na.rm = TRUE),
-    CV_Sampling_Rate = (sd(Sampling_Rate, na.rm = TRUE) / mean(Sampling_Rate, na.rm = TRUE)) * 100
+    Average_Sampling_Rate = mean(`Sampling_Rate (m3/d)`, na.rm = TRUE),
+    SD_Sampling_Rate = sd(`Sampling_Rate (m3/d)`, na.rm = TRUE),
+    CV_Sampling_Rate = (sd(`Sampling_Rate (m3/d)`,
+                           na.rm = TRUE) / mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100
   )
 
 # Remove PCB (rows) with only one SR measurement, i.e., SD and CV = NA
@@ -941,8 +1007,8 @@ ggsave("Output/Plots/AvSRs.png",
        plot = Plot.AV.SR, width = 15, height = 5, dpi = 500)
 
 # Plot the combined data with different colors for each group
-Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
-                   aes(x = congener, y = Sampling_Rate, color = group)) +
+Plot.SRs <- ggplot(combined_SR, aes(x = congener, y = `Sampling_Rate (m3/d)`,
+                                    color = group)) +
   geom_point(size = 1) +
   geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
   annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
@@ -1014,6 +1080,9 @@ ggsave("Output/Plots/SRsBoxplotV03.png",
        plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
 
 # Potential regressions ---------------------------------------------------
+# Until here
+
+
 # Read logKoa
 logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
                                   col_names = TRUE, col_types = NULL))
@@ -1025,20 +1094,18 @@ logKoa_long <- logKoa %>%
 # Combine the datasets based on the 'congener' column
 combined_data <- merge(combined_SR, logKoa_long, by = "congener")
 
-# Analysis all data
-# Perform exponential regression with the specified condition
-exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
-               data = subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
+# Remove rows with NA in Sampling_Rate (m3/d) or logKoa
+filtered_data <- combined_data[!is.na(combined_data$`Sampling_Rate (m3/d)`) & !is.na(combined_data$logKoa), ]
+
+# Refit the model using the filtered data
+exp_reg <- nls(`Sampling_Rate (m3/d)` ~ a * exp(b * logKoa), 
+               data = filtered_data, 
                start = list(a = 1, b = 1))
 
-# Extract coefficients
-a_value <- coef(exp_reg)[["a"]]
-b_value <- coef(exp_reg)[["b"]]
-
-# Calculate R-squared value
+# Calculate R-squared
 RSS <- sum(residuals(exp_reg)^2)
-TSS <- sum((combined_data$Sampling_Rate - mean(combined_data$Sampling_Rate))^2)
-rsquared <- 1 - RSS/TSS
+TSS <- sum((filtered_data$`Sampling_Rate (m3/d)` - mean(filtered_data$`Sampling_Rate (m3/d)`))^2)
+rsquared <- 1 - RSS / TSS
 
 # Errors
 # Calculate Residual Standard Error (RSE)
@@ -1060,8 +1127,21 @@ annotation_df <- data.frame(
 )
 
 # Plot the data with the filtered exponential regression line
-Plot.exp.regr.all <- ggplot(subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
-       aes(x = logKoa, y = Sampling_Rate, color = group)) +
+Plot.exp.regr.all <- ggplot(combined_data, aes(x = logKoa, y = # Remove rows with NA in Sampling_Rate (m3/d) or logKoa
+filtered_data <- combined_data[!is.na(combined_data$`Sampling_Rate (m3/d)`) & !is.na(combined_data$logKoa), ]
+
+# Refit the model using the filtered data
+exp_reg <- nls(`Sampling_Rate (m3/d)` ~ a * exp(b * logKoa), 
+               data = filtered_data, 
+               start = list(a = 1, b = 1))
+
+# Calculate R-squared
+RSS <- sum(residuals(exp_reg)^2)
+TSS <- sum((filtered_data$`Sampling_Rate (m3/d)` - mean(filtered_data$`Sampling_Rate (m3/d)`))^2)
+rsquared <- 1 - RSS / TSS
+
+
+, color = group)) +
   geom_point() +
   geom_line(data = data.frame(logKoa = seq(min(combined_data$logKoa),
                                            max(combined_data$logKoa),
