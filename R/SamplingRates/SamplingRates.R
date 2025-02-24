@@ -143,7 +143,9 @@ time.2 <- WB.st$time/24
 # Remove sample name of PUFs
 PUF.2 <- subset(PUF.v2, select = -c(Concentration..ng.m3.))
 # Average individual PCBs from PUF
-PUF.mean.2 <- t(colMeans(PUF.2))
+# If value 0, the average is the number left.
+PUF.mean.2 <- t(apply(PUF.2, 2, function(x) mean(x[x != 0])))
+colnames(PUF.mean.2) <- colnames(PUF.2)  # Ensure the column names match the original data
 
 # (dMWD/Cair) = Rsdt
 # Force intercept 0
@@ -153,7 +155,7 @@ PUF.mean.2 <- t(colMeans(PUF.2))
 SR.st <- matrix(nrow = length(WB.st.2), ncol = 3)
 
 for(i in 1:length(WB.st.2)) {
-  if (PUF.mean.2[i] > 0) {
+  if (!is.na(PUF.mean.2[i]) && PUF.mean.2[i] > 0) { # for NaN values
     fit <- lm(WB.st.2[,i]/PUF.mean.2[i] ~ 0 + time.2)
     SR.st[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
     SR.st[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
@@ -222,7 +224,7 @@ ggplot(WB.st.2, aes(x = time.2*24, y = WB.st.2[, 153]/PUF.mean.2[153])) +
 SR.rot <- matrix(nrow = length(WB.rot.2), ncol = 3)
 
 for(i in 1:length(WB.rot.2)) {
-  if (PUF.mean.2[i] > 0) {
+  if (!is.na(PUF.mean.2[i]) && PUF.mean.2[i] > 0) { # for NaN values
     fit <- lm(WB.rot.2[,i]/PUF.mean.2[i] ~ 0 + time.2)
     SR.rot[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
     SR.rot[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
