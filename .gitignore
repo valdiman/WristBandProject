@@ -1,5 +1,14 @@
+# Ignore everything by default
+*
+
+# Allow only R scripts and related files
+!*.R
+!*.r
+!*.Rmd
+!*.Rproj
+
 # RStudio-specific files
-.Rproj.user
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
@@ -7,14 +16,15 @@
 # macOS-specific files
 .DS_Store
 
-# Ignore CSV files
+# Ignore all other file types
 *.csv
-
-# Ignore log files
 *.log
-
-# Ignore temporary files
 *.tmp
-
-# Ignore PNG files
 *.png
+*.pdf
+*.xlsx
+*.sav
+*.rds
+*.html
+*.xml
+*.json
