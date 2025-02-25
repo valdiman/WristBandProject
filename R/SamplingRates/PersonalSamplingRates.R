@@ -169,6 +169,51 @@ ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
+# Amanda SR vs logKoa regression ------------------------------------------
+# Read logKoa
+logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
+                                col_names = TRUE, col_types = NULL))
+# Average both d and nd
+ave_amanda <- as.data.frame(rowMeans(cbind(SR.amanda.d$`Sampling_Rate (m3/d)`, 
+                                SR.amanda.nd$`Sampling_Rate (m3/d)`), 
+                          na.rm = TRUE))
+
+ave_amanda$logkoa <- logKoa$logKoa
+colnames(ave_amanda) <- c('ave_sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model <- lm(log(ave_amanda$ave_sr) ~ ave_amanda$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model)[1])  # exponentiate the intercept
+b <- coef(model)[2]       # coefficient for logKoa
+r2 <- summary(model)$r.squared
+
+# plot
+p.sr.koa <- ggplot(ave_amanda, aes(x = logKoa, y = ave_sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 3)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.koa
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Amanda_logKoa.png", plot = p.sr.koa,
+       width = 6, height = 6, dpi = 500)
+
+
 # Calculate personal sampling rate Kay ------------------------------------
 # WBs were used to calculate PCB concentration
 # Dominant hand (d)
