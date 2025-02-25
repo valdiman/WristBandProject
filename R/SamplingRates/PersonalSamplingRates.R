@@ -173,7 +173,7 @@ ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)
 # Read logKoa
 logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
                                 col_names = TRUE, col_types = NULL))
-# Average both d and nd
+# (1) Average both d and nd
 ave_amanda <- as.data.frame(rowMeans(cbind(SR.amanda.d$`Sampling_Rate (m3/d)`, 
                                 SR.amanda.nd$`Sampling_Rate (m3/d)`), 
                           na.rm = TRUE))
@@ -197,7 +197,7 @@ p.sr.koa <- ggplot(ave_amanda, aes(x = logKoa, y = ave_sr)) +
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
            size = 4) + 
   annotate("text", x = 6.75, y = 14.2,
-           label = paste("R² = ", round(r2, 3)), size = 4) + 
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
@@ -213,6 +213,51 @@ p.sr.koa
 ggsave("Output/Plots/SamplingRates/Amanda_logKoa.png", plot = p.sr.koa,
        width = 6, height = 6, dpi = 500)
 
+# (2) Individual values
+# Create a long dataframe combining SR.amanda.d and SR.amanda.nd
+sr_long <- data.frame(
+  sr = c(SR.amanda.d$`Sampling_Rate (m3/d)`, SR.amanda.nd$`Sampling_Rate (m3/d)`),
+  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
+)
+
+# Remove any NA values
+sr_long <- na.omit(sr_long)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model <- lm(log(sr_long$sr) ~ sr_long$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model)[1])  # exponentiate the intercept
+b <- coef(model)[2]       # coefficient for logKoa
+r2 <- summary(model)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.koa.2 <- ggplot(sr_long, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr_long$logKoa) + 1.2, y = max(sr_long$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr_long$logKoa) + 0.35, y = max(sr_long$sr) * 1.13,
+           label = paste("R² =", round(r2, 2)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.koa.2
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Amanda_logKoa2.png", plot = p.sr.koa.2,
+       width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Kay ------------------------------------
 # WBs were used to calculate PCB concentration
