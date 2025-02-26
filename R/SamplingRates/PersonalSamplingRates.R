@@ -403,7 +403,7 @@ SR.yau.1st.nd$R2 <- as.numeric(SR.yau.1st.nd$R2)
 SR.yau.1st.nd$p_value <- as.numeric(SR.yau.1st.nd$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.yau.1st.nd$R2 < 0.75 | SR.yau.1st.nd$p_value > 0.05
+mask <- SR.yau.1st.nd$R2 < 0.9 | SR.yau.1st.nd$p_value > 0.05
 SR.yau.1st.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.yau.1st.nd$R2[mask] <- NA
 SR.yau.1st.nd$p_value[mask] <- NA
@@ -455,7 +455,7 @@ SR.yau.2nd.nd$R2 <- as.numeric(SR.yau.2nd.nd$R2)
 SR.yau.2nd.nd$p_value <- as.numeric(SR.yau.2nd.nd$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.yau.2nd.nd$R2 < 0.75 | SR.yau.2nd.nd$p_value > 0.05
+mask <- SR.yau.2nd.nd$R2 < 0.9 | SR.yau.2nd.nd$p_value > 0.05
 SR.yau.2nd.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.yau.2nd.nd$R2[mask] <- NA
 SR.yau.2nd.nd$p_value[mask] <- NA
@@ -552,7 +552,7 @@ SR.yau.nw.d$R2 <- as.numeric(SR.yau.nw.d$R2)
 SR.yau.nw.d$p_value <- as.numeric(SR.yau.nw.d$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.yau.nw.d$R2 < 0.75 | SR.yau.nw.d$p_value > 0.05
+mask <- SR.yau.nw.d$R2 < 0.9 | SR.yau.nw.d$p_value > 0.05
 SR.yau.nw.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.yau.nw.d$R2[mask] <- NA
 SR.yau.nw.d$p_value[mask] <- NA
@@ -607,7 +607,7 @@ SR.yau.w.d$R2 <- as.numeric(SR.yau.w.d$R2)
 SR.yau.w.d$p_value <- as.numeric(SR.yau.w.d$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.yau.w.d$R2 < 0.75 | SR.yau.w.d$p_value > 0.05
+mask <- SR.yau.w.d$R2 < 0.9 | SR.yau.w.d$p_value > 0.05
 SR.yau.w.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.yau.w.d$R2[mask] <- NA
 SR.yau.w.d$p_value[mask] <- NA
