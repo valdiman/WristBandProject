@@ -45,7 +45,7 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 }
 
 # Read calculated average sampling rates for volunteers -------------------
-sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
+sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 

@@ -30,6 +30,8 @@ data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
 data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
                                   col_names = TRUE, col_types = NULL))
+logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
+                                col_names = TRUE, col_types = NULL))
 
 # Calculate personal sampling rate Amanda ---------------------------------
 # WBs were used to calculate PCB concentration
@@ -100,7 +102,7 @@ SR.amanda.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.amanda.nd,
-          file = "Output/Data/csv/SR.amanda.nd.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.amanda.nd.csv", row.names = FALSE)
 
 # Create matrix for sampling rate (SR)
 SR.amanda.d <- matrix(nrow = length(Veff.amanda.d[1,]), ncol = 3)
@@ -136,7 +138,8 @@ SR.amanda.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.amanda.d,
-          file = "Output/Data/csv/SR.amanda.d.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.amanda.d.csv",
+          row.names = FALSE)
 
 # Plot
 # Organize PCB names
@@ -170,26 +173,23 @@ ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)
         axis.title.x = element_text(face = "bold", size = 7))
 
 # Amanda SR vs logKoa regression ------------------------------------------
-# Read logKoa
-logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
-                                col_names = TRUE, col_types = NULL))
 # (1) Average both d and nd
-ave_amanda <- as.data.frame(rowMeans(cbind(SR.amanda.d$`Sampling_Rate (m3/d)`, 
+sr.ave.amanda <- as.data.frame(rowMeans(cbind(SR.amanda.d$`Sampling_Rate (m3/d)`, 
                                 SR.amanda.nd$`Sampling_Rate (m3/d)`), 
                           na.rm = TRUE))
 
-ave_amanda$logkoa <- logKoa$logKoa
-colnames(ave_amanda) <- c('ave_sr', 'logKoa')
+sr.ave.amanda$logkoa <- logKoa$logKoa
+colnames(sr.ave.amanda) <- c('ave_sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
-model <- lm(log(ave_amanda$ave_sr) ~ ave_amanda$logKoa)
+model.amanda.1 <- lm(log(sr.ave.amanda$ave_sr) ~ sr.ave.amanda$logKoa)
 
 # Get the coefficients
-a <- exp(coef(model)[1])  # exponentiate the intercept
-b <- coef(model)[2]       # coefficient for logKoa
-r2 <- summary(model)$r.squared
+a <- exp(coef(model.amanda.1)[1])  # exponentiate the intercept
+b <- coef(model.amanda.1)[2]       # coefficient for logKoa
+r2 <- summary(model.amanda.1)$r.squared
 
 # plot
-p.sr.koa <- ggplot(ave_amanda, aes(x = logKoa, y = ave_sr)) +
+p.sr.amanda.koa.1 <- ggplot(sr.ave.amanda, aes(x = logKoa, y = ave_sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
   annotate("text", x = 7.3, y = 15,
@@ -207,42 +207,42 @@ p.sr.koa <- ggplot(ave_amanda, aes(x = logKoa, y = ave_sr)) +
   theme(axis.text.x = element_text(face = "bold", size = 10),
         axis.title.x = element_text(face = "bold", size = 10))
 
-p.sr.koa
+p.sr.amanda.koa.1
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Amanda_logKoa.png", plot = p.sr.koa,
+ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa1.png", plot = p.sr.amanda.koa.1,
        width = 6, height = 6, dpi = 500)
 
 # (2) Individual values
 # Create a long dataframe combining SR.amanda.d and SR.amanda.nd
-sr_long <- data.frame(
+sr.long.amanda <- data.frame(
   sr = c(SR.amanda.d$`Sampling_Rate (m3/d)`, SR.amanda.nd$`Sampling_Rate (m3/d)`),
   logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
 )
 
 # Remove any NA values
-sr_long <- na.omit(sr_long)
+sr.long.amanda <- na.omit(sr.long.amanda)
 
 # Fit exponential regression model: sr = a * exp(b * logKoa)
-model <- lm(log(sr_long$sr) ~ sr_long$logKoa)
+model.amanda.2 <- lm(log(sr.long.amanda$sr) ~ sr.long.amanda$logKoa)
 
 # Get the coefficients
-a <- exp(coef(model)[1])  # exponentiate the intercept
-b <- coef(model)[2]       # coefficient for logKoa
-r2 <- summary(model)$r.squared
+a <- exp(coef(model.amanda.2)[1])  # exponentiate the intercept
+b <- coef(model.amanda.2)[2]       # coefficient for logKoa
+r2 <- summary(model.amanda.2)$r.squared
 
 # Print equation
 cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
 cat("R² = ", round(r2, 2), "\n")
 
 # Plot
-p.sr.koa.2 <- ggplot(sr_long, aes(x = logKoa, y = sr)) +
+p.sr.amanda.koa.2 <- ggplot(sr.long.amanda, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = min(sr_long$logKoa) + 1.2, y = max(sr_long$sr) * 1.2,
+  annotate("text", x = min(sr.long.amanda$logKoa) + 1.2, y = max(sr.long.amanda$sr) * 1.2,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
-  annotate("text", x = min(sr_long$logKoa) + 0.35, y = max(sr_long$sr) * 1.13,
+  annotate("text", x = min(sr.long.amanda$logKoa) + 0.35, y = max(sr.long.amanda$sr) * 1.13,
            label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
@@ -253,10 +253,10 @@ p.sr.koa.2 <- ggplot(sr_long, aes(x = logKoa, y = sr)) +
   theme(axis.text.x = element_text(face = "bold", size = 10),
         axis.title.x = element_text(face = "bold", size = 10))
 
-p.sr.koa.2
+p.sr.amanda.koa.2
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Amanda_logKoa2.png", plot = p.sr.koa.2,
+ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa2.png", plot = p.sr.amanda.koa.2,
        width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Kay ------------------------------------
@@ -324,7 +324,7 @@ SR.kay.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.kay.d,
-          file = "Output/Data/csv/SR.kay.d.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.kay.d.csv", row.names = FALSE)
 
 # Plot
 # Organize PCB names
@@ -341,6 +341,51 @@ ggplot(SR.kay.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   theme(axis.text.x = element_text(face = "bold", size = 5,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
+
+# Kay SR vs logKoa regression ---------------------------------------------
+# Create a long dataframe combining SR.kay.d
+sr.kay <- data.frame(
+  sr = SR.kay.d$`Sampling_Rate (m3/d)`,
+  logKoa = logKoa$logKoa)
+
+# Remove any NA values
+sr.kay <- na.omit(sr.kay)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.kay <- lm(log(sr.kay$sr) ~ sr.kay$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.kay)[1])  # exponentiate the intercept
+b <- coef(model.kay)[2]       # coefficient for logKoa
+r2 <- summary(model.kay)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.kay.koa <- ggplot(sr.kay, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.kay$logKoa) + 1.05, y = max(sr.kay$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.kay$logKoa) + 0.35, y = max(sr.kay$sr) * 1.13,
+           label = paste("R² =", round(r2, 2)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.kay.koa
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Kay_logKoa.png", plot = p.sr.kay.koa,
+       width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Ya'u -----------------------------------
 # WBs were used to calculate PCB concentration
@@ -410,7 +455,8 @@ SR.yau.1st.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.1st.nd,
-          file = "Output/Data/csv/SR.yau.1st.nd.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.1st.nd.csv",
+          row.names = FALSE)
 
 # Plot
 # Organize PCB names
@@ -462,7 +508,8 @@ SR.yau.2nd.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.2nd.nd,
-          file = "Output/Data/csv/SR.yau.2nd.nd.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.2nd.nd.csv",
+          row.names = FALSE)
 
 # Plot
 # Organize PCB names
@@ -479,6 +526,93 @@ ggplot(SR.yau.2nd.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = grou
   theme(axis.text.x = element_text(face = "bold", size = 5,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
+
+# Ya'u SR vs logKoa regression 1 ------------------------------------------
+# (1) Average both d and nd
+sr.ave.yau <- as.data.frame(rowMeans(cbind(SR.yau.1st.nd$`Sampling_Rate (m3/d)`, 
+                                              SR.yau.1st.nd$`Sampling_Rate (m3/d)`), 
+                                        na.rm = TRUE))
+
+sr.ave.yau$logkoa <- logKoa$logKoa
+colnames(sr.ave.yau) <- c('ave_sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.1 <- lm(log(sr.ave.yau$ave_sr) ~ sr.ave.yau$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.1)[1])  # exponentiate the intercept
+b <- coef(model.yau.1)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.1)$r.squared
+
+# plot
+p.sr.yau.koa.1 <- ggplot(sr.ave.yau, aes(x = logKoa, y = ave_sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.1
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.1.png",
+       plot = p.sr.yau.koa.1, width = 6, height = 6, dpi = 500)
+
+# (2) Individual values
+# Create a long dataframe combining SR.yau.1st. nd and SR.yau.2nd.nd
+sr.long.yau <- data.frame(
+  sr = c(SR.yau.1st.nd$`Sampling_Rate (m3/d)`, SR.yau.2nd.nd$`Sampling_Rate (m3/d)`),
+  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
+)
+
+# Remove any NA values
+sr.long.yau <- na.omit(sr.long.yau)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.2 <- lm(log(sr.long.yau$sr) ~ sr.long.yau$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.2)[1])  # exponentiate the intercept
+b <- coef(model.yau.2)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.2)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.yau.koa.2 <- ggplot(sr.long.yau, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.long.yau$logKoa) + 1.2, y = max(sr.long.yau$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.long.yau$logKoa) + 0.35, y = max(sr.long.yau$sr) * 1.13,
+           label = paste("R² =", round(r2, 2)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.2
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.2.png",
+       plot = p.sr.yau.koa.2, width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Ya'u 2nd -------------------------------
 # 3 WBs were not wiped and 3 WBs were wiped
@@ -559,7 +693,8 @@ SR.yau.nw.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.nw.d,
-          file = "Output/Data/csv/SR.yau.nw.d.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.nw.d.csv",
+          row.names = FALSE)
 
 # Plot
 # Organize PCB names
@@ -614,7 +749,8 @@ SR.yau.w.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.w.d,
-          file = "Output/Data/csv/SR.yau.w.d.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.w.d.csv",
+          row.names = FALSE)
 
 # Plot
 # Organize PCB names
@@ -631,6 +767,84 @@ ggplot(SR.yau.w.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group))
   theme(axis.text.x = element_text(face = "bold", size = 5,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
+
+# Ya'u SR vs logKoa regression 2 ------------------------------------------
+# Check difference btw w and nw
+# (1) nw
+sr.yau.nw <- as.data.frame(SR.yau.nw.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
+
+sr.yau.nw$logkoa <- logKoa$logKoa
+colnames(sr.yau.nw) <- c('sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.nw <- lm(log(sr.yau.nw$sr) ~ sr.yau.nw$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.nw)[1])  # exponentiate the intercept
+b <- coef(model.yau.nw)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.nw)$r.squared
+
+# plot
+p.sr.yau.koa.nw <- ggplot(sr.yau.nw, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.nw
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nw.png",
+       plot = p.sr.yau.koa.nw, width = 6, height = 6, dpi = 500)
+
+# (2) w
+sr.yau.w <- as.data.frame(SR.yau.w.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
+
+sr.yau.w$logkoa <- logKoa$logKoa
+colnames(sr.yau.w) <- c('sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.w <- lm(log(sr.yau.w$sr) ~ sr.yau.w$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.w)[1])  # exponentiate the intercept
+b <- coef(model.yau.w)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.w)$r.squared
+
+# plot
+p.sr.yau.koa.w <- ggplot(sr.yau.w, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.w
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.w.png",
+       plot = p.sr.yau.koa.w, width = 6, height = 6, dpi = 500)
 
 # Plot individual congeners -----------------------------------------------
 # Combine plot
@@ -742,7 +956,7 @@ plot.18.30 <- plot.18.30 +
 plot.18.30
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB18.30VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRates.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
@@ -844,7 +1058,7 @@ plot.52 <- plot.52 +
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB52VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRates.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -946,7 +1160,7 @@ plot.118 <- plot.118 +
 plot.118
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB118VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB118VoluntSamplingRates.png",
        plot = plot.118, width = 8, height = 10, dpi = 1300)
 
 # PCB 187
@@ -1048,7 +1262,7 @@ plot.187 <- plot.187 +
 plot.187
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB187VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRates.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
 
 # Combine sampling rates --------------------------------------------------
@@ -1072,7 +1286,8 @@ SR_averages_sd_cv <- SR_averages_sd_cv %>%
 
 # Export results
 write.csv(SR_averages_sd_cv,
-          file = "Output/Data/csv/ParticipantSRV02.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv",
+          row.names = FALSE)
 
 # Plot the average and stdev
 Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_Rate)) +
@@ -1093,7 +1308,7 @@ Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_R
 print(Plot.AV.SR)
 
 # Save plot
-ggsave("Output/Plots/AvSRs.png",
+ggsave("Output/Plots/SamplingRates/Personal/AvePersonalSRs.png",
        plot = Plot.AV.SR, width = 15, height = 5, dpi = 500)
 
 # Plot the combined data with different colors for each group
@@ -1117,15 +1332,14 @@ Plot.SRs <- ggplot(combined_SR, aes(x = congener, y = `Sampling_Rate (m3/d)`,
 print(Plot.SRs)
 
 # Save plot
-ggsave("Output/Plots/SRsV04.png",
+ggsave("Output/Plots/SamplingRates/Personal/SRsV01.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
 
 # Only Yau
-combined_SR.2 <- rbind(SR.yau.1st, SR.yau.2nd, SR.yau.nw, SR.yau.w)
+combined_SR.2 <- rbind(SR.yau.1st.nd, SR.yau.2nd.nd, SR.yau.nw.d, SR.yau.w.d)
 
 # Plot the combined data with different colors for each group
-Plot.SRs <- ggplot(combined_SR.2[combined_SR.2$Sampling_Rate > 0 & combined_SR.2$p_value < 0.05, ],
-                   aes(x = congener, y = Sampling_Rate, color = group)) +
+Plot.SRs <- ggplot(combined_SR.2, aes(x = congener, y = Sampling_Rate, color = group)) +
   geom_point(size = 1) +
   geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
   annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
@@ -1144,7 +1358,7 @@ Plot.SRs <- ggplot(combined_SR.2[combined_SR.2$Sampling_Rate > 0 & combined_SR.2
 print(Plot.SRs)
 
 # Save plot
-ggsave("Output/Plots/SRsV05.png",
+ggsave("Output/Plots/SamplingRates/Personal/SRsV05.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
 
 # Box plot
@@ -1166,158 +1380,11 @@ Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_
 print(Plot.SRs.boxplot)
 
 # Save plot
-ggsave("Output/Plots/SRsBoxplotV03.png",
+ggsave("Output/Plots/SamplingRates/Personal/SRsBoxplotV03.png",
        plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
 
-# Potential regressions ---------------------------------------------------
-# Until here
+# Not sure about this
 
-
-# Read logKoa
-logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
-                                  col_names = TRUE, col_types = NULL))
-
-# Reshape the dataset into a long format
-logKoa_long <- logKoa %>%
-  gather(key = "variable", value = "logKoa", -congener)
-
-# Combine the datasets based on the 'congener' column
-combined_data <- merge(combined_SR, logKoa_long, by = "congener")
-
-# Remove rows with NA in Sampling_Rate (m3/d) or logKoa
-filtered_data <- combined_data[!is.na(combined_data$`Sampling_Rate (m3/d)`) & !is.na(combined_data$logKoa), ]
-
-# Refit the model using the filtered data
-exp_reg <- nls(`Sampling_Rate (m3/d)` ~ a * exp(b * logKoa), 
-               data = filtered_data, 
-               start = list(a = 1, b = 1))
-
-# Calculate R-squared
-RSS <- sum(residuals(exp_reg)^2)
-TSS <- sum((filtered_data$`Sampling_Rate (m3/d)` - mean(filtered_data$`Sampling_Rate (m3/d)`))^2)
-rsquared <- 1 - RSS / TSS
-
-# Errors
-# Calculate Residual Standard Error (RSE)
-RSE <- sqrt(RSS / (length(residuals(exp_reg)) - 2))
-# Calculate Mean Absolute Error (MAE)
-MAE <- mean(abs(residuals(exp_reg)))
-# Calculate Mean Squared Error (MSE)
-MSE <- mean(residuals(exp_reg)^2)
-# Calculate Root Mean Squared Error (RMSE)
-RMSE <- sqrt(MSE)
-
-# Create a data frame for text annotations
-annotation_df <- data.frame(
-  equation = sprintf("SR = %.3f * exp(%.3f * logKoa)", a_value, b_value),
-  rsquared = sprintf("R-squared = %.3f", rsquared),
-  x = max(combined_data$logKoa),  # Set x to the maximum logKoa value
-  y = max(combined_data$Sampling_Rate),  # Set y to the maximum Sampling Rate value
-  group = "exp regression"  # Specify a group for the text annotations
-)
-
-# Plot the data with the filtered exponential regression line
-Plot.exp.regr.all <- ggplot(combined_data, aes(x = logKoa, y = # Remove rows with NA in Sampling_Rate (m3/d) or logKoa
-filtered_data <- combined_data[!is.na(combined_data$`Sampling_Rate (m3/d)`) & !is.na(combined_data$logKoa), ]
-
-# Refit the model using the filtered data
-exp_reg <- nls(`Sampling_Rate (m3/d)` ~ a * exp(b * logKoa), 
-               data = filtered_data, 
-               start = list(a = 1, b = 1))
-
-# Calculate R-squared
-RSS <- sum(residuals(exp_reg)^2)
-TSS <- sum((filtered_data$`Sampling_Rate (m3/d)` - mean(filtered_data$`Sampling_Rate (m3/d)`))^2)
-rsquared <- 1 - RSS / TSS
-
-
-, color = group)) +
-  geom_point() +
-  geom_line(data = data.frame(logKoa = seq(min(combined_data$logKoa),
-                                           max(combined_data$logKoa),
-                                           length.out = 100)),
-            aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
-            color = "red", linetype = "solid", linewidth = 1) +  # Add exponential regression line
-  geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
-            hjust = 2, vjust = 1, size = 4) +
-  geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
-            hjust = 3.5, vjust = 3, size = 4) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10) +
-  xlab(expression(bold("log Koa (PCBi)"))) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 14),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 14)) +
-  scale_color_discrete(name = "Participants")
-
-# See plot
-print(Plot.exp.regr.all)
-
-# Save plot
-ggsave("Output/Plots/SRExpRegresionAllV02.png",
-       plot = Plot.exp.regr.all, width = 8, height = 8, dpi = 500)
-
-# Select participant with high SR in the high PCBs
-group1 <- "ParticipantA.r"
-group2 <- "ParticipantA.l"
-
-# Filter the data for the selected groups
-selected_data <- combined_data[combined_data$group %in% c(group1, group2), ]
-
-# Perform exponential regression with the specified condition
-exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
-               data = subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
-               start = list(a = 1, b = 1))
-
-# Extract coefficients
-a_value <- coef(exp_reg)[["a"]]
-b_value <- coef(exp_reg)[["b"]]
-
-# Calculate R-squared value
-RSS <- sum(residuals(exp_reg)^2)
-TSS <- sum((selected_data$Sampling_Rate - mean(selected_data$Sampling_Rate))^2)
-rsquared <- 1 - RSS/TSS
-
-# Create a data frame for text annotations
-annotation_df <- data.frame(
-  equation = sprintf("SR = %.3f * exp(%.3f * logKoa)", a_value, b_value),
-  rsquared = sprintf("R-squared = %.3f", rsquared),
-  x = max(selected_data$logKoa),  # Set x to the maximum logKoa value
-  y = max(selected_data$Sampling_Rate),  # Set y to the maximum Sampling Rate value
-  group = "exp regression"  # Specify a group for the text annotations
-)
-
-# Plot the data with the filtered exponential regression line
-Plot.exp.regr <- ggplot(subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
-       aes(x = logKoa, y = Sampling_Rate, color = group)) +
-  geom_point() +
-  geom_line(data = data.frame(logKoa = seq(min(selected_data$logKoa),
-                                           max(selected_data$logKoa),
-                                           length.out = 100)),
-            aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
-            color = "red", linetype = "solid", linewidth = 1) +  # Add exponential regression line
-  geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
-            hjust = 2, vjust = 5, size = 4) +
-  geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
-            hjust = 3.5, vjust = 7, size = 4) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10) +
-  xlab(expression(bold("log Koa (PCBi)"))) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 14),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 14)) +
-  scale_color_discrete(name = "Participants")
-
-# See plot
-print(Plot.exp.regr)
-
-# Save plot
-ggsave("Output/Plots/SRExpRegresionV01.png",
-       plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
 
 # Profiles Amanda ---------------------------------------------------------
 # Select data 
@@ -1366,7 +1433,7 @@ Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
 print(Plot.prof.amanda)
 
 # Save plot
-ggsave("Output/Plots/ProfAmanada5dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfAmanada5dayBarV01.png",
        plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
 
 # 1:1 plots
@@ -1429,7 +1496,7 @@ iii <- ggplot(profile.amanda, aes(x = Air, y = ParticipantA.r,
 combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
 
 # Save plot
-ggsave("Output/Plots/ProfAmanda5dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfAmanda5dayDotV01.png",
        plot = combined_plot, width = 15, height = 5, dpi = 500)
 
 # Profiles Kay ------------------------------------------------------------
@@ -1473,7 +1540,7 @@ Plot.prof.kay <- ggplot(profile_long, aes(x = congeners, y = Value,
 print(Plot.prof.kay)
 
 # Save plot
-ggsave("Output/Plots/ProfKay5dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfKay5dayBarV01.png",
        plot = Plot.prof.kay, width = 15, height = 5, dpi = 500)
 
 # 1:1 plots
@@ -1501,7 +1568,7 @@ i <- ggplot(profile.kay, aes(x = Air,
 print(i)
 
 # Save plot
-ggsave("Output/Plots/ProfKay5dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfKay5dayDotV01.png",
        plot = i, width = 15, height = 5, dpi = 500)
 
 # Profiles Ya'u -----------------------------------------------------------
@@ -1560,7 +1627,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau1st1dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau1st1dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
@@ -1592,7 +1659,7 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day1,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau1st1dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau1st1dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 3
@@ -1621,7 +1688,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau1st3dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau1st3dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
@@ -1648,7 +1715,7 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau1st2dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau1st2dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
@@ -1677,7 +1744,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau1st5dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau1st5dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
@@ -1704,7 +1771,7 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau1st5dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau1st5dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Week 2
@@ -1756,7 +1823,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau2nd1dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau2nd1dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
@@ -1788,7 +1855,7 @@ Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day1,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau2nd1dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau2nd1dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 3
@@ -1817,7 +1884,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau2nd3dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau2nd3dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
@@ -1844,7 +1911,7 @@ Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day3,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau2nd3dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau2nd3dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
@@ -1873,7 +1940,7 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau2nd5dayBarV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau2nd5dayBarV01.png",
        plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
 
 # 1:1 plot
@@ -1900,7 +1967,7 @@ Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day5,
 print(Plot.prof.yau)
 
 # Save plot
-ggsave("Output/Plots/ProfYau2nd5dayDotV01.png",
+ggsave("Output/Plots/SamplingRates/Personal/ProfYau2nd5dayDotV01.png",
        plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 
