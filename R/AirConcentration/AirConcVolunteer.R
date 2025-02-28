@@ -68,7 +68,8 @@ tPCB.conc.air <- colSums(conc.air, na.rm = TRUE)
 tPCB.conc.air
 
 # Read calculated average sampling rates for volunteers -------------------
-sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
+sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
+sr.0 <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
@@ -203,7 +204,7 @@ plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCB.png", plot = plotAirWBtPCB, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCBV2.png", plot = plotAirWBtPCB, width = 6,
        height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
@@ -227,7 +228,7 @@ max(percentage_error)
 mean_error <- mean(percentage_error)
 print(paste("Mean Error:", mean_error))
 
-# Calcualte percentage errors btw left and right WBs
+# Calculate percentage errors btw left and right WBs
 # Extract the Wb_Concentration column as a vector
 Wb_Concentration <- data$Wb_Concentration
 # Remove the last row to ensure an even number of elements
@@ -382,7 +383,7 @@ plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
 print(plotAirWBPCBi)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBi.png", plot = plotAirWBPCBi, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV2.png", plot = plotAirWBPCBi, width = 6,
        height = 5, dpi = 500)
 
 
