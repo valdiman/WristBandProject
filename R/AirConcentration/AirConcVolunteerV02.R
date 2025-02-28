@@ -46,6 +46,7 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 
 # Read calculated average sampling rates for volunteers -------------------
 sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
+sr.0 <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
@@ -186,7 +187,7 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHome.png",
+ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHomeV2.png",
        plot = plotAirWBtPCB, width = 6, height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
