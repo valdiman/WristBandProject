@@ -1,4 +1,5 @@
-# Concentration estimation
+## Script to fabricate PCB profiles &
+# and calculate cosine theta for similarity analysis
 
 # Install packages
 install.packages("readxl")
@@ -102,7 +103,7 @@ tPCB.conc.air
 
 # (2) Wore WBs
 # Read calculated average sampling rates
-sr <- read.csv("Output/Data/csv/Ave.SRs.csv")
+sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
@@ -217,7 +218,7 @@ p_prof_comb.Mi <- ggplot(prof_combined.Mi, aes(x = congener, y = Conc,
 print(p_prof_comb.Mi)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol1.png", plot = p_prof_comb.Mi,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol1.png", plot = p_prof_comb.Mi,
        width = 10, height = 5, dpi = 500)
 
 # Ya
@@ -265,7 +266,7 @@ p_prof_comb.Ya <- ggplot(prof_combined.Ya, aes(x = congener, y = Conc,
 print(p_prof_comb.Ya)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol2.png", plot = p_prof_comb.Ya,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol2.png", plot = p_prof_comb.Ya,
        width = 10, height = 5, dpi = 500)
 
 # Ea
@@ -312,7 +313,7 @@ p_prof_comb.Ea <- ggplot(prof_combined.Ea, aes(x = congener, y = Conc, fill = So
 print(p_prof_comb.Ea)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol3.png", plot = p_prof_comb.Ea,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol3.png", plot = p_prof_comb.Ea,
        width = 10, height = 5, dpi = 500)
 
 # Cr
@@ -359,7 +360,7 @@ p_prof_comb.Cr <- ggplot(prof_combined.Cr, aes(x = congener, y = Conc,
 print(p_prof_comb.Cr)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol4.png", plot = p_prof_comb.Cr,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol4.png", plot = p_prof_comb.Cr,
        width = 10, height = 5, dpi = 500)
 
 # Hu
@@ -406,7 +407,7 @@ p_prof_comb.Hu <- ggplot(prof_combined.Hu, aes(x = congener, y = Conc,
 print(p_prof_comb.Hu)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol5.png", plot = p_prof_comb.Hu,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol5.png", plot = p_prof_comb.Hu,
        width = 10, height = 5, dpi = 500)
 
 # Xu
@@ -454,7 +455,7 @@ p_prof_comb.Xu <- ggplot(prof_combined.Xu, aes(x = congener, y = Conc,
 print(p_prof_comb.Xu)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol6.png", plot = p_prof_comb.Xu,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol6.png", plot = p_prof_comb.Xu,
        width = 10, height = 5, dpi = 500)
 
 # Gift
@@ -502,7 +503,7 @@ p_prof_comb.Gi <- ggplot(prof_combined.Gi, aes(x = congener, y = Conc,
 print(p_prof_comb.Gi)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol7.png", plot = p_prof_comb.Gi,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol7.png", plot = p_prof_comb.Gi,
        width = 10, height = 5, dpi = 500)
 
 # Xuefang
@@ -545,7 +546,7 @@ p_prof_comb.Xue <- ggplot(prof_combined.Xue, aes(x = congener, y = Conc,
 print(p_prof_comb.Xue)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/prof_combined.Vol8.png", plot = p_prof_comb.Xue,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol8.png", plot = p_prof_comb.Xue,
        width = 10, height = 5, dpi = 500)
 
 # Calculate cosine theta --------------------------------------------------
