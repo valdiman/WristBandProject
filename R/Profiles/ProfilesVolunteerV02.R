@@ -1,4 +1,5 @@
-# Concentration estimation
+## Script to fabricate PCB profiles &
+# and calculate cosine theta for similarity analysis
 
 # Install packages
 install.packages("readxl")
@@ -53,7 +54,7 @@ tPCB.conc.air
 
 # (2) Wore WBs
 # Read calculated average sampling rates
-sr <- read.csv("Output/Data/csv/Ave.SRs.csv")
+sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
