@@ -80,6 +80,9 @@ color_palette <- c("red", "blue", "green", "purple", "orange", "brown",
 
 shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22)
 
+# Add sampling rates
+sr_labels <- paste0(names(sr.fred), " (", round(sr.fred, 2), ")")
+
 # Plot the data
 plotfred7d <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB, 
                           fill = congener, shape = congener)) +
@@ -103,16 +106,16 @@ plotfred7d <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
   guides(fill = guide_legend(override.aes = list(color = NA))) +
-  scale_fill_manual(values = color_palette) +   # Manual color scale for congener
-  scale_shape_manual(values = shape_palette) +  # Manual shape scale for congener
-  labs(fill = "Congener", shape = "Congener") +
+  scale_fill_manual(values = color_palette, labels = sr_labels) +
+  scale_shape_manual(values = shape_palette, labels = sr_labels) +
+  labs(fill = "Congener (Sampling Rate)", shape = "Congener (Sampling Rate)") +
   theme(legend.position = "right")
 
 plotfred7d
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/Frederiksen7d.png", plot = plotfred7d, width = 5,
-       height = 5, dpi = 500)
+ggsave("Output/Plots/AirConcentrations/Frederiksen7d.png", plot = plotfred7d,
+       width = 7, height = 7, dpi = 500)
 
 # Home time. Pivot wb.Fred.7d to long format
 wb.Fred.home_long <- wb.Fred.home %>%
@@ -159,16 +162,16 @@ plotfredhome <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
   guides(fill = guide_legend(override.aes = list(color = NA))) +
-  scale_fill_manual(values = color_palette) +   # Manual color scale for congener
-  scale_shape_manual(values = shape_palette) +  # Manual shape scale for congener
-  labs(fill = "Congener", shape = "Congener") +
+  scale_fill_manual(values = color_palette, labels = sr_labels) +
+  scale_shape_manual(values = shape_palette, labels = sr_labels) +
+  labs(fill = "Congener (Sampling Rate)", shape = "Congener (Sampling Rate)") +
   theme(legend.position = "right")
 
 plotfredhome
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/Frederiksenhome.png", plot = plotfredhome, width = 5,
-       height = 5, dpi = 500)
+ggsave("Output/Plots/AirConcentrations/Frederiksenhome.png", plot = plotfredhome,
+       width = 7, height = 7, dpi = 500)
 
 # Including sleeping time -------------------------------------------------
 # Define the number of sleeping days
