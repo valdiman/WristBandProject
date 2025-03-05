@@ -1,4 +1,4 @@
-## Code to individual PCB calculate sampling rates
+## Script to calcualte individual PCB calculate sampling rates
 # for silicone wristbands. Sampling rates were calculated with
 # (i) static (2 times) and (ii) rotating set up.
 
@@ -318,9 +318,11 @@ plot.18.30 <- ggplot(combined_data, aes(x = time, y = PCB18.30_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -373,9 +375,11 @@ plot.52 <- ggplot(combined_data, aes(x = time, y = PCB52_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -428,9 +432,11 @@ plot.118 <- ggplot(combined_data, aes(x = time, y = PCB118_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -483,9 +489,11 @@ plot.187 <- ggplot(combined_data, aes(x = time, y = PCB187_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
