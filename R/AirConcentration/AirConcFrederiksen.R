@@ -298,3 +298,86 @@ plotfredhomesl
 ggsave("Output/Plots/AirConcentrations/Frederiksenhomesl.png",
        plot = plotfredhomesl, width = 5, height = 5, dpi = 500)
 
+# Use constant SR & adjust air concentration to exposure time -------------
+wb.Fred.7d.v2 <- wb.Fred[, c("ID", "group", matching_cols)]
+for (col in matching_cols) {
+  wb.Fred.7d.v2[[col]] <- wb.Fred[[col]] / (0.5 * 7) # change SR
+}
+
+# 7 days. Pivot wb.Fred.7d to long format
+wb.Fred.7d.v2_long <- wb.Fred.7d.v2 %>%
+  pivot_longer(cols = starts_with("PCB"), 
+               names_to = "congener", 
+               values_to = "Conc.WB")
+
+conc.Fred <- data.Fred %>% filter(measurement == "concentration")
+# Pivot conc.Fred to long format
+conc.Fred_long <- conc.Fred %>%
+  pivot_longer(cols = starts_with("PCB"), 
+               names_to = "congener", 
+               values_to = "Conc.Air")
+
+# Create a copy of conc.Fred to store the modified data
+conc.Fred_mod <- conc.Fred
+# Identify columns that start with "PCB"
+pcb_columns <- grep("^PCB", names(conc.Fred), value = TRUE)
+# Adjust the air concentration to the time the volunteer were exposed
+# The WB was not 100% of the time exposed to the apartment concentration
+conc.Fred_mod[pcb_columns] <- conc.Fred[pcb_columns] * (conc.Fred$time.home / (7 * 24))
+# Pivot conc.Fred to long format
+conc.Fred_mod_long <- conc.Fred_mod %>%
+  pivot_longer(cols = starts_with("PCB"), 
+               names_to = "congener", 
+               values_to = "Conc.Air")
+
+# Merge both data frames by the congener column
+merged_data <- merge(conc.Fred_mod_long, wb.Fred.7d.v2_long, by = c("ID", "congener"))
+
+# Filter out rows where Conc.Air or Conc.WB are zero
+filtered_data <- merged_data %>%
+  filter(Conc.Air != 0, Conc.WB != 0)
+
+filtered_data <- filtered_data %>%
+  mutate(congener = factor(congener, levels = congener_names))
+
+color_palette <- c("red", "blue", "green", "purple", "orange", "brown", 
+                   "pink", "yellow", "cyan", "gray", "black", "violet", 
+                   "magenta", "indianred") # 14 colors as an example
+
+shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22)
+
+# Plot the data
+plotfred7d.v2 <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB, 
+                                        fill = congener, shape = congener)) +
+  geom_point(size = 2.5, color = "black", stroke = 0.5) + # Points will have black border
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  annotation_logticks(sides = "bl") +
+  scale_y_log10(limits = c(0.001, 10^4),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", math_format(10^.x))) +
+  scale_x_log10(limits = c(0.001, 10^4),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", math_format(10^.x))) +
+  xlab(expression(bold("Air Concentration PCBi (ng/m"^3*")"))) +
+  ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14)) +
+  geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
+  geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
+  geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
+  guides(fill = guide_legend(override.aes = list(color = NA))) +
+  scale_fill_manual(values = color_palette, labels = names(sr.fred)) +
+  scale_shape_manual(values = shape_palette, labels = names(sr.fred)) +
+  labs(fill = "Congener", shape = "Congener") +
+  theme(legend.position = "right")
+
+plotfred7d.v2
+
+# Save plot in folder
+ggsave("Output/Plots/AirConcentrations/Frederiksen7dSrCteTieExpAdj.png", plot = plotfred7d.v2,
+       width = 7, height = 7, dpi = 500)
+
+
