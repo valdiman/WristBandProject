@@ -187,8 +187,53 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHomeV2.png",
+ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHome.png",
        plot = plotAirWBtPCB, width = 6, height = 5, dpi = 500)
+
+# Plot 1:1 Air PCB office vs. WB full-day
+data_filtered <- data.plot %>%
+  filter(grepl("Ho$", Volunteer2))
+
+# Define a color palette with enough distinct colors for the number of volunteers
+color_palette <- c("#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd")
+
+# Define a shape palette with enough distinct shapes for the number of volunteers
+shape_palette <- c(21, 22, 23, 24, 25)
+
+# Create the plot
+plot <- ggplot(data_filtered, aes(x = Air_Concentration, y = Wb_Concentration,
+                                  fill = Volunteer2, shape = Volunteer2)) +
+  geom_point(size = 3.5, color = "black", stroke = 0.5) +
+  theme_bw() +
+  theme(aspect.ratio = 15/15) +
+  annotation_logticks(sides = "bl") +
+  scale_y_log10(limits = c(1, 10^2),
+                breaks = 10^(0:3),  # Integer powers of 10 only
+                labels = trans_format("log10", math_format(10^.x))) +
+  scale_x_log10(limits = c(1, 10^2),
+                breaks = 10^(0:3),  # Integer powers of 10 only
+                labels = trans_format("log10", math_format(10^.x))) +
+  xlab(expression(bold("Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
+  ylab(expression(bold("Predicted Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14)) +
+  geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
+  geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
+  geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
+  guides(fill = guide_legend(override.aes = list(color = NA))) +
+  scale_fill_manual(values = color_palette) +
+  scale_shape_manual(values = shape_palette) +
+  labs(fill = "Volunteers", shape = "Volunteers") +
+  theme(legend.position = "right") # Optional: Adjust legend position
+
+# See plot
+plot
+
+# Save plot in folder
+ggsave("Output/Plots/AirConcentrations/VolunteerAirOffHome.png",
+       plot = plot, width = 6, height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
 # Estimate a factor of 2 between observations and predictions
@@ -236,52 +281,54 @@ comparison_df <- data.frame(
 # Print the result
 print(comparison_df)
 
-# Home vs office WBs ------------------------------------------------------
-data.plot.v2 <- data.plot[-c(1, 3, 5, 6, 7, 9), ]
+# Plot individual PCB congeners -------------------------------------------
+# Create a data frame with the combined data
+# Reshape conc_air_common to long format
 
-# Reshape the data into long format so that each volunteer will have three rows: Of, Ho, and Air
-data_long.v2 <- data.plot.v2 %>%
-  # Create a new "Category" column to represent the Concentration type
-  mutate(Concentration_Type = case_when(
-    grepl("Ho", data.plot.v2$Volunteer2) ~ "Ho",
-    TRUE ~ "Air"
+# Add PCB as a column
+conc_air_common <- conc_air_common %>% rownames_to_column(var = "PCB")
+
+# Transform conc_air_common into long format
+conc_air_long <- conc_air_common %>%
+  pivot_longer(
+    cols = starts_with("Conc.Air"),  # This will select Conc.Air.1 and Conc.Air.2
+    names_to = "Conc.Type",
+    values_to = "Conc.Air"
+  )
+
+# Replicate the rows: 3 times for Conc.Air.1 and 2 times for Conc.Air.2
+conc_air_long <- conc_air_long %>%
+  mutate(Replicate_Count = case_when(
+    Conc.Type == "Conc.Air.1" ~ 3,  # Replicate Conc.Air.1 3 times
+    Conc.Type == "Conc.Air.2" ~ 2,  # Replicate Conc.Air.2 2 times
+    TRUE ~ 1
   )) %>%
-  # Reshape to long format
-  pivot_longer(cols = c(Wb_Concentration, Air_Concentration), 
-               names_to = "Concentration_Name", 
-               values_to = "Concentration") %>%
-  # Now, add a column to distinguish between the three types of concentration
-  mutate(Concentration_Category = case_when(
-    Concentration_Name == "Wb_Concentration" & Concentration_Type == "Ho" ~ "Ho",
-    Concentration_Name == "Air_Concentration" ~ "Air",
+  uncount(weights = Replicate_Count) %>%  # Replicate based on the count
+  mutate(Volunteer = case_when(
+    Conc.Type == "Conc.Air.1" ~ rep(c("Vol1", "Vol2", "Vol3"), length.out = n()),  # Assign Vol1, Vol2, Vol3
+    Conc.Type == "Conc.Air.2" ~ rep(c("Vol4", "Vol5"), length.out = n()),  # Assign Vol4, Vol5
     TRUE ~ NA_character_
   ))
 
-# Set the factor levels for Concentration_Category to control the order
-data_long.v2$Concentration_Category <- factor(
-  data_long.v2$Concentration_Category,
-  levels = c("Air", "Ho")  # Desired order
-)
+# Move row names to the first column
+conc_wb_clean <- conc.wb %>%
+  rownames_to_column(var = "Row.Name")  # Row names are moved to 'Row.Name' column
 
-# Plot
-plotAirWBtPCB.2 <- ggplot(data_long.v2, aes(x = Volunteer_Group, y = Concentration,
-                                            fill = Concentration_Category)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
-  scale_fill_manual(
-    values = c("Ho" = "#E69F00", "Air" = "#009E73"),  # Custom colors
-    labels = c("Ho" = "WB full-day", "Air" = "Air PCB office")  # Custom labels
-  ) +
-  labs(x = '', fill = "Location") +
-  ylab(expression(bold("Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
-  theme_bw() +
-  theme(axis.text.y = element_text(face = "bold", size = 14),
-        axis.title.y = element_text(face = "bold", size = 14),
-        axis.text.x = element_text(face = "bold", size = 14,
-                                   angle = 45, hjust =1),
-        axis.title.x = element_text(face = "bold", size = 14))
+# Remove rows that end with 'o'
+conc_wb_clean <- conc_wb_clean %>%
+  filter(!grepl("o$", Row.Name))  # Filter out rows where the 'Row.Name' ends with 'o'
 
-# Print the plot
-print(plotAirWBtPCB.2)
+# Rename the first column to 'Volunteer'
+conc_wb_clean <- conc_wb_clean %>%
+  rename(Volunteer = Row.Name)
+
+# Assign 'Vol1', 'Vol2', ..., 'Vol5' based on row numbers
+conc_wb_clean <- conc_wb_clean %>%
+  mutate(Volunteer = paste0("Vol", rep(1:5, length.out = n())))  # Assigns Vol1 to Vol5 cyclically
+
+# View the updated data
+head(conc_wb_clean)
+
 
 
 
