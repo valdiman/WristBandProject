@@ -45,7 +45,8 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 }
 
 # Read calculated average sampling rates for volunteers -------------------
-sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
+sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
+sr.0 <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
@@ -121,10 +122,10 @@ data.plot$Volunteer2 <- case_when(
   data.plot$Volunteer == "wb.Ya.h" ~ "Vol. 2 Ho",
   data.plot$Volunteer == "wb.Ea.o" ~ "Vol. 3 Of",
   data.plot$Volunteer == "wb.Ea.h" ~ "Vol. 3 Ho",
-  data.plot$Volunteer == "wb.Xu.o" ~ "Vol. 4 Of",
-  data.plot$Volunteer == "wb.Xu.h" ~ "Vol. 4 Ho",
-  data.plot$Volunteer == "wb.An.o" ~ "Vol. 5 Of",
-  data.plot$Volunteer == "wb.An.h" ~ "Vol. 5 Ho",
+  data.plot$Volunteer == "wb.Xu.o" ~ "Vol. 8 Of",
+  data.plot$Volunteer == "wb.Xu.h" ~ "Vol. 8 Ho",
+  data.plot$Volunteer == "wb.An.o" ~ "Vol. 9 Of",
+  data.plot$Volunteer == "wb.An.h" ~ "Vol. 9 Ho",
   TRUE ~ NA_character_
 )
 
@@ -133,8 +134,8 @@ data.plot$Volunteer_Group <- case_when(
   grepl("wb.Mi", data.plot$Volunteer) ~ "Vol. 1",
   grepl("wb.Ya", data.plot$Volunteer) ~ "Vol. 2",
   grepl("wb.Ea", data.plot$Volunteer) ~ "Vol. 3",
-  grepl("wb.Xu", data.plot$Volunteer) ~ "Vol. 4",
-  grepl("wb.An", data.plot$Volunteer) ~ "Vol. 5",
+  grepl("wb.Xu", data.plot$Volunteer) ~ "Vol. 8",
+  grepl("wb.An", data.plot$Volunteer) ~ "Vol. 9",
   TRUE ~ NA_character_
 )
 
@@ -170,8 +171,8 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
   geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
   scale_fill_manual(
     values = c("Ho" = "#E69F00", "Of" = "blue", "Air" = "#009E73"),  # Custom colors
-    labels = c("Ho" = "WB home", "Of" = "WB office",
-               "Air" = "Air office")  # Custom labels
+    labels = c("Ho" = "WB full-day", "Of" = "WB office-only",
+               "Air" = "Air PCB office")  # Custom labels
   ) +
   labs(x = '', fill = "Location") +
   ylab(expression(bold("Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
@@ -186,7 +187,7 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHome.png",
+ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHomeV2.png",
        plot = plotAirWBtPCB, width = 6, height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
@@ -234,141 +235,4 @@ comparison_df <- data.frame(
 )
 # Print the result
 print(comparison_df)
-
-# Individual PCB Congeners ------------------------------------------------
-# Not sure if this analysis is relevant
-# Potential plots: i) WB office vs. WB home, ii) Conc office vs. WB home
-# Create a data frame with the combined data
-# Reshape conc_air_common to long format
-
-# Add PCB as a column
-conc_air_common <- conc_air_common %>% rownames_to_column(var = "PCB")
-
-conc_air_long <- conc_air_common %>%
-  pivot_longer(
-    cols = -PCB,  # All columns except 'PCB'
-    names_to = "Volunteer",
-    values_to = "Conc.Air"
-  ) %>%
-  mutate(Volunteer = gsub("Conc.Air.", "", Volunteer))
-
-# Until here!
-
-conc_wb_long <- as.data.frame(conc.wb) %>%
-  rownames_to_column(var = "Volunteer") %>%  # Convert row names to a column
-  pivot_longer(
-    cols = -Volunteer,  # All columns except 'Volunteer'
-    names_to = "PCB",   # Column for PCB names
-    values_to = "Conc.WB"  # Column for concentration values
-  ) %>%
-  mutate(Volunteer = gsub("wb.", "", Volunteer)) %>%  # Remove 'wb.' from Volunteer names
-  select(PCB, Conc.WB, Volunteer)
-
-# Create a simplified Volunteer column in conc_wb_long
-conc_wb_long <- conc_wb_long %>%
-  mutate(Volunteer_Simplified = gsub("\\..*", "", Volunteer))  # Remove everything after and including "."
-
-# Merge the two data frames
-merged_data <- conc_air_long %>%
-  inner_join(conc_wb_long, by = c("PCB", "Volunteer" = "Volunteer_Simplified"))
-
-# Filter out rows with 0 in either Conc.Air or Conc.WB
-filtered_data <- merged_data %>%
-  filter(Conc.Air != 0, Conc.WB != 0)
-
-# Estimate error (factor of 2) --------------------------------------------
-# Estimate a factor of 2 between observations and predictions
-filtered_data$factor2 <- filtered_data$Conc.WB/filtered_data$Conc.Air
-
-# Calculate the percentage of observations within the factor of 2
-factor2_percentage <- nrow(filtered_data[filtered_data$factor2 > 0.5 & filtered_data$factor2 < 2, ])/nrow(filtered_data)*100
-
-# Calculate percentage error ---------------------------------------------------
-percentage_error <-function(observed, predicted) {
-  return(abs(observed - predicted)/abs(observed) * 100)
-}
-
-# Calculate percentage errors
-percentage_error <- percentage_error(filtered_data$Conc.Air, filtered_data$Conc.WB)
-
-# Calculate mean percent error
-mean_error <- mean(percentage_error)
-print(paste("Mean Error:", mean_error))
-min_error <- min(percentage_error)
-print(paste("Minimun Error:", min_error))
-max_error <- max(percentage_error)
-print(paste("Max Error:", max_error))
-
-# Define the threshold
-threshold <- 200
-
-# Count how many values are above the threshold
-count_above_threshold <- sum(percentage_error > threshold)
-
-# Get the total number of values
-total_values <- length(percentage_error)
-
-# Calculate the proportion
-proportion_above_threshold <- count_above_threshold / total_values
-
-# Print the results
-cat("Number of values above", threshold, ":", count_above_threshold, "\n")
-cat("Total number of values:", total_values, "\n")
-cat("Proportion of values above", threshold, ":", proportion_above_threshold, "\n")
-
-# Color and shapes from tPCB plot
-# Change names for legend
-filtered_data$Volunteer.y <- case_when(
-  filtered_data$Volunteer.y == "Mi.l" ~ "Vol. 1 nd",
-  filtered_data$Volunteer.y == "Mi.r" ~ "Vol. 1 d",
-  filtered_data$Volunteer.y == "Ya.l" ~ "Vol. 2 d",
-  filtered_data$Volunteer.y == "Ya.r" ~ "Vol. 2 nd",
-  filtered_data$Volunteer.y == "Ea.l" ~ "Vol. 3 nd",
-  filtered_data$Volunteer.y == "Ea.r" ~ "Vol. 3 d",
-  filtered_data$Volunteer.y == "Cr.l" ~ "Vol. 4 nd",
-  filtered_data$Volunteer.y == "Cr.r" ~ "Vol. 4 d",
-  filtered_data$Volunteer.y == "Hu.l" ~ "Vol. 5 d",
-  filtered_data$Volunteer.y == "Hu.r" ~ "Vol. 5 nd",
-  filtered_data$Volunteer.y == "Xu.l" ~ "Vol. 6 nd",
-  filtered_data$Volunteer.y == "Xu.r" ~ "Vol. 6 d",
-  filtered_data$Volunteer.y == "Gi.l" ~ "Vol. 7 nd",
-  filtered_data$Volunteer.y == "Gi.r" ~ "Vol. 7 d",
-  TRUE ~ NA_character_  # Handles any unmatched cases
-)
-
-# Plot with different colors for each volunteer  
-plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB, 
-                             fill = Volunteer.y, shape = Volunteer.y)) +
-    geom_point(size = 2.5, color = "black", stroke = 0.5) +
-    theme_bw() +
-    theme(aspect.ratio = 15/15) +
-    annotation_logticks(sides = "bl") +
-    scale_y_log10(limits = c(0.00001, 10^3),
-                  breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    scale_x_log10(limits = c(0.00001, 10^3),
-                  breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    xlab(expression(bold("Air Concentration PCBi (ng/m"^3*")"))) +
-    ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
-    theme(axis.text.y = element_text(face = "bold", size = 14),
-          axis.title.y = element_text(face = "bold", size = 14),
-          axis.text.x = element_text(face = "bold", size = 14),
-          axis.title.x = element_text(face = "bold", size = 14)) +
-    geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
-    geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
-    geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
-    guides(fill = guide_legend(override.aes = list(color = NA))) +
-  scale_fill_manual(values = color_palette) +
-  scale_shape_manual(values = shape_palette) +
-  labs(fill = "Volunteers", shape = "Volunteers") +
-  theme(legend.position = "right")
-
-# Print the plots
-print(plotAirWBPCBi)
-
-# Save plot in folder
-ggsave("Output/Plots/AirWBPCBi.png", plot = plotAirWBPCBi, width = 6,
-       height = 5, dpi = 500)
-
 

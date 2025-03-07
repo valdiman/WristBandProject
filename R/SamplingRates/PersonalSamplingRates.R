@@ -1,4 +1,4 @@
-## Code to calculate individual PCB "personal" sampling rates
+## Script to calculate individual PCB "personal" sampling rates
 # for silicone wristbands.
 # nd non-dominant hand
 # d dominant hand
@@ -30,6 +30,8 @@ data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
 data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
                                   col_names = TRUE, col_types = NULL))
+logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
+                                col_names = TRUE, col_types = NULL))
 
 # Calculate personal sampling rate Amanda ---------------------------------
 # WBs were used to calculate PCB concentration
@@ -39,8 +41,8 @@ data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
 {
   # Select WBs to calculate air concentration
   data.amanda.1 <- data.amanda[1:3, ]
-  # Average 3 WBs
-  data.amanda.2 <- colMeans(data.amanda.1[, 3:175])
+  # Average 3 WBs. NA values not included in the calculations
+  data.amanda.2 <- colMeans(data.amanda.1[, 3:175], na.rm = TRUE)
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
   conc <- data.amanda.2/(0.5*data.amanda[1,1])
@@ -82,14 +84,25 @@ for(i in 1:length(SR.amanda.nd[, 1])) {
   }
 }
 
-colnames(SR.amanda.nd) <-c("Sampling_Rate", "R2", "p_value")
+SR.amanda.nd <- data.frame(SR.amanda.nd, group = "ParticipantA.nd")
+colnames(SR.amanda.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.amanda.nd)[0, ])
 SR.amanda.nd <- cbind(congener, SR.amanda.nd)
-SR.amanda.nd <- data.frame(SR.amanda.nd, group = "ParticipantA.nd")
+
+# Convert R2 and p-value to numeric
+SR.amanda.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.amanda.nd$`Sampling_Rate (m3/d)`)
+SR.amanda.nd$R2 <- as.numeric(SR.amanda.nd$R2)
+SR.amanda.nd$p_value <- as.numeric(SR.amanda.nd$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.amanda.nd$R2 < 0.9 | SR.amanda.nd$p_value > 0.05
+SR.amanda.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.amanda.nd$R2[mask] <- NA
+SR.amanda.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.amanda.nd,
-          file = "Output/Data/csv/SR.amanda.nd.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.amanda.nd.csv", row.names = FALSE)
 
 # Create matrix for sampling rate (SR)
 SR.amanda.d <- matrix(nrow = length(Veff.amanda.d[1,]), ncol = 3)
@@ -107,24 +120,33 @@ for(i in 1:length(SR.amanda.d[, 1])) {
   }
 }
 
-colnames(SR.amanda.d) <-c("Sampling_Rate", "R2", "p_value")
-SR.amanda.d <- cbind(congener, SR.amanda.d)
 SR.amanda.d <- data.frame(SR.amanda.d, group = "ParticipantA.d")
+colnames(SR.amanda.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.amanda.d)[0, ])
+SR.amanda.d <- cbind(congener, SR.amanda.d)
+
+# Convert R2 and p-value to numeric
+SR.amanda.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.amanda.d$`Sampling_Rate (m3/d)`)
+SR.amanda.d$R2 <- as.numeric(SR.amanda.d$R2)
+SR.amanda.d$p_value <- as.numeric(SR.amanda.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.amanda.d$R2 < 0.9 | SR.amanda.d$p_value > 0.05
+SR.amanda.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.amanda.d$R2[mask] <- NA
+SR.amanda.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.amanda.d,
-          file = "Output/Data/csv/SR.amanda.d.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.amanda.d.csv",
+          row.names = FALSE)
 
 # Plot
-# Convert numerical columns to numeric
-SR.amanda.nd[, 2:4] <- apply(SR.amanda.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.amanda.nd$congener <- factor(SR.amanda.nd$congener,
                             levels = unique(SR.amanda.nd$congener))
-
 # Plot with legend
-ggplot(SR.amanda.nd[SR.amanda.nd$Sampling_Rate > 0 & SR.amanda.nd$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.amanda.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -135,14 +157,11 @@ ggplot(SR.amanda.nd[SR.amanda.nd$Sampling_Rate > 0 & SR.amanda.nd$p_value < 0.05
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# Convert numerical columns to numeric
-SR.amanda.d[, 2:4] <- apply(SR.amanda.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.amanda.d$congener <- factor(SR.amanda.d$congener,
                                levels = unique(SR.amanda.d$congener))
-
-ggplot(SR.amanda.d[SR.amanda.d$Sampling_Rate > 0 & SR.amanda.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+# Plot with legend
+ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -152,6 +171,93 @@ ggplot(SR.amanda.d[SR.amanda.d$Sampling_Rate > 0 & SR.amanda.d$p_value < 0.05, ]
   theme(axis.text.x = element_text(face = "bold", size = 5,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
+
+# Amanda SR vs logKoa regression ------------------------------------------
+# (1) Average both d and nd
+sr.ave.amanda <- as.data.frame(rowMeans(cbind(SR.amanda.d$`Sampling_Rate (m3/d)`, 
+                                SR.amanda.nd$`Sampling_Rate (m3/d)`), 
+                          na.rm = TRUE))
+
+sr.ave.amanda$logkoa <- logKoa$logKoa
+colnames(sr.ave.amanda) <- c('ave_sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.amanda.1 <- lm(log(sr.ave.amanda$ave_sr) ~ sr.ave.amanda$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.amanda.1)[1])  # exponentiate the intercept
+b <- coef(model.amanda.1)[2]       # coefficient for logKoa
+r2 <- summary(model.amanda.1)$r.squared
+
+# plot
+p.sr.amanda.koa.1 <- ggplot(sr.ave.amanda, aes(x = logKoa, y = ave_sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.amanda.koa.1
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa1.png", plot = p.sr.amanda.koa.1,
+       width = 6, height = 6, dpi = 500)
+
+# (2) Individual values
+# Create a long dataframe combining SR.amanda.d and SR.amanda.nd
+sr.long.amanda <- data.frame(
+  sr = c(SR.amanda.d$`Sampling_Rate (m3/d)`, SR.amanda.nd$`Sampling_Rate (m3/d)`),
+  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
+)
+
+# Remove any NA values
+sr.long.amanda <- na.omit(sr.long.amanda)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.amanda.2 <- lm(log(sr.long.amanda$sr) ~ sr.long.amanda$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.amanda.2)[1])  # exponentiate the intercept
+b <- coef(model.amanda.2)[2]       # coefficient for logKoa
+r2 <- summary(model.amanda.2)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.amanda.koa.2 <- ggplot(sr.long.amanda, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.long.amanda$logKoa) + 1.2, y = max(sr.long.amanda$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.long.amanda$logKoa) + 0.35, y = max(sr.long.amanda$sr) * 1.13,
+           label = paste("R² =", round(r2, 2)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.amanda.koa.2
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa2.png", plot = p.sr.amanda.koa.2,
+       width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Kay ------------------------------------
 # WBs were used to calculate PCB concentration
@@ -200,18 +306,32 @@ for(i in 1:length(SR.kay.d[, 1])) {
   }
 }
 
-colnames(SR.kay.d) <-c("Sampling_Rate", "R2", "p_value")
-SR.kay.d <- cbind(congener, SR.kay.d)
 SR.kay.d <- data.frame(SR.kay.d, group = "ParticipantK.d")
+colnames(SR.kay.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.kay.d)[0, ])
+SR.kay.d <- cbind(congener, SR.kay.d)
+
+# Convert R2 and p-value to numeric
+SR.kay.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.kay.d$`Sampling_Rate (m3/d)`)
+SR.kay.d$R2 <- as.numeric(SR.kay.d$R2)
+SR.kay.d$p_value <- as.numeric(SR.kay.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.kay.d$R2 < 0.9 | SR.kay.d$p_value > 0.05
+SR.kay.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.kay.d$R2[mask] <- NA
+SR.kay.d$p_value[mask] <- NA
+
+# Export results
+write.csv(SR.kay.d,
+          file = "Output/Data/csv/SamplingRates/Personal/SR.kay.d.csv", row.names = FALSE)
 
 # Plot
-SR.kay.d[, 2:4] <- apply(SR.kay.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.kay.d$congener <- factor(SR.kay.d$congener,
                                levels = unique(SR.kay.d$congener))
 
-ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.kay.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -222,6 +342,51 @@ ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
+# Kay SR vs logKoa regression ---------------------------------------------
+# Create a long dataframe combining SR.kay.d
+sr.kay <- data.frame(
+  sr = SR.kay.d$`Sampling_Rate (m3/d)`,
+  logKoa = logKoa$logKoa)
+
+# Remove any NA values
+sr.kay <- na.omit(sr.kay)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.kay <- lm(log(sr.kay$sr) ~ sr.kay$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.kay)[1])  # exponentiate the intercept
+b <- coef(model.kay)[2]       # coefficient for logKoa
+r2 <- summary(model.kay)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.kay.koa <- ggplot(sr.kay, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.kay$logKoa) + 1.05, y = max(sr.kay$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.kay$logKoa) + 0.35, y = max(sr.kay$sr) * 1.13,
+           label = paste("R² =", round(r2, 2)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.kay.koa
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Kay_logKoa.png", plot = p.sr.kay.koa,
+       width = 6, height = 6, dpi = 500)
+
 # Calculate personal sampling rate Ya'u -----------------------------------
 # WBs were used to calculate PCB concentration
 # Non-dominant hand (nd)
@@ -229,13 +394,13 @@ ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
 # sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
-  data.yau.1 <- data.yau[1:6, 4:174]
+  data.yau.1 <- data.yau[1:6, 4:176]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
   time <- data.yau[1:6, 1]
   conc <- t(sweep(data.yau.1, 1, 0.5 * time, "/"))
   # get WB mass
-  mass.WD <- data.yau[7:12, 4:174]
+  mass.WD <- data.yau[7:12, 4:176]
   Veff.yau <- mass.WD/t(conc)
   # Add metadata to Veff.amanda and change format
   Veff.yau <- cbind(data.yau[7:12, 3], data.yau[7:12, 1], Veff.yau)
@@ -244,13 +409,13 @@ ggplot(SR.kay.d[SR.kay.d$Sampling_Rate > 0 & SR.kay.d$p_value < 0.05, ],
   # Add names to first 2 columns
   colnames(Veff.yau)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.yau[, 2:173] <- apply(Veff.yau[, 2:173], 2, as.numeric)
+  Veff.yau[, 2:175] <- apply(Veff.yau[, 2:175], 2, as.numeric)
   # Select 1st week, remove metadata
-  Veff.yau.1st.nd <- Veff.yau[1:3, 3:173]
+  Veff.yau.1st.nd <- Veff.yau[1:3, 3:175]
   # Select time
   Veff.yau.1st.nd.t <- Veff.yau[1:3, 2]
   # Select left, remove metadata
-  Veff.yau.2nd.nd <- Veff.yau[4:6, 3:173]
+  Veff.yau.2nd.nd <- Veff.yau[4:6, 3:175]
   # Select time
   Veff.yau.2nd.nd.t <- Veff.yau[4:6, 2]
 }
@@ -272,23 +437,33 @@ for(i in 1:length(SR.yau.1st.nd[, 1])) {
   }
 }
 
-colnames(SR.yau.1st.nd) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.1st.nd <- data.frame(SR.yau.1st.nd, group = "ParticipantY.1st.nd")
+colnames(SR.yau.1st.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.1st.nd)[0, ])
 SR.yau.1st.nd <- cbind(congener, SR.yau.1st.nd)
-SR.yau.1st.nd <- data.frame(SR.yau.1st.nd, group = "ParticipantY.1st.nd")
+
+# Convert R2 and p-value to numeric
+SR.yau.1st.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.1st.nd$`Sampling_Rate (m3/d)`)
+SR.yau.1st.nd$R2 <- as.numeric(SR.yau.1st.nd$R2)
+SR.yau.1st.nd$p_value <- as.numeric(SR.yau.1st.nd$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.1st.nd$R2 < 0.9 | SR.yau.1st.nd$p_value > 0.05
+SR.yau.1st.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.1st.nd$R2[mask] <- NA
+SR.yau.1st.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.1st.nd,
-          file = "Output/Data/csv/SR.yau.1st.nd.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.1st.nd.csv",
+          row.names = FALSE)
 
 # Plot
-SR.yau.1st.nd[, 2:4] <- apply(SR.yau.1st.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.1st.nd$congener <- factor(SR.yau.1st.nd$congener,
                             levels = unique(SR.yau.1st.nd$congener))
 
-ggplot(SR.yau.1st.nd[SR.yau.1st.nd$Sampling_Rate > 0 & SR.yau.1st.nd$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.1st.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -315,23 +490,33 @@ for(i in 1:length(SR.yau.2nd.nd[, 1])) {
   }
 }
 
-colnames(SR.yau.2nd.nd) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.2nd.nd <- data.frame(SR.yau.2nd.nd, group = "ParticipantY.2nd.nd")
+colnames(SR.yau.2nd.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.2nd.nd)[0, ])
 SR.yau.2nd.nd <- cbind(congener, SR.yau.2nd.nd)
-SR.yau.2nd.nd <- data.frame(SR.yau.2nd.nd, group = "ParticipantY.2nd.nd")
+
+# Convert R2 and p-value to numeric
+SR.yau.2nd.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.2nd.nd$`Sampling_Rate (m3/d)`)
+SR.yau.2nd.nd$R2 <- as.numeric(SR.yau.2nd.nd$R2)
+SR.yau.2nd.nd$p_value <- as.numeric(SR.yau.2nd.nd$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.2nd.nd$R2 < 0.9 | SR.yau.2nd.nd$p_value > 0.05
+SR.yau.2nd.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.2nd.nd$R2[mask] <- NA
+SR.yau.2nd.nd$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.2nd.nd,
-          file = "Output/Data/csv/SR.yau.2nd.nd.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.2nd.nd.csv",
+          row.names = FALSE)
 
 # Plot
-SR.yau.2nd.nd[, 2:4] <- apply(SR.yau.2nd.nd[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.2nd.nd$congener <- factor(SR.yau.2nd.nd$congener,
                               levels = unique(SR.yau.2nd.nd$congener))
 
-ggplot(SR.yau.2nd.nd[SR.yau.2nd.nd$Sampling_Rate > 0 & SR.yau.2nd.nd$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.2nd.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -341,6 +526,93 @@ ggplot(SR.yau.2nd.nd[SR.yau.2nd.nd$Sampling_Rate > 0 & SR.yau.2nd.nd$p_value < 0
   theme(axis.text.x = element_text(face = "bold", size = 5,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
+
+# Ya'u SR vs logKoa regression 1 ------------------------------------------
+# (1) Average both d and nd
+sr.ave.yau <- as.data.frame(rowMeans(cbind(SR.yau.1st.nd$`Sampling_Rate (m3/d)`, 
+                                              SR.yau.1st.nd$`Sampling_Rate (m3/d)`), 
+                                        na.rm = TRUE))
+
+sr.ave.yau$logkoa <- logKoa$logKoa
+colnames(sr.ave.yau) <- c('ave_sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.1 <- lm(log(sr.ave.yau$ave_sr) ~ sr.ave.yau$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.1)[1])  # exponentiate the intercept
+b <- coef(model.yau.1)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.1)$r.squared
+
+# plot
+p.sr.yau.koa.1 <- ggplot(sr.ave.yau, aes(x = logKoa, y = ave_sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.1
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.1.png",
+       plot = p.sr.yau.koa.1, width = 6, height = 6, dpi = 500)
+
+# (2) Individual values
+# Create a long dataframe combining SR.yau.1st. nd and SR.yau.2nd.nd
+sr.long.yau <- data.frame(
+  sr = c(SR.yau.1st.nd$`Sampling_Rate (m3/d)`, SR.yau.2nd.nd$`Sampling_Rate (m3/d)`),
+  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
+)
+
+# Remove any NA values
+sr.long.yau <- na.omit(sr.long.yau)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.2 <- lm(log(sr.long.yau$sr) ~ sr.long.yau$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.2)[1])  # exponentiate the intercept
+b <- coef(model.yau.2)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.2)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.yau.koa.2 <- ggplot(sr.long.yau, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.long.yau$logKoa) + 1.2, y = max(sr.long.yau$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.long.yau$logKoa) + 0.35, y = max(sr.long.yau$sr) * 1.13,
+           label = paste("R² =", round(r2, 2)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.2
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.2.png",
+       plot = p.sr.yau.koa.2, width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Ya'u 2nd -------------------------------
 # 3 WBs were not wiped and 3 WBs were wiped
@@ -403,23 +675,33 @@ for(i in 1:length(SR.yau.nw.d[, 1])) {
   }
 }
 
-colnames(SR.yau.nw.d) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.nw.d <- data.frame(SR.yau.nw.d, group = "ParticipantY.nw.d")
+colnames(SR.yau.nw.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.nw.d.2)[0, ])
 SR.yau.nw.d <- cbind(congener, SR.yau.nw.d)
-SR.yau.nw.d <- data.frame(SR.yau.nw.d, group = "ParticipantY.nw.d")
+
+# Convert R2 and p-value to numeric
+SR.yau.nw.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.nw.d$`Sampling_Rate (m3/d)`)
+SR.yau.nw.d$R2 <- as.numeric(SR.yau.nw.d$R2)
+SR.yau.nw.d$p_value <- as.numeric(SR.yau.nw.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.nw.d$R2 < 0.9 | SR.yau.nw.d$p_value > 0.05
+SR.yau.nw.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.nw.d$R2[mask] <- NA
+SR.yau.nw.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.nw.d,
-          file = "Output/Data/csv/SR.yau.nw.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.nw.d.csv",
+          row.names = FALSE)
 
 # Plot
-SR.yau.nw.d[, 2:4] <- apply(SR.yau.nw.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.nw.d$congener <- factor(SR.yau.nw.d$congener,
                               levels = unique(SR.yau.nw.d$congener))
 
-ggplot(SR.yau.nw.d[SR.yau.nw.d$Sampling_Rate > 0 & SR.yau.nw.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.nw.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -449,23 +731,33 @@ for(i in 1:length(SR.yau.w.d[, 1])) {
   }
 }
 
-colnames(SR.yau.w.d) <-c("Sampling_Rate", "R2", "p_value")
+SR.yau.w.d <- data.frame(SR.yau.w.d, group = "ParticipantY.w.d")
+colnames(SR.yau.w.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.yau.w.d.2)[0, ])
 SR.yau.w.d <- cbind(congener, SR.yau.w.d)
-SR.yau.w.d <- data.frame(SR.yau.w.d, group = "ParticipantY.w")
+
+# Convert R2 and p-value to numeric
+SR.yau.w.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.w.d$`Sampling_Rate (m3/d)`)
+SR.yau.w.d$R2 <- as.numeric(SR.yau.w.d$R2)
+SR.yau.w.d$p_value <- as.numeric(SR.yau.w.d$p_value)
+
+# Update R2 and p-value to NA based on conditions
+mask <- SR.yau.w.d$R2 < 0.9 | SR.yau.w.d$p_value > 0.05
+SR.yau.w.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.yau.w.d$R2[mask] <- NA
+SR.yau.w.d$p_value[mask] <- NA
 
 # Export results
 write.csv(SR.yau.w.d,
-          file = "Output/Data/csv/SR.yau.w.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.w.d.csv",
+          row.names = FALSE)
 
 # Plot
-SR.yau.w.d[, 2:4] <- apply(SR.yau.w.d[, 2:4], 2, as.numeric)
 # Organize PCB names
 SR.yau.w.d$congener <- factor(SR.yau.w.d$congener,
                               levels = unique(SR.yau.w.d$congener))
 
-ggplot(SR.yau.w.d[SR.yau.w.d$Sampling_Rate > 0 & SR.yau.w.d$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate, color = group)) +
+ggplot(SR.yau.w.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -475,6 +767,84 @@ ggplot(SR.yau.w.d[SR.yau.w.d$Sampling_Rate > 0 & SR.yau.w.d$p_value < 0.05, ],
   theme(axis.text.x = element_text(face = "bold", size = 5,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
+
+# Ya'u SR vs logKoa regression 2 ------------------------------------------
+# Check difference btw w and nw
+# (1) nw
+sr.yau.nw <- as.data.frame(SR.yau.nw.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
+
+sr.yau.nw$logkoa <- logKoa$logKoa
+colnames(sr.yau.nw) <- c('sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.nw <- lm(log(sr.yau.nw$sr) ~ sr.yau.nw$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.nw)[1])  # exponentiate the intercept
+b <- coef(model.yau.nw)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.nw)$r.squared
+
+# plot
+p.sr.yau.koa.nw <- ggplot(sr.yau.nw, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.nw
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nw.png",
+       plot = p.sr.yau.koa.nw, width = 6, height = 6, dpi = 500)
+
+# (2) w
+sr.yau.w <- as.data.frame(SR.yau.w.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
+
+sr.yau.w$logkoa <- logKoa$logKoa
+colnames(sr.yau.w) <- c('sr', 'logKoa')
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.w <- lm(log(sr.yau.w$sr) ~ sr.yau.w$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.w)[1])  # exponentiate the intercept
+b <- coef(model.yau.w)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.w)$r.squared
+
+# plot
+p.sr.yau.koa.w <- ggplot(sr.yau.w, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 15,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 4) + 
+  annotate("text", x = 6.75, y = 14.2,
+           label = paste("R² = ", round(r2, 2)), size = 4) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.yau.koa.w
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.w.png",
+       plot = p.sr.yau.koa.w, width = 6, height = 6, dpi = 500)
 
 # Plot individual congeners -----------------------------------------------
 # Combine plot
@@ -586,7 +956,7 @@ plot.18.30 <- plot.18.30 +
 plot.18.30
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB18.30VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRates.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
@@ -688,7 +1058,7 @@ plot.52 <- plot.52 +
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB52VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRates.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -790,7 +1160,7 @@ plot.118 <- plot.118 +
 plot.118
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB118VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB118VoluntSamplingRates.png",
        plot = plot.118, width = 8, height = 10, dpi = 1300)
 
 # PCB 187
@@ -892,7 +1262,7 @@ plot.187 <- plot.187 +
 plot.187
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB187VoluntSamplingRates.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRates.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
 
 # Combine sampling rates --------------------------------------------------
@@ -902,12 +1272,12 @@ combined_SR <- rbind(SR.amanda.nd, SR.amanda.d, SR.kay.d, SR.yau.1st.nd,
 
 # Look at SR and variability
 SR_averages_sd_cv <- combined_SR %>%
-  filter(p_value < 0.05, R2 >= 0.9) %>%
   group_by(congener) %>%
   summarise(
-    Average_Sampling_Rate = mean(Sampling_Rate, na.rm = TRUE),
-    SD_Sampling_Rate = sd(Sampling_Rate, na.rm = TRUE),
-    CV_Sampling_Rate = (sd(Sampling_Rate, na.rm = TRUE) / mean(Sampling_Rate, na.rm = TRUE)) * 100
+    Average_Sampling_Rate = mean(`Sampling_Rate (m3/d)`, na.rm = TRUE),
+    SD_Sampling_Rate = sd(`Sampling_Rate (m3/d)`, na.rm = TRUE),
+    CV_Sampling_Rate = (sd(`Sampling_Rate (m3/d)`,
+                           na.rm = TRUE) / mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100
   )
 
 # Remove PCB (rows) with only one SR measurement, i.e., SD and CV = NA
@@ -916,7 +1286,8 @@ SR_averages_sd_cv <- SR_averages_sd_cv %>%
 
 # Export results
 write.csv(SR_averages_sd_cv,
-          file = "Output/Data/csv/ParticipantSRV02.csv", row.names = FALSE)
+          file = "Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv",
+          row.names = FALSE)
 
 # Plot the average and stdev
 Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_Rate)) +
@@ -937,12 +1308,12 @@ Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_R
 print(Plot.AV.SR)
 
 # Save plot
-ggsave("Output/Plots/AvSRs.png",
+ggsave("Output/Plots/SamplingRates/Personal/AvePersonalSRs.png",
        plot = Plot.AV.SR, width = 15, height = 5, dpi = 500)
 
 # Plot the combined data with different colors for each group
-Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
-                   aes(x = congener, y = Sampling_Rate, color = group)) +
+Plot.SRs <- ggplot(combined_SR, aes(x = congener, y = `Sampling_Rate (m3/d)`,
+                                    color = group)) +
   geom_point(size = 1) +
   geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
   annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
@@ -961,195 +1332,14 @@ Plot.SRs <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_val
 print(Plot.SRs)
 
 # Save plot
-ggsave("Output/Plots/SRsV04.png",
+ggsave("Output/Plots/SamplingRates/Personal/SRsV01.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
 
-# Only Yau
-combined_SR.2 <- rbind(SR.yau.1st, SR.yau.2nd, SR.yau.nw, SR.yau.w)
+# PCB profiles ------------------------------------------------------------
+# Profiles should be created using concentration not mass
+# This is just to review the PCB distributions
 
-# Plot the combined data with different colors for each group
-Plot.SRs <- ggplot(combined_SR.2[combined_SR.2$Sampling_Rate > 0 & combined_SR.2$p_value < 0.05, ],
-                   aes(x = congener, y = Sampling_Rate, color = group)) +
-  geom_point(size = 1) +
-  geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
-  annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
-           hjust = -0.1, vjust = -1, color = "black", fontface = "bold") +  
-  theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_text(face = "bold", size = 7,
-                                   angle = 60, hjust = 1),
-        axis.title.x = element_text(face = "bold", size = 7)) +
-  scale_color_discrete(name = "Participants")
-
-# See plot
-print(Plot.SRs)
-
-# Save plot
-ggsave("Output/Plots/SRsV05.png",
-       plot = Plot.SRs, width = 15, height = 5, dpi = 500)
-
-# Box plot
-Plot.SRs.boxplot <- ggplot(combined_SR[combined_SR$Sampling_Rate > 0 & combined_SR$p_value < 0.05, ],
-       aes(x = congener, y = Sampling_Rate)) +
-  geom_boxplot() +
-  geom_hline(yintercept = 0.5, color = "black", linetype = "solid") +
-  annotate("text", x = 2, y = 2, label = "Air Sampling Rate",
-           hjust = -0.1, vjust = -1, color = "black", fontface = "bold") +  
-  theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10),
-        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
-        axis.title.x = element_text(face = "bold", size = 7))
-
-# See plot
-print(Plot.SRs.boxplot)
-
-# Save plot
-ggsave("Output/Plots/SRsBoxplotV03.png",
-       plot = Plot.SRs.boxplot, width = 15, height = 5, dpi = 500)
-
-# Potential regressions ---------------------------------------------------
-# Read logKoa
-logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
-                                  col_names = TRUE, col_types = NULL))
-
-# Reshape the dataset into a long format
-logKoa_long <- logKoa %>%
-  gather(key = "variable", value = "logKoa", -congener)
-
-# Combine the datasets based on the 'congener' column
-combined_data <- merge(combined_SR, logKoa_long, by = "congener")
-
-# Analysis all data
-# Perform exponential regression with the specified condition
-exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
-               data = subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
-               start = list(a = 1, b = 1))
-
-# Extract coefficients
-a_value <- coef(exp_reg)[["a"]]
-b_value <- coef(exp_reg)[["b"]]
-
-# Calculate R-squared value
-RSS <- sum(residuals(exp_reg)^2)
-TSS <- sum((combined_data$Sampling_Rate - mean(combined_data$Sampling_Rate))^2)
-rsquared <- 1 - RSS/TSS
-
-# Errors
-# Calculate Residual Standard Error (RSE)
-RSE <- sqrt(RSS / (length(residuals(exp_reg)) - 2))
-# Calculate Mean Absolute Error (MAE)
-MAE <- mean(abs(residuals(exp_reg)))
-# Calculate Mean Squared Error (MSE)
-MSE <- mean(residuals(exp_reg)^2)
-# Calculate Root Mean Squared Error (RMSE)
-RMSE <- sqrt(MSE)
-
-# Create a data frame for text annotations
-annotation_df <- data.frame(
-  equation = sprintf("SR = %.3f * exp(%.3f * logKoa)", a_value, b_value),
-  rsquared = sprintf("R-squared = %.3f", rsquared),
-  x = max(combined_data$logKoa),  # Set x to the maximum logKoa value
-  y = max(combined_data$Sampling_Rate),  # Set y to the maximum Sampling Rate value
-  group = "exp regression"  # Specify a group for the text annotations
-)
-
-# Plot the data with the filtered exponential regression line
-Plot.exp.regr.all <- ggplot(subset(combined_data, Sampling_Rate > 0 & p_value < 0.05),
-       aes(x = logKoa, y = Sampling_Rate, color = group)) +
-  geom_point() +
-  geom_line(data = data.frame(logKoa = seq(min(combined_data$logKoa),
-                                           max(combined_data$logKoa),
-                                           length.out = 100)),
-            aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
-            color = "red", linetype = "solid", linewidth = 1) +  # Add exponential regression line
-  geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
-            hjust = 2, vjust = 1, size = 4) +
-  geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
-            hjust = 3.5, vjust = 3, size = 4) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10) +
-  xlab(expression(bold("log Koa (PCBi)"))) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 14),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 14)) +
-  scale_color_discrete(name = "Participants")
-
-# See plot
-print(Plot.exp.regr.all)
-
-# Save plot
-ggsave("Output/Plots/SRExpRegresionAllV02.png",
-       plot = Plot.exp.regr.all, width = 8, height = 8, dpi = 500)
-
-# Select participant with high SR in the high PCBs
-group1 <- "ParticipantA.r"
-group2 <- "ParticipantA.l"
-
-# Filter the data for the selected groups
-selected_data <- combined_data[combined_data$group %in% c(group1, group2), ]
-
-# Perform exponential regression with the specified condition
-exp_reg <- nls(Sampling_Rate ~ a * exp(b * logKoa), 
-               data = subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
-               start = list(a = 1, b = 1))
-
-# Extract coefficients
-a_value <- coef(exp_reg)[["a"]]
-b_value <- coef(exp_reg)[["b"]]
-
-# Calculate R-squared value
-RSS <- sum(residuals(exp_reg)^2)
-TSS <- sum((selected_data$Sampling_Rate - mean(selected_data$Sampling_Rate))^2)
-rsquared <- 1 - RSS/TSS
-
-# Create a data frame for text annotations
-annotation_df <- data.frame(
-  equation = sprintf("SR = %.3f * exp(%.3f * logKoa)", a_value, b_value),
-  rsquared = sprintf("R-squared = %.3f", rsquared),
-  x = max(selected_data$logKoa),  # Set x to the maximum logKoa value
-  y = max(selected_data$Sampling_Rate),  # Set y to the maximum Sampling Rate value
-  group = "exp regression"  # Specify a group for the text annotations
-)
-
-# Plot the data with the filtered exponential regression line
-Plot.exp.regr <- ggplot(subset(selected_data, Sampling_Rate > 0 & p_value < 0.05),
-       aes(x = logKoa, y = Sampling_Rate, color = group)) +
-  geom_point() +
-  geom_line(data = data.frame(logKoa = seq(min(selected_data$logKoa),
-                                           max(selected_data$logKoa),
-                                           length.out = 100)),
-            aes(x = logKoa, y = a_value * exp(b_value * logKoa)), 
-            color = "red", linetype = "solid", linewidth = 1) +  # Add exponential regression line
-  geom_text(data = annotation_df, aes(x, y, label = equation, group = group),
-            hjust = 2, vjust = 5, size = 4) +
-  geom_text(data = annotation_df, aes(x, y, label = rsquared, group = group),
-            hjust = 3.5, vjust = 7, size = 4) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10) +
-  xlab(expression(bold("log Koa (PCBi)"))) +
-  ylab(expression(bold("Sampling Rates (m"^3*"/d)"))) +
-  theme(axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 14),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 14)) +
-  scale_color_discrete(name = "Participants")
-
-# See plot
-print(Plot.exp.regr)
-
-# Save plot
-ggsave("Output/Plots/SRExpRegresionV01.png",
-       plot = Plot.exp.regr, width = 8, height = 8, dpi = 500)
-
-# Profiles Amanda ---------------------------------------------------------
+# Amanda ------------------------------------------------------------------
 # Select data 
 stat.amanda <- t(data.frame(data.amanda.2))
 worn.amanda.R <- data.amanda[8, 3:175]
@@ -1194,10 +1384,6 @@ Plot.prof.amanda <- ggplot(profile_long, aes(x = congeners, y = Value,
 
 # see plot
 print(Plot.prof.amanda)
-
-# Save plot
-ggsave("Output/Plots/ProfAmanada5dayBarV01.png",
-       plot = Plot.prof.amanda, width = 15, height = 5, dpi = 500)
 
 # 1:1 plots
 threshold <- 0.005  # Define the threshold for labeling
@@ -1258,11 +1444,7 @@ iii <- ggplot(profile.amanda, aes(x = Air, y = ParticipantA.r,
 
 combined_plot <- grid.arrange(i, ii, iii, nrow = 1)
 
-# Save plot
-ggsave("Output/Plots/ProfAmanda5dayDotV01.png",
-       plot = combined_plot, width = 15, height = 5, dpi = 500)
-
-# Profiles Kay ------------------------------------------------------------
+# Kay ---------------------------------------------------------------------
 # Select data 
 stat.kay <- t(data.frame(data.kay.2))
 worn.kay.R <- data.kay[8, 3:175]
@@ -1302,10 +1484,6 @@ Plot.prof.kay <- ggplot(profile_long, aes(x = congeners, y = Value,
 # see plot
 print(Plot.prof.kay)
 
-# Save plot
-ggsave("Output/Plots/ProfKay5dayBarV01.png",
-       plot = Plot.prof.kay, width = 15, height = 5, dpi = 500)
-
 # 1:1 plots
 threshold <- 0.002  # Define the threshold for labeling
 
@@ -1330,11 +1508,8 @@ i <- ggplot(profile.kay, aes(x = Air,
 # see plot
 print(i)
 
-# Save plot
-ggsave("Output/Plots/ProfKay5dayDotV01.png",
-       plot = i, width = 15, height = 5, dpi = 500)
 
-# Profiles Ya'u -----------------------------------------------------------
+# Ya'u --------------------------------------------------------------------
 tmp <- rowSums(data.yau[, 4:176], na.rm = TRUE)
 profile.yau <- sweep(data.yau[, 4:176], 1, tmp, FUN = "/")
 profile.yau <- cbind(data.yau$congeners, profile.yau)
@@ -1389,10 +1564,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau1st1dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 prof.yau.1st <- data.frame(profile.yau.1st)
 prof.yau.1st[, 2:7] <- lapply(prof.yau.1st[, 2:7],
@@ -1421,10 +1592,6 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day1,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau1st1dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
 # Day 3
 selected_samples <- c("Air.day3", "WB Personal Y (1st) day 3")
 profile_long_filtered <- profile_long %>%
@@ -1450,10 +1617,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau1st3dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
                                           y = WB.Personal.Y..1st..day.3,
@@ -1476,10 +1639,6 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
 
 # see plot
 print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau1st2dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
 selected_samples <- c("Air.day5", "WB Personal Y (1st) day 5")
@@ -1506,10 +1665,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau1st5dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
                                           y = WB.Personal.Y..1st..day.5,
@@ -1532,10 +1687,6 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
 
 # see plot
 print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau1st5dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Week 2
 profile.yau.2nd <- profile.yau[profile.yau$week == 2, ]
@@ -1585,10 +1736,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2nd1dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 prof.yau.2nd <- data.frame(profile.yau.2nd)
 prof.yau.2nd[, 2:7] <- lapply(prof.yau.2nd[, 2:7],
@@ -1617,10 +1764,6 @@ Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day1,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2nd1dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
 # Day 3
 selected_samples <- c("Air.day3", "WB Personal Y (2nd) day 3")
 profile_long_filtered <- profile_long %>%
@@ -1646,10 +1789,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2nd3dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day3,
                                           y = WB.Personal.Y..2nd..day.3,
@@ -1672,10 +1811,6 @@ Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day3,
 
 # see plot
 print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd3dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
 selected_samples <- c("Air.day5", "WB Personal Y (2nd) day 5")
@@ -1702,10 +1837,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2nd5dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day5,
                                           y = WB.Personal.Y..2nd..day.5,
@@ -1729,12 +1860,7 @@ Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day5,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2nd5dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
-
-# Profiles Ya'u nw & w ----------------------------------------------------
+# Ya'u nw & w
 tmp <- rowSums(data.yau2[, 5:177], na.rm = TRUE)
 profile.yau <- sweep(data.yau2[, 5:177], 1, tmp, FUN = "/")
 profile.yau <- cbind(data.yau2$congeners, profile.yau)
@@ -1795,10 +1921,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2day1BarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 prof.yau.1st <- data.frame(profile.yau.1st)
 prof.yau.1st[, 2:7] <- lapply(prof.yau.1st[, 2:7],
@@ -1827,10 +1949,6 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day1,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau1st1dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
 # Day 3
 selected_samples <- c("Air.day3", "WB Personal Y (nw) day 3",
                       "WB Personal Y (w) day 3")
@@ -1857,10 +1975,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2day3BarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
                                           y = WB.Personal.Y..1st..day.3,
@@ -1883,10 +1997,6 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day3,
 
 # see plot
 print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau1st2dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
 
 # Day 5
 selected_samples <- c("Air.day5", "WB Personal Y (nw) day 5",
@@ -1914,10 +2024,6 @@ Plot.prof.yau <- ggplot(profile_long_filtered,
 # see plot
 print(Plot.prof.yau)
 
-# Save plot
-ggsave("Output/Plots/ProfYau2day5BarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
 # 1:1 plot
 Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
                                           y = WB.Personal.Y..1st..day.5,
@@ -1940,205 +2046,4 @@ Plot.prof.yau <- ggplot(prof.yau.1st, aes(x = Air.day5,
 
 # see plot
 print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau1st5dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
-# Week 2
-profile.yau.2nd <- profile.yau[profile.yau$week == 2, ]
-profile.yau.2nd <- t(profile.yau.2nd)
-profile.yau.2nd <- profile.yau.2nd[-1, ]
-colnames(profile.yau.2nd) <- profile.yau.2nd[1,]
-profile.yau.2nd <- profile.yau.2nd[-1, ]
-rownames_data <- rownames(profile.yau.2nd)
-rownames(profile.yau.2nd) <- NULL
-profile.yau.2nd <- cbind(Row_Name = rownames_data, profile.yau.2nd)
-colnames(profile.yau.2nd)[1] <- "congeners"
-colnames(profile.yau.2nd)[2] <- "Air.day1"
-colnames(profile.yau.2nd)[3] <- "Air.day3"
-colnames(profile.yau.2nd)[4] <- "Air.day5"
-colnames(profile.yau.2nd)[5] <- "WB Personal Y (2nd) day 1"
-colnames(profile.yau.2nd)[6] <- "WB Personal Y (2nd) day 3"
-colnames(profile.yau.2nd)[7] <- "WB Personal Y (2nd) day 5"
-
-profile_long <- profile.yau.2nd %>%
-  as.data.frame() %>%
-  pivot_longer(cols = -congeners, 
-               names_to = "Samples", 
-               values_to = "Value")
-
-# Day 1
-selected_samples <- c("Air.day1", "WB Personal Y (2nd) day 1")
-profile_long_filtered <- profile_long %>%
-  filter(Samples %in% selected_samples)
-profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
-profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
-                                          levels = unique(profile_long_filtered$congeners))
-
-# Bar plot
-Plot.prof.yau <- ggplot(profile_long_filtered,
-                        aes(x = congeners, y = Value, fill = Samples)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
-  xlab("") +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 3/12,
-        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
-        axis.title.x = element_text(face = "bold", size = 7),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
-
-# see plot
-print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd1dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
-# 1:1 plot
-prof.yau.2nd <- data.frame(profile.yau.2nd)
-prof.yau.2nd[, 2:7] <- lapply(prof.yau.2nd[, 2:7],
-                              as.numeric)
-threshold <- 0.005  # Define the threshold for labeling
-
-Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day1,
-                                          y = WB.Personal.Y..2nd..day.1,
-                                          label = congeners)) +
-  geom_point(size = 3) +
-  geom_text(data = subset(prof.yau.2nd,
-                          abs(Air.day1 - WB.Personal.Y..2nd..day.1) > threshold),
-            size = 5, vjust = 1.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.15) +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10,
-        axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 13),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("Air Day 1"))) +
-  xlab(expression(bold("WB Personal Y (2nd) day 1")))
-
-# see plot
-print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd1dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
-# Day 3
-selected_samples <- c("Air.day3", "WB Personal Y (2nd) day 3")
-profile_long_filtered <- profile_long %>%
-  filter(Samples %in% selected_samples)
-profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
-profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
-                                          levels = unique(profile_long_filtered$congeners))
-
-# Bar plot
-Plot.prof.yau <- ggplot(profile_long_filtered,
-                        aes(x = congeners, y = Value, fill = Samples)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
-  xlab("") +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 3/12,
-        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
-        axis.title.x = element_text(face = "bold", size = 7),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
-
-# see plot
-print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd3dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
-# 1:1 plot
-Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day3,
-                                          y = WB.Personal.Y..2nd..day.3,
-                                          label = congeners)) +
-  geom_point(size = 3) +
-  geom_text(data = subset(prof.yau.2nd,
-                          abs(Air.day3 - WB.Personal.Y..2nd..day.3) > threshold),
-            size = 5, vjust = 1.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.15) +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10,
-        axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 13),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("Air Day 3"))) +
-  xlab(expression(bold("WB Personal Y (2nd) Day 3")))
-
-# see plot
-print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd3dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
-# Day 5
-selected_samples <- c("Air.day5", "WB Personal Y (2nd) day 5")
-profile_long_filtered <- profile_long %>%
-  filter(Samples %in% selected_samples)
-profile_long_filtered$Value <- as.numeric(profile_long_filtered$Value)
-profile_long_filtered$congeners <- factor(profile_long_filtered$congeners,
-                                          levels = unique(profile_long_filtered$congeners))
-
-# Bar plot
-Plot.prof.yau <- ggplot(profile_long_filtered,
-                        aes(x = congeners, y = Value, fill = Samples)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7, alpha = 0.8) +
-  xlab("") +
-  ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 3/12,
-        axis.text.x = element_text(face = "bold", size = 5, angle = 60, hjust = 1),
-        axis.title.x = element_text(face = "bold", size = 7),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13))
-
-# see plot
-print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd5dayBarV01.png",
-       plot = Plot.prof.yau, width = 15, height = 5, dpi = 500)
-
-# 1:1 plot
-Plot.prof.yau <- ggplot(prof.yau.2nd, aes(x = Air.day5,
-                                          y = WB.Personal.Y..2nd..day.5,
-                                          label = congeners)) +
-  geom_point(size = 3) +
-  geom_text(data = subset(prof.yau.2nd,
-                          abs(Air.day5 - WB.Personal.Y..2nd..day.5) > threshold),
-            size = 5, vjust = 1.5) +
-  geom_abline(intercept = 0, slope = 1, color = "red") +
-  xlim(0, 0.15) +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 10/10,
-        axis.text.x = element_text(face = "bold", size = 12),
-        axis.title.x = element_text(face = "bold", size = 13),
-        axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13)) +
-  ylab(expression(bold("Air Day 5"))) +
-  xlab(expression(bold("WB Personal Y (2nd) Day 5")))
-
-# see plot
-print(Plot.prof.yau)
-
-# Save plot
-ggsave("Output/Plots/ProfYau2nd5dayDotV01.png",
-       plot = Plot.prof.yau, width = 10, height = 10, dpi = 500)
-
 

@@ -1,4 +1,4 @@
-## Code to individual PCB calculate sampling rates
+## Script to calcualte individual PCB calculate sampling rates
 # for silicone wristbands. Sampling rates were calculated with
 # (i) static (2 times) and (ii) rotating set up.
 
@@ -20,9 +20,12 @@ install.packages("dplyr")
 # Read data from excel
 PUF <- data.frame(read_excel("Data/DataStatic.xlsx", sheet = "PUFv2",
                                col_names = TRUE, col_types = NULL))
-
 WB <- data.frame(read_excel("Data/DataStatic.xlsx", sheet = "WDv2",
                                 col_names = TRUE, col_types = NULL))
+logKoa.1 <- data.frame(read_excel("Data/logKoaVstat1.xlsx", sheet = "logKoa",
+                                col_names = TRUE, col_types = NULL))
+logKoa.2 <- data.frame(read_excel("Data/logKoaVstat2.xlsx", sheet = "logKoa",
+                                  col_names = TRUE, col_types = NULL))
 
 # Remove metadata
 WB.1 <- subset(WB, select = -c(sample:time))
@@ -43,7 +46,7 @@ congener <- names(head(WB.1)[0,])
 WBMatrix <- cbind(congener, WBMatrix)
 
 # Export
-write.csv(WBMatrix, file = "Output/Data/csv/WDLinearity.csv")
+write.csv(WBMatrix, file = "Output/Data/csv/SamplingRates/SR/WDLinearity.csv")
 
 # Calculate sampling rate
 # Remove sample name of PUFs
@@ -58,45 +61,45 @@ time <- WB$time/24
 # Conditions: Mean of PUF >0, but also all the measurements >0,
 # Measurements from WB >3
 # Create matrix for sampling rate (SR)
-SR <- matrix(nrow = length(WB.1), ncol = 3)
+SR.st.1 <- matrix(nrow = length(WB.1), ncol = 3)
 
 for(i in 1:length(WB.1)) {
   if ((PUF.mean[i] > 0) && (sum(WB.1[i] > 0,
                                 na.rm = TRUE) > 3) && (sum(PUF.1[i] > 0,
                                                            na.rm = TRUE) == 4)) {
     fit <- lm(WB.1[,i]/PUF.mean[i] ~ 0 + time)
-    SR[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR[i,3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+    SR.st.1[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.st.1[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.st.1[i,3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR[i,1] <- NA
-    SR[i,2] <- NA
-    SR[i,3] <- NA
+    SR.st.1[i,1] <- NA
+    SR.st.1[i,2] <- NA
+    SR.st.1[i,3] <- NA
   }
 }
 
-colnames(SR) <-c("Sampling Rate (m3/d)", "R2", "p-value")
+colnames(SR.st.1) <-c("Sampling Rate (m3/d)", "R2", "p-value")
 congener <- names(head(WB.1)[0,])
-SR <- as.data.frame(cbind(congener, SR))
+SR.st.1 <- as.data.frame(cbind(congener, SR.st.1))
 
 # Convert R2 and p-value to numeric
-SR$`Sampling Rate (m3/d)` <- as.numeric(SR$`Sampling Rate (m3/d)`)
-SR$R2 <- as.numeric(SR$R2)
-SR$`p-value` <- as.numeric(SR$`p-value`)
+SR.st.1$`Sampling Rate (m3/d)` <- as.numeric(SR.st.1$`Sampling Rate (m3/d)`)
+SR.st.1$R2 <- as.numeric(SR.st.1$R2)
+SR.st.1$`p-value` <- as.numeric(SR.st.1$`p-value`)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR$R2 < 0.9 | SR$`p-value` > 0.05
-SR$`Sampling Rate (m3/d)`[mask] <- NA
-SR$R2[mask] <- NA
-SR$`p-value`[mask] <- NA
+mask <- SR.st.1$R2 < 0.9 | SR.st.1$`p-value` > 0.05
+SR.st.1$`Sampling Rate (m3/d)`[mask] <- NA
+SR.st.1$R2[mask] <- NA
+SR.st.1$`p-value`[mask] <- NA
 
 # Values
-SR.n <- length(na.omit(SR$`Sampling Rate (m3/d)`))
-SR.ave <- mean(SR$`Sampling Rate (m3/d)`, na.rm = TRUE)
-SR.sd <- sd(SR$`Sampling Rate (m3/d)`, na.rm = TRUE)
+SR.n <- length(na.omit(SR.st.1$`Sampling Rate (m3/d)`))
+SR.ave <- mean(SR.st.1$`Sampling Rate (m3/d)`, na.rm = TRUE)
+SR.sd <- sd(SR.st.1$`Sampling Rate (m3/d)`, na.rm = TRUE)
 
 # Export
-write.csv(SR, file = "Output/Data/csv/WDSamplingRateV1.csv")
+write.csv(SR.st.1, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
 
 # Plots
 # Change number congener in [] 
@@ -126,10 +129,8 @@ ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[16])) +
 # Read data from excel
 PUF.v2 <- data.frame(read_excel("Data/DataV05.xlsx", sheet = "PUFv3",
                              col_names = TRUE, col_types = NULL))
-
 WB.st <- data.frame(read_excel("Data/DataV05.xlsx", sheet = "WDST",
                             col_names = TRUE, col_types = NULL))
-
 WB.rot <- data.frame(read_excel("Data/DataV05.xlsx", sheet = "WDROT",
                                col_names = TRUE, col_types = NULL))
 
@@ -143,50 +144,52 @@ time.2 <- WB.st$time/24
 # Remove sample name of PUFs
 PUF.2 <- subset(PUF.v2, select = -c(Concentration..ng.m3.))
 # Average individual PCBs from PUF
-PUF.mean.2 <- t(colMeans(PUF.2))
+# If value 0, the average is the number left.
+PUF.mean.2 <- t(apply(PUF.2, 2, function(x) mean(x[x != 0])))
+colnames(PUF.mean.2) <- colnames(PUF.2)  # Ensure the column names match the original data
 
 # (dMWD/Cair) = Rsdt
 # Force intercept 0
 # Conditions: Mean of PUF >0, but also all the measurements >0,
 # Measurements from WB >3
 # Create matrix for sampling rate (SR)
-SR.st <- matrix(nrow = length(WB.st.2), ncol = 3)
+SR.st.2 <- matrix(nrow = length(WB.st.2), ncol = 3)
 
 for(i in 1:length(WB.st.2)) {
-  if (PUF.mean.2[i] > 0) {
+  if (!is.na(PUF.mean.2[i]) && PUF.mean.2[i] > 0) { # for NaN values
     fit <- lm(WB.st.2[,i]/PUF.mean.2[i] ~ 0 + time.2)
-    SR.st[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.st[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.st[i,3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+    SR.st.2[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.st.2[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.st.2[i,3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.st[i,1] <- NA
-    SR.st[i,2] <- NA
-    SR.st[i,3] <- NA
+    SR.st.2[i,1] <- NA
+    SR.st.2[i,2] <- NA
+    SR.st.2[i,3] <- NA
   }
 }
 
-colnames(SR.st) <-c("Sampling Rate (m3/d)", "R2", "p-value")
+colnames(SR.st.2) <-c("Sampling Rate (m3/d)", "R2", "p-value")
 congener <- names(head(WB.st.2)[0,])
-SR.st <- as.data.frame(cbind(congener, SR.st))
+SR.st.2 <- as.data.frame(cbind(congener, SR.st.2))
 
 # Convert R2 and p-value to numeric
-SR.st$`Sampling Rate (m3/d)` <- as.numeric(SR.st$`Sampling Rate (m3/d)`)
-SR.st$R2 <- as.numeric(SR.st$R2)
-SR.st$`p-value` <- as.numeric(SR.st$`p-value`)
+SR.st.2$`Sampling Rate (m3/d)` <- as.numeric(SR.st.2$`Sampling Rate (m3/d)`)
+SR.st.2$R2 <- as.numeric(SR.st.2$R2)
+SR.st.2$`p-value` <- as.numeric(SR.st.2$`p-value`)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.st$R2 < 0.9 | SR.st$`p-value` > 0.05
-SR.st$`Sampling Rate (m3/d)`[mask] <- NA
-SR.st$R2[mask] <- NA
-SR.st$`p-value`[mask] <- NA
+mask <- SR.st.2$R2 < 0.9 | SR.st.2$`p-value` > 0.05
+SR.st.2$`Sampling Rate (m3/d)`[mask] <- NA
+SR.st.2$R2[mask] <- NA
+SR.st.2$`p-value`[mask] <- NA
 
 # Values
-SR.st.n <- length(na.omit(SR.st$`Sampling Rate (m3/d)`))
-SR.st.ave <- mean(SR.st$`Sampling Rate (m3/d)`, na.rm = TRUE)
-SR.st.sd <- sd(SR.st$`Sampling Rate (m3/d)`, na.rm = TRUE)
+SR.st.n <- length(na.omit(SR.st.2$`Sampling Rate (m3/d)`))
+SR.st.ave <- mean(SR.st.2$`Sampling Rate (m3/d)`, na.rm = TRUE)
+SR.st.sd <- sd(SR.st.2$`Sampling Rate (m3/d)`, na.rm = TRUE)
 
 #export
-write.csv(SR.st, file = "Output/Data/csv/WDSamplingRateStV2.csv")
+write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2.csv")
 
 # Plots
 # Change number congener in [] 
@@ -222,7 +225,7 @@ ggplot(WB.st.2, aes(x = time.2*24, y = WB.st.2[, 153]/PUF.mean.2[153])) +
 SR.rot <- matrix(nrow = length(WB.rot.2), ncol = 3)
 
 for(i in 1:length(WB.rot.2)) {
-  if (PUF.mean.2[i] > 0) {
+  if (!is.na(PUF.mean.2[i]) && PUF.mean.2[i] > 0) { # for NaN values
     fit <- lm(WB.rot.2[,i]/PUF.mean.2[i] ~ 0 + time.2)
     SR.rot[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
     SR.rot[i,2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
@@ -255,7 +258,7 @@ SR.rot.ave <- mean(SR.rot$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.rot.sd <- sd(SR.rot$`Sampling Rate (m3/d)`, na.rm = TRUE)
 
 #export
-write.csv(SR.rot, file = "Output/Data/csv/WDSamplingRateRotV2.csv")
+write.csv(SR.rot, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateRotV1.csv")
 
 # Plots
 # Change number congener in [] 
@@ -315,9 +318,11 @@ plot.18.30 <- ggplot(combined_data, aes(x = time, y = PCB18.30_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -336,7 +341,7 @@ plot.18.30 <- ggplot(combined_data, aes(x = time, y = PCB18.30_comb,
 plot.18.30
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB18.30SamplingRates.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB18.30SamplingRates.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
@@ -370,9 +375,11 @@ plot.52 <- ggplot(combined_data, aes(x = time, y = PCB52_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -391,7 +398,7 @@ plot.52 <- ggplot(combined_data, aes(x = time, y = PCB52_comb,
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB52SamplingRates.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -425,9 +432,11 @@ plot.118 <- ggplot(combined_data, aes(x = time, y = PCB118_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -446,7 +455,7 @@ plot.118 <- ggplot(combined_data, aes(x = time, y = PCB118_comb,
 plot.118
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB118SamplingRates.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB118SamplingRates.png",
        plot = plot.118, width = 8, height = 10, dpi = 1300)
 
 # PCB 187
@@ -480,9 +489,11 @@ plot.187 <- ggplot(combined_data, aes(x = time, y = PCB187_comb,
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5, label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0, label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+  annotate("text", x = 1, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
@@ -501,5 +512,138 @@ plot.187 <- ggplot(combined_data, aes(x = time, y = PCB187_comb,
 plot.187
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/PCB187SamplingRates.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB187SamplingRates.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
+
+# SR vs logKoa regressions ------------------------------------------------
+# (1) Static 1
+sr.stat.1 <- data.frame(
+  sr = SR.st.1$`Sampling Rate (m3/d)`,
+  logKoa = logKoa.1$logKoa)
+
+# Remove any NA values
+sr.stat.1 <- na.omit(sr.stat.1)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.stat.1 <- lm(log(sr.stat.1$sr) ~ sr.stat.1$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.stat.1)[1])  # exponentiate the intercept
+b <- coef(model.stat.1)[2]       # coefficient for logKoa
+r2 <- summary(model.stat.1)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.stat.1.koa <- ggplot(sr.stat.1, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.stat.1$logKoa) + 1.05, y = max(sr.stat.1$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.stat.1$logKoa) + 0.35, y = max(sr.stat.1$sr) * 1.13,
+           label = paste("R² =", round(r2, 3)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.stat.1.koa
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/SR/Stat1_logKoa.png", plot = p.sr.stat.1.koa,
+       width = 6, height = 6, dpi = 500)
+
+# (2) Static 2
+sr.stat.2 <- data.frame(
+  sr = SR.st.2$`Sampling Rate (m3/d)`,
+  logKoa = logKoa.2$logKoa)
+
+# Remove any NA values
+sr.stat.2 <- na.omit(sr.stat.2)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.stat.2 <- lm(log(sr.stat.2$sr) ~ sr.stat.2$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.stat.2)[1])  # exponentiate the intercept
+b <- coef(model.stat.2)[2]       # coefficient for logKoa
+r2 <- summary(model.stat.2)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.stat.2.koa <- ggplot(sr.stat.2, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.stat.2$logKoa) + 1.05, y = max(sr.stat.2$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.stat.2$logKoa) + 0.35, y = max(sr.stat.2$sr) * 1.13,
+           label = paste("R² =", round(r2, 3)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.stat.2.koa
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/SR/Stat2_logKoa.png", plot = p.sr.stat.2.koa,
+       width = 6, height = 6, dpi = 500)
+
+# (3) Rot
+sr.rot <- data.frame(
+  sr = SR.rot$`Sampling Rate (m3/d)`,
+  logKoa = logKoa.2$logKoa)
+
+# Remove any NA values
+sr.rot <- na.omit(sr.rot)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.rot <- lm(log(sr.rot$sr) ~ sr.rot$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.rot)[1])  # exponentiate the intercept
+b <- coef(model.rot)[2]       # coefficient for logKoa
+r2 <- summary(model.rot)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.rot.koa <- ggplot(sr.rot, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = min(sr.rot$logKoa) + 1.05, y = max(sr.rot$sr) * 1.2,
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           size = 5) +
+  annotate("text", x = min(sr.rot$logKoa) + 0.35, y = max(sr.rot$sr) * 1.13,
+           label = paste("R² =", round(r2, 3)), size = 5) +
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 10),
+        axis.title.y = element_text(face = "bold", size = 10)) +
+  theme(axis.text.x = element_text(face = "bold", size = 10),
+        axis.title.x = element_text(face = "bold", size = 10))
+
+p.sr.rot.koa
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/SR/Rot_logKoa.png", plot = p.sr.rot.koa,
+       width = 6, height = 6, dpi = 500)

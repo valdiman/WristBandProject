@@ -29,29 +29,29 @@ install.packages("tibble")
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # For MI & YA
-  data.Mi.Ya.Stat <- data[8, 4:176]
+  mass.Mi.Ya.Stat <- data[8, 4:176]
   # For EA
-  data.Ea.Stat <- data[7, 4:176]
+  mass.Ea.Stat <- data[7, 4:176]
   # For Cr
-  data.Cr.Stat <- data.frame(colMeans(data[14:15, 4:176]))
+  mass.Cr.Stat <- data.frame(colMeans(data[14:15, 4:176]))
   # For Hu
-  data.Hu.Stat <- data[13, 4:176]
+  mass.Hu.Stat <- data[13, 4:176]
   # For Xu
-  data.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
+  mass.Xu.Stat <- data.frame(colMeans(data[19:21, 4:176]))
   # For Gift
-  data.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
+  mass.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
   # For Xue
-  data.Xue.Stat <- data.2[3, 3:175]
+  mass.Xue.Stat <- data.2[3, 3:175]
   
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
-  conc.Mi.Ya <- as.data.frame(t(data.Mi.Ya.Stat/(0.5*data$time.day[8])))
-  conc.Ea <- as.data.frame(t(data.Ea.Stat/(0.5*data$time.day[7])))
-  conc.Cr <- as.data.frame(data.Cr.Stat/(0.5*data$time.day[14]))
-  conc.Hu <- as.data.frame(t(data.Hu.Stat/(0.5*data$time.day[13])))
-  conc.Xu <- as.data.frame(data.Xu.Stat/(0.5*data$time.day[19]))
-  conc.Gi <- as.data.frame(data.Gi.Stat/(0.5*data$time.day[22]))
-  conc.Xue <- as.data.frame(t(data.Xue.Stat/(0.5*data.2$time.day[3])))
+  conc.Mi.Ya <- as.data.frame(t(mass.Mi.Ya.Stat/(0.5*data$time.day[8])))
+  conc.Ea <- as.data.frame(t(mass.Ea.Stat/(0.5*data$time.day[7])))
+  conc.Cr <- as.data.frame(mass.Cr.Stat/(0.5*data$time.day[14]))
+  conc.Hu <- as.data.frame(t(mass.Hu.Stat/(0.5*data$time.day[13])))
+  conc.Xu <- as.data.frame(mass.Xu.Stat/(0.5*data$time.day[19]))
+  conc.Gi <- as.data.frame(mass.Gi.Stat/(0.5*data$time.day[22]))
+  conc.Xue <- as.data.frame(t(mass.Xue.Stat/(0.5*data.2$time.day[3])))
   
   # Combine concentrations
   conc.air <- cbind(conc.Mi.Ya, conc.Ea, conc.Cr, conc.Hu, conc.Xu, conc.Gi,
@@ -62,8 +62,14 @@ install.packages("tibble")
                           "Conc.Air.Xue")
 }
 
+# Check total PCB
+tPCB.conc.air <- colSums(conc.air, na.rm = TRUE)
+# See
+tPCB.conc.air
+
 # Read calculated average sampling rates for volunteers -------------------
-sr <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
+sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
+sr.0 <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
@@ -198,7 +204,7 @@ plotAirWBtPCB <- ggplot(data, aes(x = Air_Concentration, y = Wb_Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirWBtPCBSR.png", plot = plotAirWBtPCB, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCBV2.png", plot = plotAirWBtPCB, width = 6,
        height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
@@ -216,10 +222,23 @@ percentage_error <-function(observed, predicted) {
 
 # Calculate percentage errors
 percentage_error <- percentage_error(data$Air_Concentration, data$Wb_Concentration)
-
+min(percentage_error)
+max(percentage_error)
 # Calculate mean percent error
 mean_error <- mean(percentage_error)
 print(paste("Mean Error:", mean_error))
+
+# Calculate percentage errors btw left and right WBs
+# Extract the Wb_Concentration column as a vector
+Wb_Concentration <- data$Wb_Concentration
+# Remove the last row to ensure an even number of elements
+Wb_Concentration <- Wb_Concentration[-length(Wb_Concentration)]
+# Convert the remaining vector into a 2x7 matrix
+Wb_matrix <- matrix(Wb_Concentration, nrow = 7, ncol = 2, byrow = TRUE)
+colnames(Wb_matrix) <- c('WBleft', 'WBright')
+# Calculate percentage errors
+percentage_error_hand <- percentage_error(Wb_matrix[, 1], Wb_matrix[, 2])
+mean(percentage_error_hand)
 
 # Individual PCB Congeners ------------------------------------------------
 # Create a data frame with the combined data
@@ -364,7 +383,7 @@ plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
 print(plotAirWBPCBi)
 
 # Save plot in folder
-ggsave("Output/Plots/AirWBPCBi.png", plot = plotAirWBPCBi, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV2.png", plot = plotAirWBPCBi, width = 6,
        height = 5, dpi = 500)
 
 

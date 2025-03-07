@@ -159,7 +159,7 @@ ggplot(data = model.df.2, aes(x = time, y = Vef)) +
 # Ca from BSB student room
 uptakeWB3.PCB52 <- function(t, state, parms) {
   
-  Kwb <- 10^7.4 # [m3wb/m3air] from Frederiksen 2022
+  Kwb <- 10^7.4 # [m3wb/m3air] from 4.
   Vwb <- 4.73 * 10^-6 # [m3]. Debossed adult size (www.24hourwristbands.com)
   
   # Variables
@@ -175,12 +175,12 @@ uptakeWB3.PCB52 <- function(t, state, parms) {
                       0.5))                   # 22:00 to 24:00
   
   # Apply the conditions for Ca
-  Ca <- ifelse(hour < 8, 0.2,                                # 0:00 to 8:00
-               ifelse(hour < 8.5, 0.0227,                   # 8:00 to 8:30
-                      ifelse(hour < 9, 0.2,                 # 8:30 to 9:00
-                             ifelse(hour < 18, 1.4,        # 9:00 to 18:00
-                                    ifelse(hour < 18.5, 0.0227,  # 18:00 to 18:30
-                                           0.2)))))              # 18:30 to 24:00
+  Ca <- ifelse(hour < 8, 0.2,                            # 0:00 to 8:00 home
+               ifelse(hour < 8.5, 0.0227,                # 8:00 to 8:30 outdoor/commute
+                      ifelse(hour < 17, 1.4,             # 8:30 to 17:00 office
+                             ifelse(hour < 17.5, 0.0227, # 17:00 to 17:30 outdoor/commute
+                                    0.2))))              # 17:30 to 24:00 home
+  
   
   # Differential equations
   dMwbdt <- sr * (Ca - Mwb / (Kwb * Vwb)) # [ng/d]
@@ -193,9 +193,9 @@ uptakeWB3.PCB52 <- function(t, state, parms) {
 # Initial conditions
 cinit <- c(Mwb = 0, Vef = 0) # Initial values for Mwb and Vef
 
-# Time sequence for 5 days (starting at 8 AM on Monday and ending at 6 PM on Friday)
+# Time sequence for 5 days (starting at 8 AM on Monday and ending at 5 PM on Friday)
 start_time <- 9   # Starting at 9 AM on Monday (first day)
-end_time <- 4 * 24 + 18  # Ending at 6 PM on Friday (5th day)
+end_time <- 4 * 24 + 17  # Ending at 5 PM on Friday (5th day)
 
 # Generate time sequence with 0.25 hour steps
 t_seq <- seq(start_time, end_time, by = 0.25)
@@ -225,7 +225,7 @@ Ca_avg <- mean(model.df.3$Ca)
 start_time <- as.POSIXct("2025-01-06 09:00:00", format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 
 # Generate a sequence of times with an increment of 0.25 hours (15 minutes)
-model.df.3$new_datetime <- start_time + (0:420) * 3600 * 0.25  # 0.25 hours = 15 minutes
+model.df.3$new_datetime <- start_time + (0:416) * 3600 * 0.25  # 0.25 hours = 15 minutes
 
 # Format the new datetime to display only the day and hour (without minutes/seconds)
 model.df.3$new_formatted_datetime <- format(model.df.3$new_datetime, "%a %H:%M")
@@ -240,7 +240,7 @@ plotPCB52Model <- ggplot(data = model.df.3, aes(x = time)) +
   geom_line(aes(y = Ca_avg, color = "Ca_avg"), linetype = "dotted", linewidth = 1) +
   scale_color_manual(name = "",
                      values = c("Cwb" = "blue", "Ca" = "#009E73", "Ca_avg" = "black"),
-                     labels = c("Cwb" = "Estimate air concentration from WB", 
+                     labels = c("Cwb" = "Estimate air concentration from full-day WB", 
                                 "Ca" = "Air concentration",
                                 "Ca_avg" = "Average air concentration")) +
   scale_x_continuous(name = "Time (hours)", 
