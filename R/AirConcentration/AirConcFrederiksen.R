@@ -298,10 +298,11 @@ plotfredhomesl
 ggsave("Output/Plots/AirConcentrations/Frederiksenhomesl.png",
        plot = plotfredhomesl, width = 5, height = 5, dpi = 500)
 
-# Use constant SR & adjust air concentration to exposure time -------------
+
+# Use a cte SR ------------------------------------------------------------
 wb.Fred.7d.v2 <- wb.Fred[, c("ID", "group", matching_cols)]
 for (col in matching_cols) {
-  wb.Fred.7d.v2[[col]] <- wb.Fred[[col]] / (0.5 * 7) # change SR
+  wb.Fred.7d.v2[[col]] <- wb.Fred[[col]] / (0.5 * 7) # change SR (0.5)
 }
 
 # 7 days. Pivot wb.Fred.7d to long format
@@ -323,7 +324,7 @@ conc.Fred_mod <- conc.Fred
 pcb_columns <- grep("^PCB", names(conc.Fred), value = TRUE)
 # Adjust the air concentration to the time the volunteer were exposed
 # The WB was not 100% of the time exposed to the apartment concentration
-conc.Fred_mod[pcb_columns] <- conc.Fred[pcb_columns] * (conc.Fred$time.home / (7 * 24))
+conc.Fred_mod[pcb_columns] <- conc.Fred[pcb_columns]
 # Pivot conc.Fred to long format
 conc.Fred_mod_long <- conc.Fred_mod %>%
   pivot_longer(cols = starts_with("PCB"), 
@@ -377,7 +378,7 @@ plotfred7d.v2 <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
 plotfred7d.v2
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/Frederiksen7dSrCteTieExpAdj.png", plot = plotfred7d.v2,
+ggsave("Output/Plots/AirConcentrations/Frederiksen7dSr0.5.png", plot = plotfred7d.v2,
        width = 7, height = 7, dpi = 500)
 
 

@@ -25,15 +25,15 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # Stat samples
-  data.Stat.1 <- data[1, 3:175]
-  data.Stat.2 <- data[2, 3:175]
-  data.Stat.3 <- data[3, 3:175]
+  data.Stat.1 <- data[1, 4:176]
+  data.Stat.2 <- data[2, 4:176]
+  data.Stat.3 <- data[3, 4:176]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
   # i and ii are from the same office
-  conc.air.i <- as.data.frame(t(data.Stat.1/(0.5*data$time.day[1])))
-  conc.air.ii <- as.data.frame(t(data.Stat.2/(0.5*data$time.day[2])))
-  conc.air.iii <- as.data.frame(t(data.Stat.3/(0.5*data$time.day[3])))
+  conc.air.i <- as.data.frame(t(data.Stat.1/(0.5*data$total.time.day[1])))
+  conc.air.ii <- as.data.frame(t(data.Stat.2/(0.5*data$total.time.day[2])))
+  conc.air.iii <- as.data.frame(t(data.Stat.3/(0.5*data$total.time.day[3])))
   # Bind the data frames together row-wise
   conc.air.i.2 <- cbind(conc.air.i, conc.air.ii)
   # Average i and ii
@@ -52,16 +52,16 @@ sr <- sr[, 1:2]
 
 # Select wore WBs ---------------------------------------------------------
 {
-  wb.Mi.o <- data[4, c(2, 3:175)]
-  wb.Mi.h <- data[5, c(2, 3:175)]
-  wb.Ea.h <- data[6, c(2, 3:175)]
-  wb.Ea.o <- data[7, c(2, 3:175)]
-  wb.Ya.o <- data[8, c(2, 3:175)]
-  wb.Ya.h <- data[9, c(2, 3:175)]
-  wb.An.h <- data[10, c(2, 3:175)]
-  wb.An.o <- data[11, c(2, 3:175)]
-  wb.Xu.h <- data[12, c(2, 3:175)]
-  wb.Xu.o <- data[13, c(2, 3:175)]
+  wb.Mi.o <- data[4, c(2, 4:176)]
+  wb.Mi.h <- data[5, c(2, 4:176)]
+  wb.Ea.h <- data[6, c(2, 4:176)]
+  wb.Ea.o <- data[7, c(2, 4:176)]
+  wb.Ya.o <- data[8, c(2, 4:176)]
+  wb.Ya.h <- data[9, c(2, 4:176)]
+  wb.An.h <- data[10, c(2, 4:176)]
+  wb.An.o <- data[11, c(2, 4:176)]
+  wb.Xu.h <- data[12, c(2, 4:176)]
+  wb.Xu.o <- data[13, c(2, 4:176)]
 }
 # Combined wore WBs
 wb.wr <- rbind(wb.Mi.o, wb.Mi.h, wb.Ea.o, wb.Ea.h, wb.Ya.o, wb.Ya.h,
@@ -81,7 +81,7 @@ wb_div_sr <- sweep(wb_common, 2, sr_common$Average_Sampling_Rate, FUN = "/")
 # Alternative method -> use a constant sampling rate
 # wb_div_sr <- sweep(wb_common, 2, 1.5, FUN = "/")
 # Extract time.day from wb.wr
-wb_time_day <- wb.wr$time.day
+wb_time_day <- wb.wr$office.time.day
 # Divide wb_div_sr further by corresponding value in wb_time_day
 conc.wb <- sweep(wb_div_sr, 1, wb_time_day, FUN = "/")
 rownames(conc.wb) <- c('wb.Mi.o', 'wb.Mi.h', 'wb.Ea.o', 'wb.Ea.h',
@@ -235,4 +235,54 @@ comparison_df <- data.frame(
 )
 # Print the result
 print(comparison_df)
+
+# Home vs office WBs ------------------------------------------------------
+data.plot.v2 <- data.plot[-c(1, 3, 5, 6, 7, 9), ]
+
+# Reshape the data into long format so that each volunteer will have three rows: Of, Ho, and Air
+data_long.v2 <- data.plot.v2 %>%
+  # Create a new "Category" column to represent the Concentration type
+  mutate(Concentration_Type = case_when(
+    grepl("Ho", data.plot.v2$Volunteer2) ~ "Ho",
+    TRUE ~ "Air"
+  )) %>%
+  # Reshape to long format
+  pivot_longer(cols = c(Wb_Concentration, Air_Concentration), 
+               names_to = "Concentration_Name", 
+               values_to = "Concentration") %>%
+  # Now, add a column to distinguish between the three types of concentration
+  mutate(Concentration_Category = case_when(
+    Concentration_Name == "Wb_Concentration" & Concentration_Type == "Ho" ~ "Ho",
+    Concentration_Name == "Air_Concentration" ~ "Air",
+    TRUE ~ NA_character_
+  ))
+
+# Set the factor levels for Concentration_Category to control the order
+data_long.v2$Concentration_Category <- factor(
+  data_long.v2$Concentration_Category,
+  levels = c("Air", "Ho")  # Desired order
+)
+
+# Plot
+plotAirWBtPCB.2 <- ggplot(data_long.v2, aes(x = Volunteer_Group, y = Concentration,
+                                            fill = Concentration_Category)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
+  scale_fill_manual(
+    values = c("Ho" = "#E69F00", "Air" = "#009E73"),  # Custom colors
+    labels = c("Ho" = "WB full-day", "Air" = "Air PCB office")  # Custom labels
+  ) +
+  labs(x = '', fill = "Location") +
+  ylab(expression(bold("Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
+  theme_bw() +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14,
+                                   angle = 45, hjust =1),
+        axis.title.x = element_text(face = "bold", size = 14))
+
+# Print the plot
+print(plotAirWBtPCB.2)
+
+
+
 
