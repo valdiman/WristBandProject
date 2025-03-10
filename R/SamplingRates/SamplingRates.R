@@ -257,7 +257,7 @@ SR.rot.n <- length(na.omit(SR.rot$`Sampling Rate (m3/d)`))
 SR.rot.ave <- mean(SR.rot$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.rot.sd <- sd(SR.rot$`Sampling Rate (m3/d)`, na.rm = TRUE)
 
-#export
+# Export
 write.csv(SR.rot, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateRotV1.csv")
 
 # Plots

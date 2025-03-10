@@ -282,10 +282,7 @@ comparison_df <- data.frame(
 print(comparison_df)
 
 # Plot individual PCB congeners -------------------------------------------
-# Create a data frame with the combined data
-# Reshape conc_air_common to long format
-
-# Add PCB as a column
+# Air Add PCB as a column
 conc_air_common <- conc_air_common %>% rownames_to_column(var = "PCB")
 
 # Transform conc_air_common into long format
@@ -310,7 +307,7 @@ conc_air_long <- conc_air_long %>%
     TRUE ~ NA_character_
   ))
 
-# Move row names to the first column
+# WB Move row names to the first column
 conc_wb_clean <- conc.wb %>%
   rownames_to_column(var = "Row.Name")  # Row names are moved to 'Row.Name' column
 
@@ -326,10 +323,118 @@ conc_wb_clean <- conc_wb_clean %>%
 conc_wb_clean <- conc_wb_clean %>%
   mutate(Volunteer = paste0("Vol", rep(1:5, length.out = n())))  # Assigns Vol1 to Vol5 cyclically
 
-# View the updated data
-head(conc_wb_clean)
+conc_wb_clean_long <- conc_wb_clean %>%
+  pivot_longer(cols = starts_with("PCB"), 
+               names_to = "PCB", 
+               values_to = "Conc.WB")
 
+# Merge the two data frames
+merged_data <- conc_air_long %>%
+  inner_join(conc_wb_clean_long, by = c("PCB", "Volunteer" = "Volunteer"))
 
+# Change column name from PCB to congener
+merged_data <- merged_data %>%
+  rename(congener = PCB)
 
+# Filter out rows with 0 in either Conc.Air or Conc.WB
+filtered_data <- merged_data %>%
+  filter(Conc.Air != 0, Conc.WB != 0)
+
+# Color and shapes from tPCB plot
+# Define a color palette with enough distinct colors for the number of volunteers
+color_palette <- c("#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd")
+
+# Define a shape palette with enough distinct shapes for the number of volunteers
+shape_palette <- c(21, 22, 23, 24, 25)
+
+# Plot with different colors for each volunteer  
+p.AirWBPCBi.volun2 <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB, 
+                                           fill = Volunteer, shape = Volunteer)) +
+  geom_point(size = 2.5, color = "black", stroke = 0.5) +
+  theme_bw() +
+  theme(aspect.ratio = 15/15) +
+  annotation_logticks(sides = "bl") +
+  scale_y_log10(limits = c(0.00001, 10^3),
+                breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  scale_x_log10(limits = c(0.00001, 10^3),
+                breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  xlab(expression(bold("Air Concentration PCBi (ng/m"^3*")"))) +
+  ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14)) +
+  geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
+  geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
+  geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
+  guides(fill = guide_legend(override.aes = list(color = NA))) +
+  scale_fill_manual(values = color_palette) +
+  scale_shape_manual(values = shape_palette) +
+  labs(fill = "Volunteers", shape = "Volunteers") +
+  theme(legend.position = "right")
+
+# See plot
+p.AirWBPCBi.volun2
+
+# Save plot in folder
+ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCB.png",
+       plot = p.AirWBPCBi.volun2, width = 6, height = 5, dpi = 500)
+
+# Prepare data to combine with Frederiksen
+Volunteer2_PCBi_fred <- filtered_data %>%
+  filter(congener %in% c("PCB8", "PCB18.30", "PCB20.28", "PCB31", "PCB44.47.65",
+                    "PCB52", "PCB66", "PCB99", "PCB90.101.113", "PCB105",
+                    "PCB118", "PCB129.138.163", "PCB153.168", "PCB180.193"))
+
+Volunteer2_PCBi_fred <- Volunteer2_PCBi_fred %>%
+  mutate(congener = factor(congener, levels = congener_names))
+
+# Plot
+color_palette2 <- c("red", "blue", "green", "purple", "orange", "brown", 
+                   "pink", "yellow", "cyan", "gray", "black", "violet", 
+                   "magenta", "indianred") # 14 colors as an example
+
+shape_palette2 <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 21, 21, 22, 22)
+
+# Plot the data
+p.AirWBPCBi.volun2.Fred <- ggplot(Volunteer2_PCBi_fred, aes(x = Conc.Air, y = Conc.WB, 
+                                           fill = congener, shape = congener)) +
+  geom_point(size = 2.5, color = "black", stroke = 0.5) + # Points will have black border
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  annotation_logticks(sides = "bl") +
+  scale_y_log10(limits = c(0.001, 10^4),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", math_format(10^.x))) +
+  scale_x_log10(limits = c(0.001, 10^4),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", math_format(10^.x))) +
+  xlab(expression(bold("Air Concentration PCBi (ng/m"^3*")"))) +
+  ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 14),
+        axis.title.y = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(face = "bold", size = 14),
+        axis.title.x = element_text(face = "bold", size = 14)) +
+  geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
+  geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
+  geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
+  guides(fill = guide_legend(override.aes = list(color = NA))) +
+  scale_fill_manual(values = color_palette2) +
+  scale_shape_manual(values = shape_palette2) +
+  labs(fill = "Congener", shape = "Congener") +
+  theme(legend.position = "right")
+
+# See plot
+p.AirWBPCBi.volun2.Fred
+
+# Save plot in folder
+ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCBFred.png",
+       plot = p.AirWBPCBi.volun2.Fred, width = 6, height = 5, dpi = 500)
+
+# Export data
+write.csv(Volunteer2_PCBi_fred,
+          file = "Output/Data/csv/FrederiksenPCB/Volunteer2_PCBi.csv")
 
 
