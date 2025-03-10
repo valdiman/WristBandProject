@@ -117,6 +117,10 @@ plotfred7d
 ggsave("Output/Plots/AirConcentrations/Frederiksen7d.png", plot = plotfred7d,
        width = 7, height = 7, dpi = 500)
 
+# Export data
+write.csv(filtered_data,
+          file = "Output/Data/csv/FrederiksenPCB/Frederiksen_PCBi.csv")
+
 # Home time. Pivot wb.Fred.7d to long format
 wb.Fred.home_long <- wb.Fred.home %>%
   pivot_longer(cols = starts_with("PCB"), 
