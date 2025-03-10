@@ -190,30 +190,29 @@ print(plotAirWBtPCB)
 ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHome.png",
        plot = plotAirWBtPCB, width = 6, height = 5, dpi = 500)
 
-# Plot 1:1 Air PCB office vs. WB full-day
-data_filtered <- data.plot %>%
-  filter(grepl("Ho$", Volunteer2))
+# Plot 1:1 Air PCB office vs. WB full-day and WB only office
 
 # Define a color palette with enough distinct colors for the number of volunteers
-color_palette <- c("#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd")
+color_palette <- c("#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+                   "#f781bf", "#a65628", "#999999", "#e41a1c", "#4daf4a")
 
 # Define a shape palette with enough distinct shapes for the number of volunteers
-shape_palette <- c(21, 22, 23, 24, 25)
+shape_palette <- c(21, 21, 22, 22, 23, 23, 24, 24, 25, 25)
 
 # Create the plot
-plot <- ggplot(data_filtered, aes(x = Air_Concentration, y = Wb_Concentration,
-                                  fill = Volunteer2, shape = Volunteer2)) +
+plot <- ggplot(data.plot, aes(x = Air_Concentration, y = Wb_Concentration,
+                              fill = Volunteer2, shape = Volunteer2)) +
   geom_point(size = 3.5, color = "black", stroke = 0.5) +
   theme_bw() +
-  theme(aspect.ratio = 15/15) +
+  theme(aspect.ratio = 1) +
   annotation_logticks(sides = "bl") +
   scale_y_log10(limits = c(1, 10^2),
-                breaks = 10^(0:3),  # Integer powers of 10 only
-                labels = trans_format("log10", math_format(10^.x))) +
+                breaks = 10^(0:2),  # Integer powers of 10 only
+                labels = scales::trans_format("log10", math_format(10^.x))) +
   scale_x_log10(limits = c(1, 10^2),
-                breaks = 10^(0:3),  # Integer powers of 10 only
-                labels = trans_format("log10", math_format(10^.x))) +
-  xlab(expression(bold("Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
+                breaks = 10^(0:2),  # Integer powers of 10 only
+                labels = scales::trans_format("log10", math_format(10^.x))) +
+  xlab(expression(bold("Office Air Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
   ylab(expression(bold("Predicted Concentration " *Sigma*"PCB (ng/m"^3*")"))) +
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
@@ -222,11 +221,11 @@ plot <- ggplot(data_filtered, aes(x = Air_Concentration, y = Wb_Concentration,
   geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
-  guides(fill = guide_legend(override.aes = list(color = NA))) +
+  guides(fill = guide_legend(override.aes = list(color = "black", shape = shape_palette))) +
   scale_fill_manual(values = color_palette) +
   scale_shape_manual(values = shape_palette) +
   labs(fill = "Volunteers", shape = "Volunteers") +
-  theme(legend.position = "right") # Optional: Adjust legend position
+  theme(legend.position = "right")
 
 # See plot
 plot
