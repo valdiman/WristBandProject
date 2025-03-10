@@ -359,8 +359,8 @@ p.AirWBPCBi.volun2 <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
   scale_x_log10(limits = c(0.00001, 10^3),
                 breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
-  xlab(expression(bold("Air Concentration PCBi (ng/m"^3*")"))) +
-  ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
+  xlab(expression(bold("Office Air Concentration PCBi (ng/m"^3*")"))) +
+  ylab(expression(bold("Predicted full-day Concentration PCBi (ng/m"^3*")"))) +
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
         axis.text.x = element_text(face = "bold", size = 14),
@@ -410,7 +410,7 @@ p.AirWBPCBi.volun2.Fred <- ggplot(Volunteer2_PCBi_fred, aes(x = Conc.Air, y = Co
   scale_x_log10(limits = c(0.001, 10^4),
                 breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", math_format(10^.x))) +
-  xlab(expression(bold("Air Concentration PCBi (ng/m"^3*")"))) +
+  xlab(expression(bold("Office Air Concentration PCBi (ng/m"^3*")"))) +
   ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
