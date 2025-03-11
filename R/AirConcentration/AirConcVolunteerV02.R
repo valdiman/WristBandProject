@@ -339,6 +339,9 @@ merged_data <- merged_data %>%
 filtered_data <- merged_data %>%
   filter(Conc.Air != 0, Conc.WB != 0)
 
+# Add Ho after volunteer
+filtered_data$Volunteer <- paste0(filtered_data$Volunteer, " Ho")
+
 # Color and shapes from tPCB plot
 # Define a color palette with enough distinct colors for the number of volunteers
 color_palette <- c("#377eb8", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd")
