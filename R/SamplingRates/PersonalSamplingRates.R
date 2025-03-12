@@ -239,19 +239,21 @@ cat("R² = ", round(r2, 2), "\n")
 p.sr.amanda.koa.2 <- ggplot(sr.long.amanda, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 1.2, y = max(sr.long.amanda$sr) * 1.2,
+  annotate("text", x = min(sr.long.amanda$logKoa) + 0.5, y = max(sr.long.amanda$sr) * 1.2,
+           label = paste("Vol. 1 (d & nd)"),size = 5) +
+  annotate("text", x = min(sr.long.amanda$logKoa) + 1.2, y = max(sr.long.amanda$sr) * 1.15,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 0.35, y = max(sr.long.amanda$sr) * 1.13,
+  annotate("text", x = min(sr.long.amanda$logKoa) + 0.35, y = max(sr.long.amanda$sr) * 1.1,
            label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
-  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 10),
-        axis.title.x = element_text(face = "bold", size = 10))
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
 
 p.sr.amanda.koa.2
 
@@ -367,19 +369,19 @@ cat("R² = ", round(r2, 2), "\n")
 p.sr.kay.koa <- ggplot(sr.kay, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = min(sr.kay$logKoa) + 1.05, y = max(sr.kay$sr) * 1.2,
+  annotate("text", x = 6.6, y = 5, label = paste("Vol. 2 (d)"),size = 5) +
+  annotate("text", x = 7.3, y = 4.7,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
-  annotate("text", x = min(sr.kay$logKoa) + 0.35, y = max(sr.kay$sr) * 1.13,
-           label = paste("R² =", round(r2, 2)), size = 5) +
+  annotate("text", x = 6.58, y = 4.4, label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
-  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 10),
-        axis.title.x = element_text(face = "bold", size = 10))
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
 
 p.sr.kay.koa
 
@@ -547,20 +549,22 @@ r2 <- summary(model.yau.1)$r.squared
 p.sr.yau.koa.1 <- ggplot(sr.ave.yau, aes(x = logKoa, y = ave_sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.3, y = 15,
+  annotate("text", x = 7.3, y = 7,
+           label = paste("Vol. 3 (nd 1st & 2nd weeks)"),size = 5) +
+  annotate("text", x = 7.55, y = 6.7,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
-           size = 4) + 
-  annotate("text", x = 6.75, y = 14.2,
-           label = paste("R² = ", round(r2, 2)), size = 4) + 
+           size = 5) + 
+  annotate("text", x = 6.75, y = 6.4,
+           label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
-  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 10),
-        axis.title.x = element_text(face = "bold", size = 10))
+  ylab(expression(bold("Average Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
 
 p.sr.yau.koa.1
 
@@ -613,6 +617,99 @@ p.sr.yau.koa.2
 # Save plot in folder
 ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.2.png",
        plot = p.sr.yau.koa.2, width = 6, height = 6, dpi = 500)
+
+# (3) 1st week only
+sr.long.yau.1st <- data.frame(
+  sr = c(SR.yau.1st.nd$`Sampling_Rate (m3/d)`), logKoa = logKoa$logKoa)
+
+# Remove any NA values
+sr.long.yau.1st <- na.omit(sr.long.yau.1st)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.3 <- lm(log(sr.long.yau.1st$sr) ~ sr.long.yau.1st$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.3)[1])  # exponentiate the intercept
+b <- coef(model.yau.3)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.3)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.yau.koa.3 <- ggplot(sr.long.yau.1st, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  xlim(7, 10) +
+  annotate("text", x = 7.5, y = 7,
+           label = paste("Vol. 3 (nd 1st week)"),size = 5) +
+  annotate("text", x = 7.85, y = 6.7,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 5) + 
+  annotate("text", x = 7.25, y = 6.4,
+           label = paste("R² = ", round(r2, 2)), size = 5) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
+
+p.sr.yau.koa.3
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.1st.week.png",
+       plot = p.sr.yau.koa.3, width = 6, height = 6, dpi = 500)
+
+# (4) 2nd week only
+sr.long.yau.2nd <- data.frame(
+  sr = c(SR.yau.2nd.nd$`Sampling_Rate (m3/d)`), logKoa = logKoa$logKoa)
+
+# Remove any NA values
+sr.long.yau.2nd <- na.omit(sr.long.yau.2nd)
+
+# Fit exponential regression model: sr = a * exp(b * logKoa)
+model.yau.4 <- lm(log(sr.long.yau.2nd$sr) ~ sr.long.yau.2nd$logKoa)
+
+# Get the coefficients
+a <- exp(coef(model.yau.4)[1])  # exponentiate the intercept
+b <- coef(model.yau.4)[2]       # coefficient for logKoa
+r2 <- summary(model.yau.4)$r.squared
+
+# Print equation
+cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
+cat("R² = ", round(r2, 2), "\n")
+
+# Plot
+p.sr.yau.koa.4 <- ggplot(sr.long.yau.2nd, aes(x = logKoa, y = sr)) +
+  geom_point(size = 3, shape = 1, stroke = 1) +
+  geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
+  annotate("text", x = 7.3, y = 4.5,
+           label = paste("Vol. 3 (nd 2nd week)"),size = 5) +
+  annotate("text", x = 7.7, y = 4.3,
+           label = paste("sr = ", round(a, 3),
+                         " * exp(", round(b, 2), " x log Koa)", sep = ""),
+           size = 5) + 
+  annotate("text", x = 6.95, y = 4.1,
+           label = paste("R² = ", round(r2, 2)), size = 5) + 
+  theme_bw() +
+  theme(aspect.ratio = 1) +
+  xlab(expression(bold("log Koa"))) +
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
+
+p.sr.yau.koa.4
+
+# Save plot in folder
+ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nd.2nd.week.png",
+       plot = p.sr.yau.koa.4, width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Ya'u 2nd -------------------------------
 # 3 WBs were not wiped and 3 WBs were wiped
@@ -797,10 +894,10 @@ p.sr.yau.koa.nw <- ggplot(sr.yau.nw, aes(x = logKoa, y = sr)) +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
   ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 10),
-        axis.title.x = element_text(face = "bold", size = 10))
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
 
 p.sr.yau.koa.nw
 
