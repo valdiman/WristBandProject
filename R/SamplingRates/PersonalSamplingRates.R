@@ -239,9 +239,9 @@ cat("R² = ", round(r2, 2), "\n")
 p.sr.amanda.koa.2 <- ggplot(sr.long.amanda, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 0.5, y = max(sr.long.amanda$sr) * 1.2,
+  annotate("text", x = min(sr.long.amanda$logKoa) + 0.6, y = max(sr.long.amanda$sr) * 1.2,
            label = paste("Vol. 1 (d & nd)"),size = 5) +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 1.2, y = max(sr.long.amanda$sr) * 1.15,
+  annotate("text", x = min(sr.long.amanda$logKoa) + 1.5, y = max(sr.long.amanda$sr) * 1.15,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
   annotate("text", x = min(sr.long.amanda$logKoa) + 0.35, y = max(sr.long.amanda$sr) * 1.1,
@@ -370,7 +370,7 @@ p.sr.kay.koa <- ggplot(sr.kay, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
   annotate("text", x = 6.6, y = 5, label = paste("Vol. 2 (d)"),size = 5) +
-  annotate("text", x = 7.3, y = 4.7,
+  annotate("text", x = 7.67, y = 4.7,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
   annotate("text", x = 6.58, y = 4.4, label = paste("R² =", round(r2, 2)), size = 5) +
@@ -688,9 +688,9 @@ cat("R² = ", round(r2, 2), "\n")
 p.sr.yau.koa.4 <- ggplot(sr.long.yau.2nd, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.3, y = 4.5,
+  annotate("text", x = 7.4, y = 4.5,
            label = paste("Vol. 3 (nd 2nd week)"),size = 5) +
-  annotate("text", x = 7.7, y = 4.3,
+  annotate("text", x = 7.9, y = 4.3,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
            size = 5) + 

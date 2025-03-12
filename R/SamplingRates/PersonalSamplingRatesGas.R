@@ -125,7 +125,7 @@ SR.amanda.d$R2[mask] <- NA
 SR.amanda.d$p_value[mask] <- NA
 
 # Gas sampling rate calculations ------------------------------------------
-cte <- 10^-8
+cte <- 10^-9.5
 fg <- 1/(10^(logKoa$logKoa)*cte + 1)
 sr.gas.nd <- SR.amanda.nd$`Sampling_Rate (m3/d)`* fg 
 sr.gas.d <- SR.amanda.d$`Sampling_Rate (m3/d)`* fg
@@ -166,7 +166,7 @@ plot.sr.nd <- ggplot(sr_filtered_nd, aes(x = congener, y = Value, fill = Type)) 
 plot.sr.nd
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Personal/sr.nd.png", plot = plot.sr.nd,
+ggsave("Output/Plots/SamplingRates/Personal/srNorGasnd.png", plot = plot.sr.nd,
        width = 10, height = 5, dpi = 500)
 
 # Filter data to include only sr.nd and sr.gas.nd
