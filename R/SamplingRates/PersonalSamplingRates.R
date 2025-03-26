@@ -1047,7 +1047,9 @@ plot.18.30 <- plot.18.30 +
              show.legend = FALSE) +
   annotate("text", x = 2, y = 1.7,
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
-           hjust = 0, size = 10, color = "black")
+           hjust = 0, size = 10, color = "black") +
+  annotate("text", x = 35, y = 0.05,
+           label = "Study 2", hjust = 0, size = 10, color = "black")
 
 # See plot
 plot.18.30
@@ -1149,7 +1151,9 @@ plot.52 <- plot.52 +
              show.legend = FALSE) +
   annotate("text", x = 2, y = 2.7,
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
-           hjust = 0, size = 10, color = "black")
+           hjust = 0, size = 10, color = "black") +
+  annotate("text", x = 35, y = 0.1,
+           label = "Study 2", hjust = 0, size = 10, color = "black")
 
 # See plot
 plot.52
@@ -1251,7 +1255,9 @@ plot.118 <- plot.118 +
              show.legend = FALSE) +
   annotate("text", x = 2, y = 8.5,
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
-           hjust = 0, size = 10, color = "black")
+           hjust = 0, size = 10, color = "black") +
+  annotate("text", x = 35, y = 0.1,
+           label = "Study 2", hjust = 0, size = 10, color = "black")
 
 # See plot
 plot.118
@@ -1353,7 +1359,9 @@ plot.187 <- plot.187 +
              show.legend = FALSE) +
   annotate("text", x = 2, y = 14.0,
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
-           hjust = 0, size = 10, color = "black")
+           hjust = 0, size = 10, color = "black") +
+  annotate("text", x = 35, y = 0.6,
+           label = "Study 2", hjust = 0, size = 10, color = "black")
 
 # See plot
 plot.187

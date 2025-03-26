@@ -369,36 +369,55 @@ slopes <- combined_data %>%
   group_by(group) %>%
   summarize(slope = coef(lm(PCB52_comb ~ 0 + time))[1] * 24) # times 24 to get [m3/d]
 
-# Plotting
+# Define colors for groups (Dynamic and Static)
+group_colors <- c("Dynamic" = "#F8766D",
+                  "Static" = "#00BFC4")
+
+# Plot with defined colors
 plot.52 <- ggplot(combined_data, aes(x = time, y = PCB52_comb,
                                      color = group, fill = group)) +
   geom_point(shape = 21, size = 6, color = "black") +
   stat_smooth(method = "lm", se = FALSE, aes(group = group),
               formula = y ~ 0 + x, fullrange = TRUE) +
-  annotate("text", x = 1, y = 5.5,
-           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
-           hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 1, y = 5.0,
-           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
-           hjust = 0, size = 10, color = "black") +
   theme_bw() +
   xlim(0, 125) +
   ylim(0, 6) +
   xlab(expression(bold("Deployment time (h)"))) +
-  ylab(expression(bold("Effective Volume PCB 52 (m"^"3"*")"))) +
+  ylab(expression(bold("Effective Volume PCB 52 (m"^3*")"))) +
+  scale_color_manual(values = group_colors) +
+  scale_fill_manual(values = group_colors) +
   theme(axis.text.y = element_text(face = "bold", size = 22),
         axis.title.y = element_text(face = "bold", size = 24),
         axis.text.x = element_text(face = "bold", size = 22),
         axis.title.x = element_text(face = "bold", size = 24),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 24),
+        legend.position = "none",  # Remove the existing legend
         aspect.ratio = 1.5)
+
+# Adding color symbols before text with increased spacing
+plot.52 <- plot.52 + 
+  # Add color dot for "Dynamic"
+  geom_point(aes(x = 1, y = 5.5), size = 6, shape = 21,
+             fill = group_colors["Dynamic"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 5, y = 5.5,
+           label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  # Add color dot for "Static"
+  geom_point(aes(x = 1, y = 5.0), size = 6, shape = 21,
+             fill = group_colors["Static"], color = "black",
+             show.legend = FALSE) +
+  annotate("text", x = 5, y = 5.0,
+           label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
+           hjust = 0, size = 10, color = "black") +
+  # Add label for "Study 1"
+  annotate("text", x = 90, y = 0.1,
+           label = "Study 1", hjust = 0, size = 10, color = "black")
 
 # See plot
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates2.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
