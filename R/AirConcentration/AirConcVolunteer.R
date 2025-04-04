@@ -1,4 +1,5 @@
-# Concentration estimation
+## Concentration estimation
+# Office only
 
 # Install packages
 install.packages("readxl")
@@ -41,7 +42,7 @@ install.packages("tibble")
   # For Gift
   mass.Gi.Stat <- data.frame(colMeans(data[22:23, 4:176]))
   # For Xue
-  mass.Xue.Stat <- data.2[3, 3:175]
+  mass.Xue.Stat <- data.2[3, 4:176]
   
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
@@ -51,7 +52,7 @@ install.packages("tibble")
   conc.Hu <- as.data.frame(t(mass.Hu.Stat/(0.5*data$time.day[13])))
   conc.Xu <- as.data.frame(mass.Xu.Stat/(0.5*data$time.day[19]))
   conc.Gi <- as.data.frame(mass.Gi.Stat/(0.5*data$time.day[22]))
-  conc.Xue <- as.data.frame(t(mass.Xue.Stat/(0.5*data.2$time.day[3])))
+  conc.Xue <- as.data.frame(t(mass.Xue.Stat/(0.5*data.2$office.time.day[3])))
   
   # Combine concentrations
   conc.air <- cbind(conc.Mi.Ya, conc.Ea, conc.Cr, conc.Hu, conc.Xu, conc.Gi,
@@ -69,7 +70,6 @@ tPCB.conc.air
 
 # Read calculated average sampling rates for volunteers -------------------
 sr <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV01.csv")
-sr.0 <- read.csv("Output/Data/csv/ParticipantSRV02.csv")
 # Select only average sampling rate
 sr <- sr[, 1:2]
 
@@ -89,7 +89,8 @@ sr <- sr[, 1:2]
   wb.Xu.r <- data[18, c(2, 4:176)]
   wb.Gi.l <- data[25, c(2, 4:176)]
   wb.Gi.r <- data[24, c(2, 4:176)]
-  wb.Xue.l <- data.2[13, c(2, 3:175)]
+  wb.Xue.l <- data.2[13, c(2, 4:176)]
+  colnames(wb.Xue.l)[colnames(wb.Xue.l) == "office.time.day"] <- "time.day"
 }
 # Combined wore WBs
 wb.wr <- rbind(wb.Mi.l, wb.Mi.r, wb.Ya.l, wb.Ya.r, wb.Ea.l, wb.Ea.r,
