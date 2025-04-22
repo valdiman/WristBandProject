@@ -99,6 +99,7 @@ mask <- SR.amanda.nd$R2 < 0.9 | SR.amanda.nd$p_value > 0.05
 SR.amanda.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.amanda.nd$R2[mask] <- NA
 SR.amanda.nd$p_value[mask] <- NA
+SR.amanda.nd$ko <- SR.amanda.nd$`Sampling_Rate (m3/d)` / 0.0048707 # [m/d]. Awb = 0.0048707 m2
 
 # Export results
 write.csv(SR.amanda.nd,
@@ -135,6 +136,7 @@ mask <- SR.amanda.d$R2 < 0.9 | SR.amanda.d$p_value > 0.05
 SR.amanda.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.amanda.d$R2[mask] <- NA
 SR.amanda.d$p_value[mask] <- NA
+SR.amanda.d$ko <- SR.amanda.d$`Sampling_Rate (m3/d)` / 0.0048707 # [m/d]. Awb = 0.0048707 m2
 
 # Export results
 write.csv(SR.amanda.d,

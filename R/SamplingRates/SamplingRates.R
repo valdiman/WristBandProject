@@ -92,7 +92,7 @@ mask <- SR.st.1$R2 < 0.9 | SR.st.1$`p-value` > 0.05
 SR.st.1$`Sampling Rate (m3/d)`[mask] <- NA
 SR.st.1$R2[mask] <- NA
 SR.st.1$`p-value`[mask] <- NA
-SR.st.1$ko <- SR.st.1$`Sampling Rate (m3/d)` / 0.0047 # [m/d]. Awb = 0.0047 m2
+SR.st.1$ko <- SR.st.1$`Sampling Rate (m3/d)` / 0.0054773 # [m/d]. Awb = 0.0054773 m2
 
 # Values
 SR.n <- length(na.omit(SR.st.1$`Sampling Rate (m3/d)`))
@@ -100,6 +100,9 @@ SR.ave <- mean(SR.st.1$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.sd <- sd(SR.st.1$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.ko.ave <- mean(SR.st.1$ko, na.rm = TRUE) 
 SR.ko.sd <- sd(SR.st.1$ko, na.rm = TRUE)
+
+# Add averege of ko to the Na values.
+SR.st.1$ko[is.na(SR.st.1$ko)] <- SR.ko.ave
 
 # Export
 write.csv(SR.st.1, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
@@ -185,7 +188,7 @@ mask <- SR.st.2$R2 < 0.9 | SR.st.2$`p-value` > 0.05
 SR.st.2$`Sampling Rate (m3/d)`[mask] <- NA
 SR.st.2$R2[mask] <- NA
 SR.st.2$`p-value`[mask] <- NA
-SR.st.2$ko <- SR.st.2$`Sampling Rate (m3/d)` / 0.0047 # [m/d]. Awb = 0.0047 m2
+SR.st.2$ko <- SR.st.2$`Sampling Rate (m3/d)` / 0.0054773 # [m/d]. Awb = 0.0054773 m2
 
 # Values
 SR.st.n <- length(na.omit(SR.st.2$`Sampling Rate (m3/d)`))
@@ -193,6 +196,9 @@ SR.st.ave <- mean(SR.st.2$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.st.sd <- sd(SR.st.2$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.ko.ave <- mean(SR.st.2$ko, na.rm = TRUE) 
 SR.ko.sd <- sd(SR.st.2$ko, na.rm = TRUE)
+
+# Add averege of ko to the Na values.
+SR.st.2$ko[is.na(SR.st.2$ko)] <- SR.ko.ave
 
 #export
 write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2.csv")
@@ -257,7 +263,7 @@ mask <- SR.rot$R2 < 0.9 | SR.rot$`p-value` > 0.05
 SR.rot$`Sampling Rate (m3/d)`[mask] <- NA
 SR.rot$R2[mask] <- NA
 SR.rot$`p-value`[mask] <- NA
-SR.rot$ko <- SR.rot$`Sampling Rate (m3/d)` / 0.0047 # [m/d]. Awb = 0.0047 m2
+SR.rot$ko <- SR.rot$`Sampling Rate (m3/d)` / 0.0054773 # [m/d]. Awb = 0.0054773 m2
 
 # Values
 SR.rot.n <- length(na.omit(SR.rot$`Sampling Rate (m3/d)`))
@@ -265,6 +271,9 @@ SR.rot.ave <- mean(SR.rot$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.rot.sd <- sd(SR.rot$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.ko.ave <- mean(SR.rot$ko, na.rm = TRUE) 
 SR.ko.sd <- sd(SR.rot$ko, na.rm = TRUE)
+
+# Add averege of ko to the Na values.
+SR.rot$ko[is.na(SR.rot$ko)] <- SR.ko.ave
 
 # Export
 write.csv(SR.rot, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateRotV1.csv")
