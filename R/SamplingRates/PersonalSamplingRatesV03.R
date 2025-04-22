@@ -320,6 +320,8 @@ ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa2.png", plot = p.sr.ama
   
   
   
+  
+  
   # = massWB/(0.5*time.day)
   conc <- data.kay.2/(0.5*data.kay[1,1])
   # Calculate effective volume (Veff)
