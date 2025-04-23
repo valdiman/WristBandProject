@@ -777,6 +777,10 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
 # WBs were used to calculate PCB concentration
 # Concentrations were calculated for each sampling day 
 # sampling rate of 0.5 m3/d was used for static WBs
+
+
+
+
 {
   # Constants
   Vwb <- 4.73e-6  # m3
@@ -812,7 +816,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
   Veff.V3.w.t <- Veff.V3.2[4:6, 1]
 }
 
-# Calculate sampling rate (SR) for nw and nw (m3/d)
+# Calculate sampling rate (SR) for V3 nw and nw (m3/d)
 # Create matrix for sampling rate (SR)
 SR.V3.nw.d <- matrix(nrow = length(Veff.V3.nw[1,]), ncol = 3)
 
@@ -869,52 +873,53 @@ ggplot(SR.V3.nw.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group))
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# (2) Remove metadata from Veff.yau.w
-Veff.yau.w.d.2 <- Veff.yau.w.d[, 3:175]
-
+# (2) Remove metadata from Veff.V3.w
 # Create matrix for sampling rate (SR)
-SR.yau.w.d <- matrix(nrow = length(Veff.yau.w.d.2[1,]), ncol = 3)
+SR.V3.w.d <- matrix(nrow = length(Veff.V3.w[1,]), ncol = 3)
 
-for(i in 1:length(SR.yau.w.d[, 1])) {
-  if (sum(!is.na(Veff.yau.w.d.2[, i ]) & !is.infinite(Veff.yau.w.d.2[, i])) == 3) {
-    fit <- lm(Veff.yau.w.d.2[, i] ~ 0 + Veff.yau.w.d.t)
-    SR.yau.w.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.yau.w.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.yau.w.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.V3.w.d[, 1])) {
+  if (sum(!is.na(Veff.V3.w[, i ]) & !is.infinite(Veff.V3.w[, i])) == 3) {
+    fit <- lm(Veff.V3.w[, i] ~ 0 + Veff.V3.w.t)
+    SR.V3.w.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.V3.w.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.V3.w.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.yau.w.d[i, 1] <- 0
-    SR.yau.w.d[i, 2] <- 0
-    SR.yau.w.d[i, 3] <- 0
+    SR.V3.w.d[i, 1] <- 0
+    SR.V3.w.d[i, 2] <- 0
+    SR.V3.w.d[i, 3] <- 0
   }
 }
 
-SR.yau.w.d <- data.frame(SR.yau.w.d, group = "ParticipantY.w.d")
-colnames(SR.yau.w.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
-congener <- names(head(Veff.yau.w.d.2)[0, ])
-SR.yau.w.d <- cbind(congener, SR.yau.w.d)
+SR.V3.w.d <- data.frame(SR.V3.w.d, group = "ParticipantV3.w.d")
+colnames(SR.V3.w.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.V3.w)[0, ])
+SR.V3.w.d <- cbind(congener, SR.V3.w.d)
 
 # Convert R2 and p-value to numeric
-SR.yau.w.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.w.d$`Sampling_Rate (m3/d)`)
-SR.yau.w.d$R2 <- as.numeric(SR.yau.w.d$R2)
-SR.yau.w.d$p_value <- as.numeric(SR.yau.w.d$p_value)
+SR.V3.w.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.V3.w.d$`Sampling_Rate (m3/d)`)
+SR.V3.w.d$R2 <- as.numeric(SR.V3.w.d$R2)
+SR.V3.w.d$p_value <- as.numeric(SR.V3.w.d$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.yau.w.d$R2 < 0.9 | SR.yau.w.d$p_value > 0.05
-SR.yau.w.d$`Sampling_Rate (m3/d)`[mask] <- NA
-SR.yau.w.d$R2[mask] <- NA
-SR.yau.w.d$p_value[mask] <- NA
+mask <- SR.V3.w.d$R2 < 0.9 | SR.V3.w.d$p_value > 0.05
+SR.V3.w.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.V3.w.d$R2[mask] <- NA
+SR.V3.w.d$p_value[mask] <- NA
+# Calculate ko from V3.2
+Awb.a <- 0.0054773 # [m2]
+SR.V3.w.d$ko <- SR.V3.w.d$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
 
 # Export results
-write.csv(SR.yau.w.d,
-          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.w.d.csv",
+write.csv(SR.V3.w.d,
+          file = "Output/Data/csv/SamplingRates/Personal/SR.V3.w.d.csv",
           row.names = FALSE)
 
 # Plot
 # Organize PCB names
-SR.yau.w.d$congener <- factor(SR.yau.w.d$congener,
-                              levels = unique(SR.yau.w.d$congener))
+SR.V3.w.d$congener <- factor(SR.V3.w.d$congener,
+                              levels = unique(SR.V3.w.d$congener))
 
-ggplot(SR.yau.w.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
+ggplot(SR.V3.w.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
