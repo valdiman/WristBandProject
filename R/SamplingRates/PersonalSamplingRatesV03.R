@@ -21,172 +21,181 @@ install.packages("RColorBrewer")
   library(RColorBrewer)
 }
 
+# 3 volunteers, V1, V2, and V3
+
 # Read data ---------------------------------------------------------------
-data.amanda <- data.frame(read_excel("Data/Amanda.xlsx", sheet = "Sheet1",
+data.V1 <- data.frame(read_excel("Data/Amanda.xlsx", sheet = "Sheet1",
                              col_names = TRUE, col_types = NULL))
-data.kay <- data.frame(read_excel("Data/Kay.xlsx", sheet = "Sheet1",
+data.V2 <- data.frame(read_excel("Data/Kay.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
-data.yau <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
+data.V3.1 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
                                      col_names = TRUE, col_types = NULL))
-data.yau2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
+data.V3.2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
                                   col_names = TRUE, col_types = NULL))
 logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
                                 col_names = TRUE, col_types = NULL))
+# ko from SamplingRates_ko.R file
 ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
+# Select only ko [m/d]
 ko <- ko[c(2,6)]
 
 # Organize all dataset to have the same PCB congener list
 # Get PCB names from each dataset
-pcbs_amanda <- names(data.amanda)[grep("^PCB", names(data.amanda))]
-pcbs_kay <- names(data.kay)[grep("^PCB", names(data.kay))]
-pcbs_yau <- names(data.yau)[grep("^PCB", names(data.yau))]
-pcbs_yau2 <- names(data.yau2)[grep("^PCB", names(data.yau2))]
+pcbs_V1 <- names(data.V1)[grep("^PCB", names(data.V1))]
+pcbs_V2 <- names(data.V2)[grep("^PCB", names(data.V2))]
+pcbs_V3.1 <- names(data.V3.1)[grep("^PCB", names(data.V3.1))]
+pcbs_V3.2 <- names(data.V3.2)[grep("^PCB", names(data.V3.2))]
 pcbs_ko <- ko$congener
 pcbs_logKoa <- logKoa$congener
 
 # Find common congeners across all
-common_pcbs <- Reduce(intersect, list(pcbs_amanda, pcbs_kay, pcbs_yau, pcbs_yau2, pcbs_ko, pcbs_logKoa))
+common_pcbs <- Reduce(intersect, list(pcbs_V1, pcbs_V2, pcbs_V3.1, pcbs_V3.2,
+                                      pcbs_ko, pcbs_logKoa))
 length(common_pcbs)
 
 # Subset each dataset to include only the common PCBs
-data.amanda.pcbs <- data.amanda[, c("time.day", "congeners", common_pcbs)]
-data.kay.pcbs <- data.kay[, c("time.day", "congeners", common_pcbs)]
-data.yau.pcbs <- data.yau[, c("time.day", "congeners", common_pcbs)]
-data.yau2.pcbs <- data.yau2[, c("time.day", "congeners", common_pcbs)]
+data.V1.pcbs <- data.V1[, c("time.day", "congeners", common_pcbs)]
+data.V2.pcbs <- data.V2[, c("time.day", "congeners", common_pcbs)]
+data.V3.1.pcbs <- data.V3.1[, c("time.day", "congeners", common_pcbs)]
+data.V3.2.pcbs <- data.V3.2[, c("time.day", "congeners", common_pcbs)]
 
 # Subset ko and logKoa data frames
 ko.common <- ko[ko$congener %in% common_pcbs, ]
 logKoa.common <- logKoa[logKoa$congener %in% common_pcbs, ]
 
 # Calculate logKws
-logKws <- data.frame(
+# Regression created with data from Tromp et al 2019 (Table 2, Wristband)
+# & Frederiksen et al 2022 (Table 3)
+logKwb <- data.frame(
   congener = logKoa.common$congener,
-  logKws = 0.6156 * logKoa.common$logKoa + 2.161
-)
+  logKwb = 0.6156 * logKoa.common$logKoa + 2.161) # R2 = 0.96
 
-# Calculate personal sampling rate Amanda ---------------------------------
-# WBs were used to calculate PCB concentration
+# Calculate personal sampling rate v1 -------------------------------------
+# Static WBs were used to calculate PCB concentration
+# Triplicates for 4.3 days were deployed
+# Effective volumes were calculated from the static ko, & Kws from above
+# regression (logKws vs. logKoa)
 # Both hands (d and nd)
-# triplicates for 4.3 days were deployed
-# sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
-  data.amanda.1 <- data.amanda.pcbs[1:3, ]
+  data.V1.1 <- data.V1.pcbs[1:3, ]
   # Average 3 WBs. NA values not included in the calculations
-  data.amanda.2 <- colMeans(data.amanda.1[, 3:173], na.rm = TRUE)
+  data.V1.2 <- colMeans(data.V1.1[, 3:173], na.rm = TRUE)
   # Calculate air concentration in ng/m3
-  # Use effective volume
-  Vws <- 4.73 * 10^-6 # [m3]
-  Aws <- 0.0054773 # [m2]
+  # Use effective volume. Adult WBs
+  Vwb <- 4.73 * 10^-6 # [m3]
+  Awb <- 0.0054773 # [m2]
   # Calculate efective volume for static WBs
-  veff_static <- 10^(logKws$logKws) * Vws * 
-    (1 - exp(-ko.common$ko * Aws / Vws / 10^(logKws$logKws) * data.amanda[1, 1]))
+  veff_static.V1 <- 10^(logKwb$logKwb) * Vwb * 
+    (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V1[1, 1]))
   # Compute concentration
-  conc <- data.amanda.2 / veff_static
-  
+  conc <- data.V1.2 / veff_static.V1
   # Calculate effective volume (Veff)
-  subset_data <- data.amanda.pcbs[4:13, 3:173]
-  Veff.amanda <- t(apply(subset_data, 1, function(row) row / conc))
+  subset_data <- data.V1.pcbs[4:13, 3:173]
+  Veff.V1 <- t(apply(subset_data, 1, function(row) row / conc))
   # Add metadata to Veff.amanda and change format
-  Veff.amanda <- cbind(data.amanda.pcbs[4:13, 2], data.amanda.pcbs[4:13, 1], Veff.amanda)
+  Veff.V1 <- cbind(data.V1.pcbs[4:13, 2], data.V1.pcbs[4:13, 1], Veff.V1)
   # Transform to data.frame
-  Veff.amanda <- as.data.frame(Veff.amanda)
+  Veff.V1 <- as.data.frame(Veff.V1)
   # Add names to first 2 columns
-  colnames(Veff.amanda)[1:2] <- c("sample", "time.day")
+  colnames(Veff.V1)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.amanda[, 2:173] <- apply(Veff.amanda[, 2:173], 2, as.numeric)
+  Veff.V1[, 2:173] <- apply(Veff.V1[, 2:173], 2, as.numeric)
   # Select right, remove metadata
-  Veff.amanda.nd <- Veff.amanda[1:5, 3:173]
+  Veff.V1.nd <- Veff.V1[1:5, 3:173]
   # Select time
-  Veff.amanda.nd.t <- Veff.amanda[1:5, 2]
+  Veff.V1.nd.t <- Veff.V1[1:5, 2]
   # Select left, remove metadata
-  Veff.amanda.d <- Veff.amanda[6:10, 3:173]
+  Veff.V1.d <- Veff.V1[6:10, 3:173]
   # Select time
-  Veff.amanda.d.t <- Veff.amanda[6:10, 2]
+  Veff.V1.d.t <- Veff.V1[6:10, 2]
 }
 
 # Calculate sampling rate (SR) for right and left hands (m3/d)
 # Create matrix for sampling rate (SR)
-SR.amanda.nd <- matrix(nrow = length(Veff.amanda.nd[1,]), ncol = 3)
+SR.V1.nd <- matrix(nrow = length(Veff.V1.nd[1,]), ncol = 3)
 
-for(i in 1:length(SR.amanda.nd[, 1])) {
-  if (length(unique(Veff.amanda.nd[, i])) >= 3) {
-    fit <- lm(Veff.amanda.nd[, i] ~ 0 + Veff.amanda.nd.t)
-    SR.amanda.nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.amanda.nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.amanda.nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.V1.nd[, 1])) {
+  if (length(unique(Veff.V1.nd[, i])) >= 3) {
+    fit <- lm(Veff.V1.nd[, i] ~ 0 + Veff.V1.nd.t)
+    SR.V1.nd[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.V1.nd[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.V1.nd[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.amanda.nd[i, 1] <- 0
-    SR.amanda.nd[i, 2] <- 0
-    SR.amanda.nd[i, 3] <- 0
+    SR.V1.nd[i, 1] <- 0
+    SR.V1.nd[i, 2] <- 0
+    SR.V1.nd[i, 3] <- 0
   }
 }
 
-SR.amanda.nd <- data.frame(SR.amanda.nd, group = "ParticipantA.nd")
-colnames(SR.amanda.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
-congener <- names(head(Veff.amanda.nd)[0, ])
-SR.amanda.nd <- cbind(congener, SR.amanda.nd)
+SR.V1.nd <- data.frame(SR.V1.nd, group = "ParticipantV1.nd")
+colnames(SR.V1.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.V1.nd)[0, ])
+SR.V1.nd <- cbind(congener, SR.V1.nd)
 
 # Convert R2 and p-value to numeric
-SR.amanda.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.amanda.nd$`Sampling_Rate (m3/d)`)
-SR.amanda.nd$R2 <- as.numeric(SR.amanda.nd$R2)
-SR.amanda.nd$p_value <- as.numeric(SR.amanda.nd$p_value)
+SR.V1.nd$`Sampling_Rate (m3/d)` <- as.numeric(SR.V1.nd$`Sampling_Rate (m3/d)`)
+SR.V1.nd$R2 <- as.numeric(SR.V1.nd$R2)
+SR.V1.nd$p_value <- as.numeric(SR.V1.nd$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.amanda.nd$R2 < 0.9 | SR.amanda.nd$p_value > 0.05
-SR.amanda.nd$`Sampling_Rate (m3/d)`[mask] <- NA
-SR.amanda.nd$R2[mask] <- NA
-SR.amanda.nd$p_value[mask] <- NA
-SR.amanda.nd$ko <- SR.amanda.nd$`Sampling_Rate (m3/d)` / 0.0048707 # [m/d]. Awb = 0.0048707 m2
+mask <- SR.V1.nd$R2 < 0.9 | SR.V1.nd$p_value > 0.05
+SR.V1.nd$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.V1.nd$R2[mask] <- NA
+SR.V1.nd$p_value[mask] <- NA
+# Calculate ko from Amanda nd
+Awb.s = 0.0048707 # [m2] youth
+SR.V1.nd$ko <- SR.V1.nd$`Sampling_Rate (m3/d)` / Awb.s # [m/d]
 
 # Export results
-write.csv(SR.amanda.nd,
-          file = "Output/Data/csv/SamplingRates/Personal/SR.amanda.nd.V2.csv", row.names = FALSE)
+write.csv(SR.V1.nd,
+          file = "Output/Data/csv/SamplingRates/Personal/SR.V1.nd.csv", row.names = FALSE)
 
 # Create matrix for sampling rate (SR)
-SR.amanda.d <- matrix(nrow = length(Veff.amanda.d[1,]), ncol = 3)
+SR.V1.d <- matrix(nrow = length(Veff.V1.d[1,]), ncol = 3)
 
-for(i in 1:length(SR.amanda.d[, 1])) {
-  if (length(unique(Veff.amanda.d[, i])) >= 3) {
-    fit <- lm(Veff.amanda.d[, i] ~ 0 + Veff.amanda.d.t)
-    SR.amanda.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.amanda.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.amanda.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.V1.d[, 1])) {
+  if (length(unique(Veff.V1.d[, i])) >= 3) {
+    fit <- lm(Veff.V1.d[, i] ~ 0 + Veff.V1.d.t)
+    SR.V1.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.V1.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.V1.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.amanda.d[i, 1] <- 0
-    SR.amanda.d[i, 2] <- 0
-    SR.amanda.d[i, 3] <- 0
+    SR.V1.d[i, 1] <- 0
+    SR.V1.d[i, 2] <- 0
+    SR.V1.d[i, 3] <- 0
   }
 }
 
-SR.amanda.d <- data.frame(SR.amanda.d, group = "ParticipantA.d")
-colnames(SR.amanda.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
-congener <- names(head(Veff.amanda.d)[0, ])
-SR.amanda.d <- cbind(congener, SR.amanda.d)
+SR.V1.d <- data.frame(SR.V1.d, group = "ParticipantV1.d")
+colnames(SR.V1.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.V1.d)[0, ])
+SR.V1.d <- cbind(congener, SR.V1.d)
 
 # Convert R2 and p-value to numeric
-SR.amanda.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.amanda.d$`Sampling_Rate (m3/d)`)
-SR.amanda.d$R2 <- as.numeric(SR.amanda.d$R2)
-SR.amanda.d$p_value <- as.numeric(SR.amanda.d$p_value)
+SR.V1.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.V1.d$`Sampling_Rate (m3/d)`)
+SR.V1.d$R2 <- as.numeric(SR.V1.d$R2)
+SR.V1.d$p_value <- as.numeric(SR.V1.d$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.amanda.d$R2 < 0.9 | SR.amanda.d$p_value > 0.05
-SR.amanda.d$`Sampling_Rate (m3/d)`[mask] <- NA
-SR.amanda.d$R2[mask] <- NA
-SR.amanda.d$p_value[mask] <- NA
-SR.amanda.d$ko <- SR.amanda.d$`Sampling_Rate (m3/d)` / 0.0048707 # [m/d]. Awb = 0.0048707 m2
+mask <- SR.V1.d$R2 < 0.9 | SR.V1.d$p_value > 0.05
+SR.V1.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.V1.d$R2[mask] <- NA
+SR.V1.d$p_value[mask] <- NA
+# Calculate ko from Amanda d
+SR.V1.d$ko <- SR.V1.d$`Sampling_Rate (m3/d)` / Awb.s # [m/d]
 
 # Export results
-write.csv(SR.amanda.d,
-          file = "Output/Data/csv/SamplingRates/Personal/SR.amanda.d.V2.csv",
+write.csv(SR.V1.d,
+          file = "Output/Data/csv/SamplingRates/Personal/SR.V1.d.csv",
           row.names = FALSE)
 
 # Plot
 # Organize PCB names
-SR.amanda.nd$congener <- factor(SR.amanda.nd$congener,
-                            levels = unique(SR.amanda.nd$congener))
+SR.V1.nd$congener <- factor(SR.V1.nd$congener,
+                            levels = unique(SR.V1.nd$congener))
 # Plot with legend
-ggplot(SR.amanda.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
+ggplot(SR.V1.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -198,10 +207,10 @@ ggplot(SR.amanda.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group
         axis.title.x = element_text(face = "bold", size = 7))
 
 # Organize PCB names
-SR.amanda.d$congener <- factor(SR.amanda.d$congener,
-                               levels = unique(SR.amanda.d$congener))
+SR.V1.d$congener <- factor(SR.V1.d$congener,
+                               levels = unique(SR.V1.d$congener))
 # Plot with legend
-ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
+ggplot(SR.V1.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -212,31 +221,33 @@ ggplot(SR.amanda.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# Amanda SR vs logKoa regression ------------------------------------------
+# V1 SR vs logKoa regression ------------------------------------------
 # (1) Average both d and nd
-sr.ave.amanda <- as.data.frame(rowMeans(cbind(SR.amanda.d$`Sampling_Rate (m3/d)`, 
-                                SR.amanda.nd$`Sampling_Rate (m3/d)`), 
+sr.ave.V1 <- as.data.frame(rowMeans(cbind(SR.V1.d$`Sampling_Rate (m3/d)`, 
+                                SR.V1.nd$`Sampling_Rate (m3/d)`), 
                           na.rm = TRUE))
 
-sr.ave.amanda$logkoa <- logKoa$logKoa
-colnames(sr.ave.amanda) <- c('ave_sr', 'logKoa')
+sr.ave.V1$logkoa <- logKoa.common$logKoa
+colnames(sr.ave.V1) <- c('ave_sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
-model.amanda.1 <- lm(log(sr.ave.amanda$ave_sr) ~ sr.ave.amanda$logKoa)
+model.V1.1 <- lm(log(sr.ave.V1$ave_sr) ~ sr.ave.V1$logKoa)
 
 # Get the coefficients
-a <- exp(coef(model.amanda.1)[1])  # exponentiate the intercept
-b <- coef(model.amanda.1)[2]       # coefficient for logKoa
-r2 <- summary(model.amanda.1)$r.squared
+a <- exp(coef(model.V1.1)[1])  # exponentiate the intercept
+b <- coef(model.V1.1)[2]       # coefficient for logKoa
+r2 <- summary(model.V1.1)$r.squared
 
 # plot
-p.sr.amanda.koa.1 <- ggplot(sr.ave.amanda, aes(x = logKoa, y = ave_sr)) +
+p.sr.V1.koa.1 <- ggplot(sr.ave.V1, aes(x = logKoa, y = ave_sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.3, y = 15,
+  annotate("text", x = 7, y = 15.7,
+           label = paste("Ave. Vol. 1 (d & nd)"),size = 4) +
+  annotate("text", x = 7.5, y = 15,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
            size = 4) + 
-  annotate("text", x = 6.75, y = 14.2,
+  annotate("text", x = 6.6, y = 14.2,
            label = paste("R² = ", round(r2, 2)), size = 4) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
@@ -247,44 +258,44 @@ p.sr.amanda.koa.1 <- ggplot(sr.ave.amanda, aes(x = logKoa, y = ave_sr)) +
   theme(axis.text.x = element_text(face = "bold", size = 10),
         axis.title.x = element_text(face = "bold", size = 10))
 
-p.sr.amanda.koa.1
+p.sr.V1.koa.1
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa1.png", plot = p.sr.amanda.koa.1,
+ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa1.png", plot = p.sr.V1.koa.1,
        width = 6, height = 6, dpi = 500)
 
 # (2) Individual values
-# Create a long dataframe combining SR.amanda.d and SR.amanda.nd
-sr.long.amanda <- data.frame(
-  sr = c(SR.amanda.d$`Sampling_Rate (m3/d)`, SR.amanda.nd$`Sampling_Rate (m3/d)`),
-  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
+# Create a long dataframe combining SR.V1.d and SR.V1.nd
+sr.long.V1 <- data.frame(
+  sr = c(SR.V1.d$`Sampling_Rate (m3/d)`, SR.V1.nd$`Sampling_Rate (m3/d)`),
+  logKoa = rep(logKoa.common$logKoa, 2)  # Repeat logKoa values for both d and nd
 )
 
 # Remove any NA values
-sr.long.amanda <- na.omit(sr.long.amanda)
+sr.long.V1 <- na.omit(sr.long.V1)
 
 # Fit exponential regression model: sr = a * exp(b * logKoa)
-model.amanda.2 <- lm(log(sr.long.amanda$sr) ~ sr.long.amanda$logKoa)
+model.V1.2 <- lm(log(sr.long.V1$sr) ~ sr.long.V1$logKoa)
 
 # Get the coefficients
-a <- exp(coef(model.amanda.2)[1])  # exponentiate the intercept
-b <- coef(model.amanda.2)[2]       # coefficient for logKoa
-r2 <- summary(model.amanda.2)$r.squared
+a <- exp(coef(model.V1.2)[1])  # exponentiate the intercept
+b <- coef(model.V1.2)[2]       # coefficient for logKoa
+r2 <- summary(model.V1.2)$r.squared
 
 # Print equation
 cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
 cat("R² = ", round(r2, 2), "\n")
 
 # Plot
-p.sr.amanda.koa.2 <- ggplot(sr.long.amanda, aes(x = logKoa, y = sr)) +
+p.sr.V1.koa.2 <- ggplot(sr.long.V1, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 0.6, y = max(sr.long.amanda$sr) * 1.2,
+  annotate("text", x = min(sr.long.V1$logKoa) + 0.6, y = max(sr.long.V1$sr) * 1.2,
            label = paste("Vol. 1 (d & nd)"),size = 5) +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 1.5, y = max(sr.long.amanda$sr) * 1.15,
+  annotate("text", x = min(sr.long.V1$logKoa) + 1.5, y = max(sr.long.V1$sr) * 1.15,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
-  annotate("text", x = min(sr.long.amanda$logKoa) + 0.35, y = max(sr.long.amanda$sr) * 1.1,
+  annotate("text", x = min(sr.long.V1$logKoa) + 0.35, y = max(sr.long.V1$sr) * 1.1,
            label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
@@ -295,10 +306,10 @@ p.sr.amanda.koa.2 <- ggplot(sr.long.amanda, aes(x = logKoa, y = sr)) +
   theme(axis.text.x = element_text(face = "bold", size = 12),
         axis.title.x = element_text(face = "bold", size = 12))
 
-p.sr.amanda.koa.2
+p.sr.V1.koa.2
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa2.png", plot = p.sr.amanda.koa.2,
+ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.2,
        width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate Kay ------------------------------------
@@ -312,11 +323,11 @@ ggsave("Output/Plots/SamplingRates/Personal/Amanda_logKoa2.png", plot = p.sr.ama
   # Average 3 WBs
   data.kay.2 <- colMeans(data.kay.1[, 3:173])
   # Calculate air concentration in ng/m3
-  # Calculate efective volume for static WBs
-  veff_static <- 10^(logKws$logKws) * Vws * 
-    (1 - exp(-ko.common$ko * Aws / Vws / 10^(logKws$logKws) * data.kay[1, 1]))
+  # Calculate effective volume for static WBs
+  veff_stat_kay <- 10^(logKwb$logKwb) * Vwb * 
+    (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.kay[1, 1]))
   # Compute concentration
-  conc <- data.kay.2 / veff_static
+  conc.kay <- data.kay.2 / veff_static
   
   
   
