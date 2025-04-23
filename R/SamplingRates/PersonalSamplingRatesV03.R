@@ -447,7 +447,6 @@ p.sr.V2.koa
 ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
        width = 6, height = 6, dpi = 500)
 
-
 # Calculate personal sampling rate V3.1 -----------------------------------
 # WBs were used to calculate PCB concentration
 # Non-dominant hand (nd)
@@ -600,7 +599,7 @@ ggplot(SR.V3.2nd.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# Ya'u SR vs logKoa regression 1 ------------------------------------------
+# V3 SR vs logKoa regression 1 ------------------------------------------
 # (1) Average both d and nd
 sr.ave.V3 <- as.data.frame(rowMeans(cbind(SR.V3.1st.nd$`Sampling_Rate (m3/d)`, 
                                               SR.V3.2nd.nd$`Sampling_Rate (m3/d)`), 
@@ -772,94 +771,94 @@ p.sr.V3.koa.4
 ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
        plot = p.sr.V3.koa.4, width = 6, height = 6, dpi = 500)
 
-# Calculate personal sampling rate Ya'u 2nd -------------------------------
+# Calculate personal sampling rate V3 2nd -------------------------------
 # 3 WBs were not wiped and 3 WBs were wiped
 # Dominant hand used here
 # WBs were used to calculate PCB concentration
 # Concentrations were calculated for each sampling day 
 # sampling rate of 0.5 m3/d was used for static WBs
 {
-  # Select WBs to calculate air concentration
-  data.yau.2 <- data.yau2[1:3, 5:177]
-  # Calculate air concentration in ng/m3
-  time <- data.yau2[1:3, 1]
-  conc <- t(sweep(data.yau.2, 1, 0.5 * time, "/"))
+  # Constants
+  Vwb <- 4.73e-6  # m3
+  Awb <- 0.0054773  # m2
+  # Prepare data
+  data.V3.2.1 <- data.V3.2.pcbs[1:3, 3:173]
+  logKwb_val <- 10^logKwb$logKwb
+  ko_val <- ko.common$ko
+  # Initialize lists to store results
+  veff_stat_list <- list()
+  conc_list <- list()
+  Veff_list <- list()
+  for (i in 1:3) {
+    # Effective volume calculation
+    veff_stat <- logKwb_val * Vwb * (1 - exp(-ko_val * Awb / Vwb / logKwb_val * data.V3.2[i, 1]))
+    veff_stat_list[[i]] <- veff_stat
+    # Air concentration calculation
+    conc <- data.V3.2.1[i, ] / veff_stat
+    conc_list[[i]] <- conc
+    # Effective volume (Veff)
+    Veff <- data.V3.2.pcbs[i + 3, 3:173] / conc
+    Veff_list[[i]] <- Veff
+  }
   
-  # Calculate Veff for WB nw
-  mass.WD.nw <- data.yau2[4:6, 5:177]
-  Veff.yau.nw.d <- mass.WD.nw/t(conc)
-  # Add metadata to Veff and change format
-  Veff.yau.nw.d <- cbind(data.yau2[4:6, 4], data.yau2[4:6, 1], Veff.yau.nw.d)
-  # Transform to data.frame
-  Veff.yau.nw.d <- as.data.frame(Veff.yau.nw.d)
-  # Add names to first 2 columns
-  colnames(Veff.yau.nw.d)[1:2] <- c("sample", "time.day")
-  # Change characters to numbers format
-  Veff.yau.nw.d[, 2:175] <- apply(Veff.yau.nw.d[, 2:175], 2, as.numeric)
-  
-  # Calculate Veff for WB w
-  mass.WD.w <- data.yau2[7:9, 5:177]
-  Veff.yau.w <- mass.WD.w/t(conc)
-  # Add metadata to Veff and change format
-  Veff.yau.w.d <- cbind(data.yau2[7:9, 4], data.yau2[7:9, 1], Veff.yau.w)
-  # Transform to data.frame
-  Veff.yau.w.d <- as.data.frame(Veff.yau.w.d)
-  # Add names to first 2 columns
-  colnames(Veff.yau.w.d)[1:2] <- c("sample", "time.day")
-  # Change characters to numbers format
-  Veff.yau.w.d[, 2:175] <- apply(Veff.yau.w.d[, 2:175], 2, as.numeric)
-  # Select time
-  Veff.yau.nw.d.t <- Veff.yau.nw.d[, 2]
-  # Select time
-  Veff.yau.w.d.t <- Veff.yau.w.d[, 2]
+  # Combine Veff results
+  Veff.V3.2 <- do.call(rbind, Veff_list)
+  Veff.V3.2 <- cbind(data.V3.2[4:9, 1:2], Veff.V3.2)
+  Veff.V3.2 <- as.data.frame(Veff.V3.2)
+  # Select w and nw
+  Veff.V3.nw <- Veff.V3.2[1:3, 3:173]
+  Veff.V3.nw.t <- Veff.V3.2[1:3, 1]
+  Veff.V3.w <- Veff.V3.2[4:6, 3:173]
+  Veff.V3.w.t <- Veff.V3.2[4:6, 1]
 }
 
-# Calculate sampling rate (SR) for nw & w (m3/d)
-# (1) Remove metadata from Veff.yau.nw
-Veff.yau.nw.d.2 <- Veff.yau.nw.d[, 3:175]
+# Calculate sampling rate (SR) for nw and nw (m3/d)
 # Create matrix for sampling rate (SR)
-SR.yau.nw.d <- matrix(nrow = length(Veff.yau.nw.d.2[1,]), ncol = 3)
+SR.V3.nw.d <- matrix(nrow = length(Veff.V3.nw[1,]), ncol = 3)
 
-for(i in 1:length(SR.yau.nw.d[, 1])) {
-  if (sum(!is.na(Veff.yau.nw.d.2[, i]) & !is.infinite(Veff.yau.nw.d.2[, i])) == 3) {
-    fit <- lm(Veff.yau.nw.d.2[, i] ~ 0 + Veff.yau.nw.d.t)
-    SR.yau.nw.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
-    SR.yau.nw.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-    SR.yau.nw.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
+for(i in 1:length(SR.V3.nw.d[, 1])) {
+  if (sum(!is.na(Veff.V3.nw[, i ]) & !is.infinite(Veff.V3.nw[, i])) == 3) {
+    fit <- lm(Veff.V3.nw[, i] ~ 0 + Veff.V3.nw.t)
+    SR.V3.nw.d[i, 1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
+    SR.V3.nw.d[i, 2] <- format(signif(summary(fit)$adj.r.squared, digits = 3))
+    SR.V3.nw.d[i, 3] <- format(signif(summary(fit)$coef[1,"Pr(>|t|)"], digits = 3))
   } else {
-    SR.yau.nw.d[i, 1] <- 0
-    SR.yau.nw.d[i, 2] <- 0
-    SR.yau.nw.d[i, 3] <- 0
+    SR.V3.nw.d[i, 1] <- 0
+    SR.V3.nw.d[i, 2] <- 0
+    SR.V3.nw.d[i, 3] <- 0
   }
 }
-
-SR.yau.nw.d <- data.frame(SR.yau.nw.d, group = "ParticipantY.nw.d")
-colnames(SR.yau.nw.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
-congener <- names(head(Veff.yau.nw.d.2)[0, ])
-SR.yau.nw.d <- cbind(congener, SR.yau.nw.d)
+  
+SR.V3.nw.d <- data.frame(SR.V3.nw.d, group = "ParticipantV3.nw.d")
+colnames(SR.V3.nw.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
+congener <- names(head(Veff.V3.nw)[0, ])
+SR.V3.nw.d <- cbind(congener, SR.V3.nw.d)
 
 # Convert R2 and p-value to numeric
-SR.yau.nw.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.yau.nw.d$`Sampling_Rate (m3/d)`)
-SR.yau.nw.d$R2 <- as.numeric(SR.yau.nw.d$R2)
-SR.yau.nw.d$p_value <- as.numeric(SR.yau.nw.d$p_value)
+SR.V3.nw.d$`Sampling_Rate (m3/d)` <- as.numeric(SR.V3.nw.d$`Sampling_Rate (m3/d)`)
+SR.V3.nw.d$R2 <- as.numeric(SR.V3.nw.d$R2)
+SR.V3.nw.d$p_value <- as.numeric(SR.V3.nw.d$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.yau.nw.d$R2 < 0.9 | SR.yau.nw.d$p_value > 0.05
-SR.yau.nw.d$`Sampling_Rate (m3/d)`[mask] <- NA
-SR.yau.nw.d$R2[mask] <- NA
-SR.yau.nw.d$p_value[mask] <- NA
+mask <- SR.V3.nw.d$R2 < 0.9 | SR.V3.nw.d$p_value > 0.05
+SR.V3.nw.d$`Sampling_Rate (m3/d)`[mask] <- NA
+SR.V3.nw.d$R2[mask] <- NA
+SR.V3.nw.d$p_value[mask] <- NA
+# Calculate ko from V3.2
+Awb.a <- 0.0054773 # [m2]
+SR.V3.nw.d$ko <- SR.V3.nw.d$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
 
 # Export results
-write.csv(SR.yau.nw.d,
-          file = "Output/Data/csv/SamplingRates/Personal/SR.yau.nw.d.csv",
+write.csv(SR.V3.nw.d,
+          file = "Output/Data/csv/SamplingRates/Personal/SR.V3.nw.d.csv",
           row.names = FALSE)
 
 # Plot
 # Organize PCB names
-SR.yau.nw.d$congener <- factor(SR.yau.nw.d$congener,
-                              levels = unique(SR.yau.nw.d$congener))
+SR.V3.nw.d$congener <- factor(SR.V3.nw.d$congener,
+                              levels = unique(SR.V3.nw.d$congener))
 
-ggplot(SR.yau.nw.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
+ggplot(SR.V3.nw.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
