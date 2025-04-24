@@ -599,7 +599,7 @@ ggplot(SR.V3.2nd.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# V3 SR vs logKoa regression 1 ------------------------------------------
+# V3 SR vs logKoa regression ----------------------------------------------
 # (1) Average both d and nd
 sr.ave.V3 <- as.data.frame(rowMeans(cbind(SR.V3.1st.nd$`Sampling_Rate (m3/d)`, 
                                               SR.V3.2nd.nd$`Sampling_Rate (m3/d)`), 
@@ -771,16 +771,12 @@ p.sr.V3.koa.4
 ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
        plot = p.sr.V3.koa.4, width = 6, height = 6, dpi = 500)
 
-# Calculate personal sampling rate V3 2nd -------------------------------
+# Calculate personal sampling rate V3.2 -----------------------------------
 # 3 WBs were not wiped and 3 WBs were wiped
 # Dominant hand used here
 # WBs were used to calculate PCB concentration
 # Concentrations were calculated for each sampling day 
 # sampling rate of 0.5 m3/d was used for static WBs
-
-
-
-
 {
   # Constants
   Vwb <- 4.73e-6  # m3
@@ -793,18 +789,19 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
   veff_stat_list <- list()
   conc_list <- list()
   Veff_list <- list()
+  row_pairs <- list(c(4, 7), c(5, 8), c(6, 9))
   for (i in 1:3) {
-    # Effective volume calculation
     veff_stat <- logKwb_val * Vwb * (1 - exp(-ko_val * Awb / Vwb / logKwb_val * data.V3.2[i, 1]))
     veff_stat_list[[i]] <- veff_stat
-    # Air concentration calculation
     conc <- data.V3.2.1[i, ] / veff_stat
     conc_list[[i]] <- conc
-    # Effective volume (Veff)
-    Veff <- data.V3.2.pcbs[i + 3, 3:173] / conc
-    Veff_list[[i]] <- Veff
   }
-  
+  for (i in 1:3) {
+    for (row in row_pairs[[i]]) {
+      Veff <- data.V3.2.pcbs[row, 3:173] / conc_list[[i]]
+      Veff_list[[length(Veff_list) + 1]] <- Veff
+    }
+  }
   # Combine Veff results
   Veff.V3.2 <- do.call(rbind, Veff_list)
   Veff.V3.2 <- cbind(data.V3.2[4:9, 1:2], Veff.V3.2)
