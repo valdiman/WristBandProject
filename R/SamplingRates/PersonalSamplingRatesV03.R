@@ -927,30 +927,30 @@ ggplot(SR.V3.w.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) 
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
-# Ya'u SR vs logKoa regression 2 ------------------------------------------
-# Check difference btw w and nw
+# V3 SR vs logKoa regression 2 ------------------------------------------
+# Check difference btw w and nw, both d
 # (1) nw
-sr.yau.nw <- as.data.frame(SR.yau.nw.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
+sr.V3.nw <- as.data.frame(SR.V3.nw.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
 
-sr.yau.nw$logkoa <- logKoa$logKoa
-colnames(sr.yau.nw) <- c('sr', 'logKoa')
+sr.V3.nw$logkoa <- logKoa.common$logKoa
+colnames(sr.V3.nw) <- c('sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
-model.yau.nw <- lm(log(sr.yau.nw$sr) ~ sr.yau.nw$logKoa)
+model.V3.nw <- lm(log(sr.V3.nw$sr) ~ sr.V3.nw.d$logKoa)
 
 # Get the coefficients
-a <- exp(coef(model.yau.nw)[1])  # exponentiate the intercept
-b <- coef(model.yau.nw)[2]       # coefficient for logKoa
-r2 <- summary(model.yau.nw)$r.squared
+a <- exp(coef(model.V3.nw)[1])  # exponentiate the intercept
+b <- coef(model.V3.nw)[2]       # coefficient for logKoa
+r2 <- summary(model.V3.nw)$r.squared
 
 # plot
-p.sr.yau.koa.nw <- ggplot(sr.yau.nw, aes(x = logKoa, y = sr)) +
+p.sr.V3.koa.nw <- ggplot(sr.V3.nw, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.3, y = 15,
+  annotate("text", x = 7.3, y = 2.4,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
            size = 4) + 
-  annotate("text", x = 6.75, y = 14.2,
+  annotate("text", x = 6.75, y = 2.3,
            label = paste("R² = ", round(r2, 2)), size = 4) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
@@ -961,27 +961,27 @@ p.sr.yau.koa.nw <- ggplot(sr.yau.nw, aes(x = logKoa, y = sr)) +
   theme(axis.text.x = element_text(face = "bold", size = 12),
         axis.title.x = element_text(face = "bold", size = 12))
 
-p.sr.yau.koa.nw
+p.sr.V3.koa.nw
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.nw.png",
-       plot = p.sr.yau.koa.nw, width = 6, height = 6, dpi = 500)
+ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nw.png",
+       plot = p.sr.V3.koa.nw, width = 6, height = 6, dpi = 500)
 
 # (2) w
-sr.yau.w <- as.data.frame(SR.yau.w.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
+sr.V3.w <- as.data.frame(SR.V3.w.d$`Sampling_Rate (m3/d)`, na.rm = TRUE)
 
-sr.yau.w$logkoa <- logKoa$logKoa
-colnames(sr.yau.w) <- c('sr', 'logKoa')
+sr.V3.w$logkoa <- logKoa.common$logKoa
+colnames(sr.V3.w) <- c('sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
-model.yau.w <- lm(log(sr.yau.w$sr) ~ sr.yau.w$logKoa)
+model.V3.w <- lm(log(sr.V3.w$sr) ~ sr.V3.w$logKoa)
 
 # Get the coefficients
-a <- exp(coef(model.yau.w)[1])  # exponentiate the intercept
-b <- coef(model.yau.w)[2]       # coefficient for logKoa
-r2 <- summary(model.yau.w)$r.squared
+a <- exp(coef(model.V3.w)[1])  # exponentiate the intercept
+b <- coef(model.V3.w)[2]       # coefficient for logKoa
+r2 <- summary(model.V3.w)$r.squared
 
 # plot
-p.sr.yau.koa.w <- ggplot(sr.yau.w, aes(x = logKoa, y = sr)) +
+p.sr.V3.koa.w <- ggplot(sr.V3.w, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
   annotate("text", x = 7.3, y = 15,
@@ -999,11 +999,14 @@ p.sr.yau.koa.w <- ggplot(sr.yau.w, aes(x = logKoa, y = sr)) +
   theme(axis.text.x = element_text(face = "bold", size = 10),
         axis.title.x = element_text(face = "bold", size = 10))
 
-p.sr.yau.koa.w
+p.sr.V3.koa.w
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Personal/Yau_logKoa.w.png",
-       plot = p.sr.yau.koa.w, width = 6, height = 6, dpi = 500)
+ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.w.png",
+       plot = p.sr.V3.koa.w, width = 6, height = 6, dpi = 500)
+
+
+
 
 # Plot individual congeners -----------------------------------------------
 # Combine plot
