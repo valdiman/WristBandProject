@@ -10,6 +10,7 @@ install.packages("ggplot2")
 install.packages("tidyr")
 install.packages("dplyr")
 install.packages("RColorBrewer")
+install.packages("rollapply")
 
 # Load libraries
 {
@@ -19,20 +20,16 @@ install.packages("RColorBrewer")
   library(tidyr)
   library(dplyr)
   library(RColorBrewer)
+  library(zoo)
 }
 
 # 3 volunteers, V1, V2, and V3
 # Read data ---------------------------------------------------------------
-data.V1 <- data.frame(read_excel("Data/Amanda.xlsx", sheet = "Sheet1",
-                             col_names = TRUE, col_types = NULL))
-data.V2 <- data.frame(read_excel("Data/Kay.xlsx", sheet = "Sheet1",
-                                     col_names = TRUE, col_types = NULL))
-data.V3.1 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet1",
-                                     col_names = TRUE, col_types = NULL))
-data.V3.2 <- data.frame(read_excel("Data/Yau.xlsx", sheet = "Sheet2",
-                                  col_names = TRUE, col_types = NULL))
-logKoa <- data.frame(read_excel("Data/logKoa.xlsx", sheet = "logKoa",
-                                col_names = TRUE, col_types = NULL))
+data.V1 <- read.csv("Data/Volunteer1.csv")
+data.V2 <- read.csv("Data/Volunteer2.csv")
+data.V3.1 <- read.csv("Data/Volunteer3.1.csv")
+data.V3.2 <- read.csv("Data/Volunteer3.2.csv")
+logKoa <- read.csv("Data/logKoa.csv")
 # ko from SamplingRates_ko.R file
 ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
 # Select only ko [m/d]
@@ -82,8 +79,8 @@ logKwb <- data.frame(
   data.V1.2 <- colMeans(data.V1.1[, 3:173], na.rm = TRUE)
   # Calculate air concentration in ng/m3
   # Use effective volume. Adult WBs
-  Vwb <- 4.73 * 10^-6 # [m3]
-  Awb <- 0.0054773 # [m2]
+  Vwb <- data.V1$vol.WB[1]
+  Awb <- data.V1$area.WB[1]
   # Calculate efective volume for static WBs
   veff_static.V1 <- 10^(logKwb$logKwb) * Vwb * 
     (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V1[1, 1]))
@@ -143,8 +140,8 @@ SR.V1.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V1.nd$R2[mask] <- NA
 SR.V1.nd$p_value[mask] <- NA
 # Calculate ko from V1 nd
-Awb.y = 0.0048707 # [m2] youth
-SR.V1.nd$ko <- SR.V1.nd$`Sampling_Rate (m3/d)` / Awb.y # [m/d]
+Awb.V1 <- data.V1$area.WB[4] # [m2] youth
+SR.V1.nd$ko <- SR.V1.nd$`Sampling_Rate (m3/d)` / Awb.V1 # [m/d]
 
 # Export results
 write.csv(SR.V1.nd,
@@ -182,8 +179,9 @@ SR.V1.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V1.d$R2[mask] <- NA
 SR.V1.d$p_value[mask] <- NA
 # Calculate ko from V1 d
-Awb.y = 0.0048707 # [m2] youth
-SR.V1.d$ko <- SR.V1.d$`Sampling_Rate (m3/d)` / Awb.y # [m/d]
+# Calculate ko from V1 nd
+Awb.V1 <- data.V1$area.WB[4] # [m2] youth
+SR.V1.d$ko <- SR.V1.d$`Sampling_Rate (m3/d)` / Awb.V1 # [m/d]
 
 # Export results
 write.csv(SR.V1.d,
@@ -320,8 +318,8 @@ ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.
   data.V2.2 <- colMeans(data.V2.1[, 3:173])
   # Calculate air concentration in ng/m3
   # Use effective volume. Adult WBs
-  Vwb <- 4.73 * 10^-6 # [m3]
-  Awb <- 0.0054773 # [m2]
+  Vwb <- data.V1$vol.WB[1]
+  Awb <- data.V1$area.WB[1]
   veff_stat.V2 <- 10^(logKwb$logKwb) * Vwb * 
     (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V2[1, 1]))
   # Compute concentration
@@ -376,8 +374,8 @@ SR.V2.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V2.d$R2[mask] <- NA
 SR.V2.d$p_value[mask] <- NA
 # Calculate ko from V2 d
-Awb.a = 0.0054773 # [m2] adult
-SR.V2.d$ko <- SR.V2.d$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
+Awb.V2 <- data.V2$area.WB[1] # [m2] adult
+SR.V2.d$ko <- SR.V2.d$`Sampling_Rate (m3/d)` / Awb.V2 # [m/d]
 
 # Export results
 write.csv(SR.V2.d,
@@ -446,8 +444,8 @@ ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
 # Concentrations were calculated for each sampling day 
 {
   # Constants
-  Vwb <- 4.73e-6  # m3
-  Awb <- 0.0054773  # m2
+  Vwb <- data.V1$vol.WB[1]
+  Awb <- data.V1$area.WB[1]
   # Prepare data
   data.V3.1.1 <- data.V3.1.pcbs[1:6, 3:173]
   logKwb_val <- 10^logKwb$logKwb
@@ -512,8 +510,8 @@ SR.V3.1st.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V3.1st.nd$R2[mask] <- NA
 SR.V3.1st.nd$p_value[mask] <- NA
 # Calculate ko from V3.1
-Awb.a <- 0.0054773 # [m2]
-SR.V3.1st.nd$ko <- SR.V3.1st.nd$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
+Awb.V3.1 <- data.V3.1$area.WB[1] # [m2] adult
+SR.V3.1st.nd$ko <- SR.V3.1st.nd$`Sampling_Rate (m3/d)` / Awb.V3.1 # [m/d]
 
 # Export results
 write.csv(SR.V3.1st.nd,
@@ -568,8 +566,8 @@ SR.V3.2nd.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V3.2nd.nd$R2[mask] <- NA
 SR.V3.2nd.nd$p_value[mask] <- NA
 # Calculate ko from V3.1
-Awb.a <- 0.0054773 # [m2]
-SR.V3.2nd.nd$ko <- SR.V3.2nd.nd$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
+Awb.V3.2nd <- data.V3.1$area.WB[1] # [m2] adult
+SR.V3.2nd.nd$ko <- SR.V3.2nd.nd$`Sampling_Rate (m3/d)` / Awb.V3.2nd # [m/d]
 
 # Export results
 write.csv(SR.V3.2nd.nd,
@@ -665,7 +663,7 @@ p.sr.V3.koa.2 <- ggplot(sr.long.V3, aes(x = logKoa, y = sr)) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
-  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 10),
         axis.title.y = element_text(face = "bold", size = 10)) +
   theme(axis.text.x = element_text(face = "bold", size = 10),
@@ -772,8 +770,8 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
 # sampling rate of 0.5 m3/d was used for static WBs
 {
   # Constants
-  Vwb <- 4.73e-6  # m3
-  Awb <- 0.0054773  # m2
+  Vwb <- data.V3.2$vol.WB[1]
+  Awb <- data.V3.2$area.WB[1]
   # Prepare data
   data.V3.2.1 <- data.V3.2.pcbs[1:3, 3:173]
   logKwb_val <- 10^logKwb$logKwb
@@ -839,8 +837,8 @@ SR.V3.nw.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V3.nw.d$R2[mask] <- NA
 SR.V3.nw.d$p_value[mask] <- NA
 # Calculate ko from V3.2
-Awb.a <- 0.0054773 # [m2]
-SR.V3.nw.d$ko <- SR.V3.nw.d$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
+Awb.V3.nw <- data.V3.2$area.WB[4] # [m2] youth
+SR.V3.nw.d$ko <- SR.V3.nw.d$`Sampling_Rate (m3/d)` / Awb.V3.nw # [m/d]
 
 # Export results
 write.csv(SR.V3.nw.d,
@@ -896,8 +894,8 @@ SR.V3.w.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V3.w.d$R2[mask] <- NA
 SR.V3.w.d$p_value[mask] <- NA
 # Calculate ko from V3.2
-Awb.a <- 0.0054773 # [m2]
-SR.V3.w.d$ko <- SR.V3.w.d$`Sampling_Rate (m3/d)` / Awb.a # [m/d]
+Awb.V3.w <- data.V3.2$area.WB[4] # [m2] youth
+SR.V3.w.d$ko <- SR.V3.w.d$`Sampling_Rate (m3/d)` / Awb.V3.w # [m/d]
 
 # Export results
 write.csv(SR.V3.w.d,
@@ -948,7 +946,7 @@ p.sr.V3.koa.nw <- ggplot(sr.V3.nw, aes(x = logKoa, y = sr)) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
-  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
   theme(axis.text.x = element_text(face = "bold", size = 12),
@@ -986,7 +984,7 @@ p.sr.V3.koa.w <- ggplot(sr.V3.w, aes(x = logKoa, y = sr)) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
-  ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
+  ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 10),
         axis.title.y = element_text(face = "bold", size = 10)) +
   theme(axis.text.x = element_text(face = "bold", size = 10),
@@ -1436,13 +1434,23 @@ SR_averages_sd_cv <- combined_SR %>%
   summarise(
     Average_Sampling_Rate = mean(`Sampling_Rate (m3/d)`, na.rm = TRUE),
     SD_Sampling_Rate = sd(`Sampling_Rate (m3/d)`, na.rm = TRUE),
-    CV_Sampling_Rate = (sd(`Sampling_Rate (m3/d)`,
-                           na.rm = TRUE) / mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100
-  )
+    CV_Sampling_Rate = (sd(`Sampling_Rate (m3/d)`, na.rm = TRUE) /
+                          mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100,
+    Average_ko = mean(ko, na.rm = TRUE)
+  ) %>%
+  arrange(congener)
 
-# Remove PCB (rows) with only one SR measurement, i.e., SD and CV = NA
-SR_averages_sd_cv <- SR_averages_sd_cv %>%
-  filter(!is.na(SD_Sampling_Rate))
+SR_averages_sd_cv$Average_ko <- ifelse(
+  is.na(SR_averages_sd_cv$Average_ko),
+  zoo::rollapply(
+    SR_averages_sd_cv$Average_ko,
+    width = 7, # 3 above + center + 3 below
+    FUN = function(x) mean(x, na.rm = TRUE),
+    fill = NA,
+    align = "center"
+  ),
+  SR_averages_sd_cv$Average_ko
+)
 
 # Export results
 write.csv(SR_averages_sd_cv,
