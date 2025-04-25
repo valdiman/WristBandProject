@@ -92,7 +92,8 @@ mask <- SR.st.1$R2 < 0.9 | SR.st.1$`p-value` > 0.05
 SR.st.1$`Sampling Rate (m3/d)`[mask] <- NA
 SR.st.1$R2[mask] <- NA
 SR.st.1$`p-value`[mask] <- NA
-SR.st.1$ko <- SR.st.1$`Sampling Rate (m3/d)` / 0.0054773 # [m/d]. Awb = 0.0054773 m2
+Awb <- 0.0054773 # [m2]
+SR.st.1$ko <- SR.st.1$`Sampling Rate (m3/d)` /  Awb # [m/d]
 
 # Values
 SR.n <- length(na.omit(SR.st.1$`Sampling Rate (m3/d)`))
@@ -188,7 +189,7 @@ mask <- SR.st.2$R2 < 0.9 | SR.st.2$`p-value` > 0.05
 SR.st.2$`Sampling Rate (m3/d)`[mask] <- NA
 SR.st.2$R2[mask] <- NA
 SR.st.2$`p-value`[mask] <- NA
-SR.st.2$ko <- SR.st.2$`Sampling Rate (m3/d)` / 0.0054773 # [m/d]. Awb = 0.0054773 m2
+SR.st.2$ko <- SR.st.2$`Sampling Rate (m3/d)` / Awb # [m/d].
 
 # Values
 SR.st.n <- length(na.omit(SR.st.2$`Sampling Rate (m3/d)`))
@@ -263,7 +264,7 @@ mask <- SR.rot$R2 < 0.9 | SR.rot$`p-value` > 0.05
 SR.rot$`Sampling Rate (m3/d)`[mask] <- NA
 SR.rot$R2[mask] <- NA
 SR.rot$`p-value`[mask] <- NA
-SR.rot$ko <- SR.rot$`Sampling Rate (m3/d)` / 0.0054773 # [m/d]. Awb = 0.0054773 m2
+SR.rot$ko <- SR.rot$`Sampling Rate (m3/d)` / Awb # [m/d]
 
 # Values
 SR.rot.n <- length(na.omit(SR.rot$`Sampling Rate (m3/d)`))
@@ -569,10 +570,6 @@ a <- exp(coef(model.stat.1)[1])  # exponentiate the intercept
 b <- coef(model.stat.1)[2]       # coefficient for logKoa
 r2 <- summary(model.stat.1)$r.squared
 
-# Print equation
-cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
-cat("R² = ", round(r2, 2), "\n")
-
 # Plot
 p.sr.stat.1.koa <- ggplot(sr.stat.1, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
@@ -613,10 +610,6 @@ a <- exp(coef(model.stat.2)[1])  # exponentiate the intercept
 b <- coef(model.stat.2)[2]       # coefficient for logKoa
 r2 <- summary(model.stat.2)$r.squared
 
-# Print equation
-cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
-cat("R² = ", round(r2, 2), "\n")
-
 # Plot
 p.sr.stat.2.koa <- ggplot(sr.stat.2, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
@@ -656,10 +649,6 @@ model.rot <- lm(log(sr.rot$sr) ~ sr.rot$logKoa)
 a <- exp(coef(model.rot)[1])  # exponentiate the intercept
 b <- coef(model.rot)[2]       # coefficient for logKoa
 r2 <- summary(model.rot)$r.squared
-
-# Print equation
-cat("Exponential Equation: sr = ", round(a, 3), " * exp(", round(b, 2), " * logKoa)\n")
-cat("R² = ", round(r2, 2), "\n")
 
 # Plot
 p.sr.rot.koa <- ggplot(sr.rot, aes(x = logKoa, y = sr)) +
