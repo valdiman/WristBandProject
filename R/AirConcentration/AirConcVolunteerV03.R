@@ -107,84 +107,89 @@ tPCB.conc.air
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
 ko.p <- ko.p[5]
 
-Vwb.V1.l <- data$vol.WB[1] # [m3]
-Awb.V1.l <- data$area.WB[1] # [m2]
-veff.V1.l <- 10^(logKwb$logKwb) * Vwb.V1.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V1.l / Vwb.V1.l / 10^(logKwb$logKwb) * data$time.day[1]))
-Vwb.V1.r <- data$vol.WB[2] # [m3]
-Awb.V1.r <- data$area.WB[2] # [m2]
-veff.V1.r <- 10^(logKwb$logKwb) * Vwb.V1.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V1.r / Vwb.V1.r / 10^(logKwb$logKwb) * data$time.day[2]))
-Vwb.V2.l <- data$vol.WB[3] # [m3]
-Awb.V2.l <- data$area.WB[3] # [m2]
-veff.V2.l <- 10^(logKwb$logKwb) * Vwb.V2.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V2.l / Vwb.V2.l / 10^(logKwb$logKwb) * data$time.day[3]))
-Vwb.V2.r <- data$vol.WB[4] # [m3]
-Awb.V2.r <- data$area.WB[4] # [m2]
-veff.V2.r <- 10^(logKwb$logKwb) * Vwb.V2.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V2.r / Vwb.V2.r / 10^(logKwb$logKwb) * data$time.day[4]))
-Vwb.V3.l <- data$vol.WB[5] # [m3]
-Awb.V3.l <- data$area.WB[5] # [m2]
-veff.V3.l <- 10^(logKwb$logKwb) * Vwb.V3.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V3.l / Vwb.V3.l / 10^(logKwb$logKwb) * data$time.day[5]))
-Vwb.V3.r <- data$vol.WB[6] # [m3]
-Awb.V3.r <- data$area.WB[6] # [m2]
-veff.V3.r <- 10^(logKwb$logKwb) * Vwb.V3.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V3.r / Vwb.V3.r / 10^(logKwb$logKwb) * data$time.day[6]))
-Vwb.V4.l <- data$vol.WB[9] # [m3]
-Awb.V4.l <- data$area.WB[9] # [m2]
-veff.V4.l <- 10^(logKwb$logKwb) * Vwb.V4.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V4.l / Vwb.V4.l / 10^(logKwb$logKwb) * data$time.day[9]))
-Vwb.V4.r <- data$vol.WB[10] # [m3]
-Awb.V4.r <- data$area.WB[10] # [m2]
-veff.V4.r <- 10^(logKwb$logKwb) * Vwb.V4.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V4.r / Vwb.V4.r / 10^(logKwb$logKwb) * data$time.day[10]))
-Vwb.V5.l <- data$vol.WB[11] # [m3]
-Awb.V5.l <- data$area.WB[11] # [m2]
-veff.V5.l <- 10^(logKwb$logKwb) * Vwb.V5.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V5.l / Vwb.V5.l / 10^(logKwb$logKwb) * data$time.day[11]))
-Vwb.V5.r <- data$vol.WB[12] # [m3]
-Awb.V5.r <- data$area.WB[12] # [m2]
-veff.V5.r <- 10^(logKwb$logKwb) * Vwb.V5.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V5.r / Vwb.V5.r / 10^(logKwb$logKwb) * data$time.day[12]))
-Vwb.V6.l <- data$vol.WB[17] # [m3]
-Awb.V6.l <- data$area.WB[17] # [m2]
-veff.V6.l <- 10^(logKwb$logKwb) * Vwb.V6.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V6.l / Vwb.V6.l / 10^(logKwb$logKwb) * data$time.day[17]))
-Vwb.V6.r <- data$vol.WB[18] # [m3]
-Awb.V6.r <- data$area.WB[18] # [m2]
-veff.V6.r <- 10^(logKwb$logKwb) * Vwb.V6.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V6.r / Vwb.V6.r / 10^(logKwb$logKwb) * data$time.day[18]))
-Vwb.V7.l <- data$vol.WB[25] # [m3]
-Awb.V7.l <- data$area.WB[25] # [m2]
-veff.V7.l <- 10^(logKwb$logKwb) * Vwb.V7.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V7.l / Vwb.V7.l / 10^(logKwb$logKwb) * data$time.day[25]))
-Vwb.V7.r <- data$vol.WB[24] # [m3]
-Awb.V7.r <- data$area.WB[24] # [m2]
-veff.V7.r <- 10^(logKwb$logKwb) * Vwb.V7.r * 
-  (1 - exp(-ko.p$Average_ko * Awb.V7.r / Vwb.V7.r / 10^(logKwb$logKwb) * data$time.day[24]))
-Vwb.V8.l <- data.2$vol.WB[13] # [m3]
-Awb.V8.l <- data.2$area.WB[13] # [m2]
-veff.V8.l <- 10^(logKwb$logKwb) * Vwb.V8.l * 
-  (1 - exp(-ko.p$Average_ko * Awb.V8.l / Vwb.V8.l / 10^(logKwb$logKwb) * data.2$office.time.day[13]))
+{
+  Vwb.V1.l <- data$vol.WB[1] # [m3]
+  Awb.V1.l <- data$area.WB[1] # [m2]
+  veff.V1.l <- 10^(logKwb$logKwb) * Vwb.V1.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V1.l / Vwb.V1.l / 10^(logKwb$logKwb) * data$time.day[1]))
+  Vwb.V1.r <- data$vol.WB[2] # [m3]
+  Awb.V1.r <- data$area.WB[2] # [m2]
+  veff.V1.r <- 10^(logKwb$logKwb) * Vwb.V1.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V1.r / Vwb.V1.r / 10^(logKwb$logKwb) * data$time.day[2]))
+  Vwb.V2.l <- data$vol.WB[3] # [m3]
+  Awb.V2.l <- data$area.WB[3] # [m2]
+  veff.V2.l <- 10^(logKwb$logKwb) * Vwb.V2.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V2.l / Vwb.V2.l / 10^(logKwb$logKwb) * data$time.day[3]))
+  Vwb.V2.r <- data$vol.WB[4] # [m3]
+  Awb.V2.r <- data$area.WB[4] # [m2]
+  veff.V2.r <- 10^(logKwb$logKwb) * Vwb.V2.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V2.r / Vwb.V2.r / 10^(logKwb$logKwb) * data$time.day[4]))
+  Vwb.V3.l <- data$vol.WB[5] # [m3]
+  Awb.V3.l <- data$area.WB[5] # [m2]
+  veff.V3.l <- 10^(logKwb$logKwb) * Vwb.V3.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V3.l / Vwb.V3.l / 10^(logKwb$logKwb) * data$time.day[5]))
+  Vwb.V3.r <- data$vol.WB[6] # [m3]
+  Awb.V3.r <- data$area.WB[6] # [m2]
+  veff.V3.r <- 10^(logKwb$logKwb) * Vwb.V3.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V3.r / Vwb.V3.r / 10^(logKwb$logKwb) * data$time.day[6]))
+  Vwb.V4.l <- data$vol.WB[9] # [m3]
+  Awb.V4.l <- data$area.WB[9] # [m2]
+  veff.V4.l <- 10^(logKwb$logKwb) * Vwb.V4.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V4.l / Vwb.V4.l / 10^(logKwb$logKwb) * data$time.day[9]))
+  Vwb.V4.r <- data$vol.WB[10] # [m3]
+  Awb.V4.r <- data$area.WB[10] # [m2]
+  veff.V4.r <- 10^(logKwb$logKwb) * Vwb.V4.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V4.r / Vwb.V4.r / 10^(logKwb$logKwb) * data$time.day[10]))
+  Vwb.V5.l <- data$vol.WB[11] # [m3]
+  Awb.V5.l <- data$area.WB[11] # [m2]
+  veff.V5.l <- 10^(logKwb$logKwb) * Vwb.V5.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V5.l / Vwb.V5.l / 10^(logKwb$logKwb) * data$time.day[11]))
+  Vwb.V5.r <- data$vol.WB[12] # [m3]
+  Awb.V5.r <- data$area.WB[12] # [m2]
+  veff.V5.r <- 10^(logKwb$logKwb) * Vwb.V5.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V5.r / Vwb.V5.r / 10^(logKwb$logKwb) * data$time.day[12]))
+  Vwb.V6.l <- data$vol.WB[17] # [m3]
+  Awb.V6.l <- data$area.WB[17] # [m2]
+  veff.V6.l <- 10^(logKwb$logKwb) * Vwb.V6.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V6.l / Vwb.V6.l / 10^(logKwb$logKwb) * data$time.day[17]))
+  Vwb.V6.r <- data$vol.WB[18] # [m3]
+  Awb.V6.r <- data$area.WB[18] # [m2]
+  veff.V6.r <- 10^(logKwb$logKwb) * Vwb.V6.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V6.r / Vwb.V6.r / 10^(logKwb$logKwb) * data$time.day[18]))
+  Vwb.V7.l <- data$vol.WB[25] # [m3]
+  Awb.V7.l <- data$area.WB[25] # [m2]
+  veff.V7.l <- 10^(logKwb$logKwb) * Vwb.V7.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V7.l / Vwb.V7.l / 10^(logKwb$logKwb) * data$time.day[25]))
+  Vwb.V7.r <- data$vol.WB[24] # [m3]
+  Awb.V7.r <- data$area.WB[24] # [m2]
+  veff.V7.r <- 10^(logKwb$logKwb) * Vwb.V7.r * 
+    (1 - exp(-ko.p$Average_ko * Awb.V7.r / Vwb.V7.r / 10^(logKwb$logKwb) * data$time.day[24]))
+  Vwb.V8.l <- data.2$vol.WB[13] # [m3]
+  Awb.V8.l <- data.2$area.WB[13] # [m2]
+  veff.V8.l <- 10^(logKwb$logKwb) * Vwb.V8.l * 
+    (1 - exp(-ko.p$Average_ko * Awb.V8.l / Vwb.V8.l / 10^(logKwb$logKwb) * data.2$office.time.day[13]))
+}
 
 # Estimate air concentration in ng/m3 from WBs
 # Using Veff
-conc.V1.l <- as.data.frame(t(data[1, 6:178] / veff.V1.l))
-conc.V1.r <- as.data.frame(t(data[2, 6:178] / veff.V1.r))
-conc.V2.l <- as.data.frame(t(data[3, 6:178] / veff.V2.l))
-conc.V2.r <- as.data.frame(t(data[4, 6:178] / veff.V2.l))
-conc.V3.l <- as.data.frame(t(data[5, 6:178] / veff.V3.l))
-conc.V3.r <- as.data.frame(t(data[6, 6:178] / veff.V3.r))
-conc.V4.l <- as.data.frame(t(data[9, 6:178] / veff.V4.l))
-conc.V4.r <- as.data.frame(t(data[10, 6:178] / veff.V4.r))
-conc.V5.l <- as.data.frame(t(data[11, 6:178] / veff.V5.l))
-conc.V5.r <- as.data.frame(t(data[12, 6:178] / veff.V5.r))
-conc.V6.l <- as.data.frame(t(data[17, 6:178] / veff.V6.l))
-conc.V6.r <- as.data.frame(t(data[18, 6:178] / veff.V6.r))
-conc.V7.l <- as.data.frame(t(data[25, 6:178] / veff.V7.l))
-conc.V7.r <- as.data.frame(t(data[24, 6:178] / veff.V7.r))
-conc.V8.l <- as.data.frame(t(data.2[13, 6:178] / veff.V8.l))
+
+{
+  conc.V1.l <- as.data.frame(t(data[1, 6:178] / veff.V1.l))
+  conc.V1.r <- as.data.frame(t(data[2, 6:178] / veff.V1.r))
+  conc.V2.l <- as.data.frame(t(data[3, 6:178] / veff.V2.l))
+  conc.V2.r <- as.data.frame(t(data[4, 6:178] / veff.V2.l))
+  conc.V3.l <- as.data.frame(t(data[5, 6:178] / veff.V3.l))
+  conc.V3.r <- as.data.frame(t(data[6, 6:178] / veff.V3.r))
+  conc.V4.l <- as.data.frame(t(data[9, 6:178] / veff.V4.l))
+  conc.V4.r <- as.data.frame(t(data[10, 6:178] / veff.V4.r))
+  conc.V5.l <- as.data.frame(t(data[11, 6:178] / veff.V5.l))
+  conc.V5.r <- as.data.frame(t(data[12, 6:178] / veff.V5.r))
+  conc.V6.l <- as.data.frame(t(data[17, 6:178] / veff.V6.l))
+  conc.V6.r <- as.data.frame(t(data[18, 6:178] / veff.V6.r))
+  conc.V7.l <- as.data.frame(t(data[25, 6:178] / veff.V7.l))
+  conc.V7.r <- as.data.frame(t(data[24, 6:178] / veff.V7.r))
+  conc.V8.l <- as.data.frame(t(data.2[13, 6:178] / veff.V8.l))
+}
 
 # Combined conc WBs
 conc.wb <- cbind(conc.V1.l, conc.V1.r, conc.V2.l, conc.V2.r, conc.V3.l, conc.V3.r,
@@ -200,8 +205,7 @@ tPCB.conc.wb <- colSums(conc.wb, na.rm = TRUE)
 print(tPCB.conc.wb)
 print(tPCB.conc.air)
 
-# Plots -------------------------------------------------------------------
-# tPCB
+# Total PCB plots ---------------------------------------------------------
 # Create a data frame with the combined data
 data.conc <- data.frame(
   Wb_Concentration = tPCB.conc.wb,
@@ -306,16 +310,12 @@ colnames(Wb_matrix) <- c('WBleft', 'WBright')
 percentage_error_hand <- percentage_error(Wb_matrix[, 1], Wb_matrix[, 2])
 mean(percentage_error_hand)
 
-
-
-
 # Individual PCB Congeners ------------------------------------------------
 # Create a data frame with the combined data
-
 # Add PCB as a column
-conc_air_common <- conc_air_common %>% rownames_to_column(var = "PCB")
+conc_air_long <- conc.air %>% rownames_to_column(var = "PCB")
 
-conc_air_long <- conc_air_common %>%
+conc_air_long <- conc_air_long %>%
   pivot_longer(
     cols = -PCB,  # All columns except 'PCB'
     names_to = "Volunteer",
@@ -325,32 +325,32 @@ conc_air_long <- conc_air_common %>%
 
 # Duplicate Mi.Ya rows and create new rows for Mi and Ya
 conc_air_long <- conc_air_long %>%
-  # Filter out Mi.Ya rows
-  filter(Volunteer != "Mi.Ya") %>%
+  # Filter out V1.V2 rows
+  filter(Volunteer != "V1.V2") %>%
   # Create new rows for Mi and Ya
   bind_rows(
     conc_air_long %>%
-      filter(Volunteer == "Mi.Ya") %>%
+      filter(Volunteer == "V1.V2") %>%
       # Duplicate the rows and assign Mi and Ya
       uncount(2) %>%
-      mutate(Volunteer = ifelse(row_number() %% 2 == 1, "Mi", "Ya"))
+      mutate(Volunteer = ifelse(row_number() %% 2 == 1, "V1", "V2"))
   )
 
 conc_wb_long <- as.data.frame(conc.wb) %>%
-  rownames_to_column(var = "Volunteer") %>%  # Convert row names to a column
+  rownames_to_column(var = "PCB") %>%  # Convert row names to a column
   pivot_longer(
-    cols = -Volunteer,  # All columns except 'Volunteer'
-    names_to = "PCB",   # Column for PCB names
+    cols = -PCB,  # All columns except 'Volunteer'
+    names_to = "Volunteer",   # Column for PCB names
     values_to = "Conc.WB"  # Column for concentration values
   ) %>%
   mutate(Volunteer = gsub("wb.", "", Volunteer)) %>%  # Remove 'wb.' from Volunteer names
   select(PCB, Conc.WB, Volunteer)
 
-# Create a simplified Volunteer column in conc_wb_long
+# Modify Volunteer to remove the 'conc.' prefix and the suffix (.l or .r)
 conc_wb_long <- conc_wb_long %>%
-  mutate(Volunteer_Simplified = gsub("\\..*", "", Volunteer))  # Remove everything after and including "."
+  mutate(Volunteer_Simplified = gsub("^conc\\.", "", Volunteer),  # Remove 'conc.' prefix
+         Volunteer_Simplified = gsub("\\..*", "", Volunteer_Simplified))  # Remove everything after the first '.'
 
-# Merge the two data frames
 merged_data <- conc_air_long %>%
   inner_join(conc_wb_long, by = c("PCB", "Volunteer" = "Volunteer_Simplified"))
 
@@ -371,51 +371,34 @@ percentage_error <-function(observed, predicted) {
 }
 
 # Calculate percentage errors
-percentage_error <- percentage_error(filtered_data$Conc.Air, filtered_data$Conc.WB)
+percentage_error_pcbi <- percentage_error(filtered_data$Conc.Air, filtered_data$Conc.WB)
 
 # Calculate mean percent error
-mean_error <- mean(percentage_error)
+mean_error <- mean(percentage_error_pcbi)
 print(paste("Mean Error:", mean_error))
-min_error <- min(percentage_error)
+min_error <- min(percentage_error_pcbi)
 print(paste("Minimun Error:", min_error))
-max_error <- max(percentage_error)
+max_error <- max(percentage_error_pcbi)
 print(paste("Max Error:", max_error))
-
-# Define the threshold
-threshold <- 200
-
-# Count how many values are above the threshold
-count_above_threshold <- sum(percentage_error > threshold)
-
-# Get the total number of values
-total_values <- length(percentage_error)
-
-# Calculate the proportion
-proportion_above_threshold <- count_above_threshold / total_values
-
-# Print the results
-cat("Number of values above", threshold, ":", count_above_threshold, "\n")
-cat("Total number of values:", total_values, "\n")
-cat("Proportion of values above", threshold, ":", proportion_above_threshold, "\n")
 
 # Color and shapes from tPCB plot
 # Change names for legend
 filtered_data$Volunteer.y <- case_when(
-  filtered_data$Volunteer.y == "Mi.l" ~ "Vol. 1 nd",
-  filtered_data$Volunteer.y == "Mi.r" ~ "Vol. 1 d",
-  filtered_data$Volunteer.y == "Ya.l" ~ "Vol. 2 d",
-  filtered_data$Volunteer.y == "Ya.r" ~ "Vol. 2 nd",
-  filtered_data$Volunteer.y == "Ea.l" ~ "Vol. 3 nd",
-  filtered_data$Volunteer.y == "Ea.r" ~ "Vol. 3 d",
-  filtered_data$Volunteer.y == "Cr.l" ~ "Vol. 4 nd",
-  filtered_data$Volunteer.y == "Cr.r" ~ "Vol. 4 d",
-  filtered_data$Volunteer.y == "Hu.l" ~ "Vol. 5 d",
-  filtered_data$Volunteer.y == "Hu.r" ~ "Vol. 5 nd",
-  filtered_data$Volunteer.y == "Xu.l" ~ "Vol. 6 nd",
-  filtered_data$Volunteer.y == "Xu.r" ~ "Vol. 6 d",
-  filtered_data$Volunteer.y == "Gi.l" ~ "Vol. 7 nd",
-  filtered_data$Volunteer.y == "Gi.r" ~ "Vol. 7 d",
-  filtered_data$Volunteer.y == "Xue.l" ~ "Vol. 8 nd",
+  filtered_data$Volunteer.y == "conc.V1.l" ~ "Vol. 1 nd",
+  filtered_data$Volunteer.y == "conc.V1.r" ~ "Vol. 1 d",
+  filtered_data$Volunteer.y == "conc.V2.l" ~ "Vol. 2 d",
+  filtered_data$Volunteer.y == "conc.V2.r" ~ "Vol. 2 nd",
+  filtered_data$Volunteer.y == "conc.V3.l" ~ "Vol. 3 nd",
+  filtered_data$Volunteer.y == "conc.V3.r" ~ "Vol. 3 d",
+  filtered_data$Volunteer.y == "conc.V4.l" ~ "Vol. 4 nd",
+  filtered_data$Volunteer.y == "conc.V4.r" ~ "Vol. 4 d",
+  filtered_data$Volunteer.y == "conc.V5.l" ~ "Vol. 5 d",
+  filtered_data$Volunteer.y == "conc.V5.r" ~ "Vol. 5 nd",
+  filtered_data$Volunteer.y == "conc.V6.l" ~ "Vol. 6 nd",
+  filtered_data$Volunteer.y == "conc.V6.r" ~ "Vol. 6 d",
+  filtered_data$Volunteer.y == "conc.V7.l" ~ "Vol. 7 nd",
+  filtered_data$Volunteer.y == "conc.V7.r" ~ "Vol. 7 d",
+  filtered_data$Volunteer.y == "conc.V8.l" ~ "Vol. 8 nd",
   TRUE ~ NA_character_  # Handles any unmatched cases
 )
 
@@ -451,7 +434,7 @@ plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
 print(plotAirWBPCBi)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV2.png", plot = plotAirWBPCBi, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV3.png", plot = plotAirWBPCBi, width = 6,
        height = 5, dpi = 500)
 
 
