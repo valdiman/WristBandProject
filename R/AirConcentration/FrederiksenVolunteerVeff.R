@@ -18,7 +18,7 @@ install.packages("tibble")
 
 # Read data ---------------------------------------------------------------
 vol2 <- read.csv("Output/Data/csv/FrederiksenPCB/Volunteer2_PCBi.csv")
-fred <- read.csv("Output/Data/csv/FrederiksenPCB/Frederiksen_PCBi.csv")
+fred <- read.csv("Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiV2.csv")
 
 # Format data -------------------------------------------------------------
 fred_trimmed <- fred %>%
