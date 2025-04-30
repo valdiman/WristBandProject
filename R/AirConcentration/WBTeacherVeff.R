@@ -259,7 +259,6 @@ Awb.V1 <- wt$area.WB[1] # [m2]
 veff.V1.l <- 10^(logKwb$logKwb) * Vwb.V1[i] * 
   (1 - exp(-ko.p$Average_ko * Awb.V1[i] / Vwb.V1[i] / 10^(logKwb$logKwb) * wt$time.day[i]))
 
-
 # Create a matrix to store Veff values
 veff_matrix <- matrix(NA, nrow = nrow(wt), ncol = nrow(logKwb))
 colnames(veff_matrix) <- logKwb$congener
