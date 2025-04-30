@@ -27,9 +27,9 @@ data <- data.frame(read_excel("Data/VolunteersV02.xlsx", sheet = "Sheet1",
 # Calculate air PCB concentration from static WBs -------------------------
 {
   # Stat samples
-  data.Stat.1 <- data[1, 4:176]
-  data.Stat.2 <- data[2, 4:176]
-  data.Stat.3 <- data[3, 4:176]
+  data.Stat.1 <- data[1, 6:178]
+  data.Stat.2 <- data[2, 6:178]
+  data.Stat.3 <- data[3, 6:178]
   # Calculate air concentration in ng/m3
   # = massWB/(0.5*time.day)
   # i and ii are from the same office
@@ -54,16 +54,16 @@ sr <- sr[, 1:2]
 
 # Select wore WBs ---------------------------------------------------------
 {
-  wb.Mi.o <- data[4, c(2, 4:176)]
-  wb.Mi.h <- data[5, c(2, 4:176)]
-  wb.Ea.h <- data[6, c(2, 4:176)]
-  wb.Ea.o <- data[7, c(2, 4:176)]
-  wb.Ya.o <- data[8, c(2, 4:176)]
-  wb.Ya.h <- data[9, c(2, 4:176)]
-  wb.An.h <- data[10, c(2, 4:176)]
-  wb.An.o <- data[11, c(2, 4:176)]
-  wb.Xu.h <- data[12, c(2, 4:176)]
-  wb.Xu.o <- data[13, c(2, 4:176)]
+  wb.Mi.o <- data[4, c(2, 6:178)]
+  wb.Mi.h <- data[5, c(2, 6:178)]
+  wb.Ea.h <- data[6, c(2, 6:178)]
+  wb.Ea.o <- data[7, c(2, 6:178)]
+  wb.Ya.o <- data[8, c(2, 6:178)]
+  wb.Ya.h <- data[9, c(2, 6:178)]
+  wb.An.h <- data[10, c(2, 6:178)]
+  wb.An.o <- data[11, c(2, 6:178)]
+  wb.Xu.h <- data[12, c(2, 6:178)]
+  wb.Xu.o <- data[13, c(2, 6:178)]
 }
 # Combined wore WBs
 wb.wr <- rbind(wb.Mi.o, wb.Mi.h, wb.Ea.o, wb.Ea.h, wb.Ya.o, wb.Ya.h,
@@ -250,11 +250,11 @@ percentage_error <-function(observed, predicted) {
 }
 
 # Calculate percentage errors
-percentage_error <- percentage_error(data.plot$Air_Concentration,
+percentage_errors <- percentage_error(data.plot$Air_Concentration,
                                      data.plot$Wb_Concentration)
 
 # Calculate mean percent error
-mean_error <- mean(percentage_error)
+mean_error <- mean(percentage_errors)
 print(paste("Mean Error:", mean_error))
 
 # Ratios between home & office ------------------------------------------

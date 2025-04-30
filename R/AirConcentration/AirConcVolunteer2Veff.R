@@ -221,7 +221,7 @@ plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHomeV2.png",
+ggsave("Output/Plots/AirConcentrations/AirWBtPCBOfficeHomeVeff.png",
        plot = plotAirWBtPCB, width = 6, height = 5, dpi = 500)
 
 # Plot 1:1 Air PCB office vs. WB full-day and WB only office
@@ -265,7 +265,7 @@ plot <- ggplot(data.plot, aes(x = Air_Concentration, y = Wb_Concentration,
 plot
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VolunteerAirOffHomeV2.png",
+ggsave("Output/Plots/AirConcentrations/VolunteerAirOffHomeVeff.png",
        plot = plot, width = 6, height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
@@ -282,11 +282,11 @@ percentage_error <-function(observed, predicted) {
 }
 
 # Calculate percentage errors
-percentage_error <- percentage_error(data.plot$Air_Concentration,
+percentage_errors <- percentage_error(data.plot$Air_Concentration,
                                      data.plot$Wb_Concentration)
 
 # Calculate mean percent error
-mean_error <- mean(percentage_error)
+mean_error <- mean(percentage_errors)
 print(paste("Mean Error:", mean_error))
 
 # Ratios between home & office ------------------------------------------
@@ -314,12 +314,9 @@ comparison_df <- data.frame(
 # Print the result
 print(comparison_df)
 
-
-
-
 # Plot individual PCB congeners -------------------------------------------
 # Air Add PCB as a column
-conc_air_common <- conc_air_common %>% rownames_to_column(var = "PCB")
+conc_air_common <- conc.air %>% rownames_to_column(var = "PCB")
 
 # Transform conc_air_common into long format
 conc_air_long <- conc_air_common %>%
@@ -343,8 +340,12 @@ conc_air_long <- conc_air_long %>%
     TRUE ~ NA_character_
   ))
 
+# Transpose conc.wb
+t.conc.wb <- t(conc.wb)
+
 # WB Move row names to the first column
-conc_wb_clean <- conc.wb %>%
+conc_wb_clean <- t.conc.wb %>%
+  as.data.frame() %>%
   rownames_to_column(var = "Row.Name")  # Row names are moved to 'Row.Name' column
 
 # Remove rows that end with 'o'
@@ -418,7 +419,7 @@ p.AirWBPCBi.volun2 <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
 p.AirWBPCBi.volun2
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCB.png",
+ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCBVeff.png",
        plot = p.AirWBPCBi.volun2, width = 6, height = 5, dpi = 500)
 
 # Prepare data to combine with Frederiksen
@@ -428,7 +429,7 @@ Volunteer2_PCBi_fred <- filtered_data %>%
                     "PCB118", "PCB129.138.163", "PCB153.168", "PCB180.193"))
 
 Volunteer2_PCBi_fred <- Volunteer2_PCBi_fred %>%
-  mutate(congener = factor(congener, levels = congener_names))
+  mutate(congener = factor(congener, levels = unique(congener)))
 
 # Plot
 color_palette2 <- c("red", "blue", "green", "purple", "orange", "brown", 
@@ -469,11 +470,11 @@ p.AirWBPCBi.volun2.Fred <- ggplot(Volunteer2_PCBi_fred, aes(x = Conc.Air, y = Co
 p.AirWBPCBi.volun2.Fred
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCBFred.png",
+ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCBFredVeff.png",
        plot = p.AirWBPCBi.volun2.Fred, width = 6, height = 5, dpi = 500)
 
 # Export data
 write.csv(Volunteer2_PCBi_fred,
-          file = "Output/Data/csv/FrederiksenPCB/Volunteer2_PCBi.csv")
+          file = "Output/Data/csv/FrederiksenPCB/Volunteer2_PCBiVeff.csv")
 
 

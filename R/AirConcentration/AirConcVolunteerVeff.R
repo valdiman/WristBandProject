@@ -437,4 +437,3 @@ print(plotAirWBPCBi)
 ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV3.png", plot = plotAirWBPCBi, width = 6,
        height = 5, dpi = 500)
 
-

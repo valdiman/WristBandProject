@@ -142,12 +142,12 @@ plotfred <- ggplot(plot_data, aes(x = obs_conc, y = est_conc,
 plotfred
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/FrederiksenHomeV2.png", plot = plotfred,
+ggsave("Output/Plots/AirConcentrations/Frederiksen/FrederiksenHomeVeff.png", plot = plotfred,
        width = 7, height = 7, dpi = 500)
 
 # Export data
 write.csv(plot_data,
-          file = "Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiV2.csv")
+          file = "Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiVeff.csv")
 
 
 # Calculate Veff for 7 days -----------------------------------------------
@@ -217,10 +217,10 @@ plotfred.2 <- ggplot(plot_data.2, aes(x = obs_conc, y = est_conc,
   theme_bw() +
   theme(aspect.ratio = 1) +
   annotation_logticks(sides = "bl") +
-  scale_y_log10(limits = c(0.001, 1e4),
+  scale_y_log10(limits = c(0.0001, 1e4),
                 breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
-  scale_x_log10(limits = c(0.001, 1e4),
+  scale_x_log10(limits = c(0.0001, 1e4),
                 breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
   xlab(expression(bold("Apartment Air Concentration PCBi (ng/m"^3*")"))) +
@@ -242,7 +242,7 @@ plotfred.2 <- ggplot(plot_data.2, aes(x = obs_conc, y = est_conc,
 plotfred.2
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/Frederiksen7dV2.png", plot = plotfred.2,
+ggsave("Output/Plots/AirConcentrations/Frederiksen/Frederiksen7dVeff.png", plot = plotfred.2,
        width = 7, height = 7, dpi = 500)
 
 # Export data

@@ -17,11 +17,15 @@ install.packages("tibble")
 }
 
 # Read data ---------------------------------------------------------------
-vol2 <- read.csv("Output/Data/csv/FrederiksenPCB/Volunteer2_PCBi.csv")
-fred <- read.csv("Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiV2.csv")
+{
+  vol2 <- read.csv("Output/Data/csv/FrederiksenPCB/Volunteer2_PCBiVeff.csv")
+  fred <- read.csv("Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiVeff.csv")
+}
 
 # Format data -------------------------------------------------------------
 fred_trimmed <- fred %>%
+  rename(Conc.WB = est_conc,
+         Conc.Air = obs_conc) %>%
   select(congener, Conc.Air, Conc.WB, ID) %>%
   mutate(source = "fred")
 
@@ -80,6 +84,6 @@ plot.FerdVol2 <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB, fill = con
 plot.FerdVol2
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/FerderiksenVol2PCBi.png",
+ggsave("Output/Plots/AirConcentrations/Frederiksen/FrederiksenVol2PCBiVeff.png",
        plot = plot.FerdVol2, width = 6, height = 6, dpi = 500)
 
