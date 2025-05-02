@@ -4,7 +4,6 @@
 # d dominant hand
 
 # Install packages
-install.packages("readxl")
 install.packages("gridExtra")
 install.packages("ggplot2")
 install.packages("tidyr")
@@ -14,7 +13,6 @@ install.packages("rollapply")
 
 # Load libraries
 {
-  library(readxl)
   library(ggplot2)
   library(gridExtra)
   library(tidyr)
@@ -25,15 +23,17 @@ install.packages("rollapply")
 
 # 3 volunteers, V1, V2, and V3
 # Read data ---------------------------------------------------------------
-data.V1 <- read.csv("Data/Volunteer1.csv")
-data.V2 <- read.csv("Data/Volunteer2.csv")
-data.V3.1 <- read.csv("Data/Volunteer3.1.csv")
-data.V3.2 <- read.csv("Data/Volunteer3.2.csv")
-logKoa <- read.csv("Data/logKoa.csv")
-# ko from SamplingRates_ko.R file
-ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
-# Select only ko [m/d]
-ko <- ko[c(2,6)]
+{
+  data.V1 <- read.csv("Data/Volunteer1.csv")
+  data.V2 <- read.csv("Data/Volunteer2.csv")
+  data.V3.1 <- read.csv("Data/Volunteer3.1.csv")
+  data.V3.2 <- read.csv("Data/Volunteer3.2.csv")
+  logKoa <- read.csv("Data/logKoa.csv")
+  # ko from SamplingRates_ko.R file
+  ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
+  # Select only ko [m/d]
+  ko <- ko[c(2,6)]
+}
 
 # Organize all dataset to have the same PCB congener list
 # Get PCB names from each dataset
@@ -1429,28 +1429,38 @@ combined_SR <- rbind(SR.V1.nd, SR.V1.d, SR.V2.d, SR.V3.1st.nd,
                      SR.V3.2nd.nd, SR.V3.nw.d, SR.V3.w.d)
 
 # Look at SR and variability
+# Parameters calculated only with 3 or more values for each congener
 SR_averages_sd_cv <- combined_SR %>%
   group_by(congener) %>%
   summarise(
-    Average_Sampling_Rate = mean(`Sampling_Rate (m3/d)`, na.rm = TRUE),
-    SD_Sampling_Rate = sd(`Sampling_Rate (m3/d)`, na.rm = TRUE),
-    CV_Sampling_Rate = (sd(`Sampling_Rate (m3/d)`, na.rm = TRUE) /
-                          mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100,
-    Average_ko = mean(ko, na.rm = TRUE)
+    n = sum(!is.na(`Sampling_Rate (m3/d)`)),
+    Average_Sampling_Rate = if (n >= 3) mean(`Sampling_Rate (m3/d)`, na.rm = TRUE) else NA_real_,
+    SD_Sampling_Rate = if (n >= 3) sd(`Sampling_Rate (m3/d)`, na.rm = TRUE) else NA_real_,
+    CV_Sampling_Rate = if (n >= 3) (sd(`Sampling_Rate (m3/d)`, na.rm = TRUE) /
+                                      mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100 else NA_real_,
+    Average_ko = if (n >= 3) mean(ko, na.rm = TRUE) else NA_real_
   ) %>%
   arrange(congener)
 
-SR_averages_sd_cv$Average_ko <- ifelse(
+# Add ko values from averaging near values (4 above + center + 4 below)
+# This is for future use of ko to determine Veff
+SR_averages_sd_cv$Average_ko2 <- ifelse(
   is.na(SR_averages_sd_cv$Average_ko),
   zoo::rollapply(
     SR_averages_sd_cv$Average_ko,
-    width = 7, # 3 above + center + 3 below
+    width = 9, # 4 above + center + 4 below
     FUN = function(x) mean(x, na.rm = TRUE),
     fill = NA,
     align = "center"
   ),
   SR_averages_sd_cv$Average_ko
 )
+
+# Add manually values to PCBs 206 to 209
+SR_averages_sd_cv$Average_ko2[168] <- SR_averages_sd_cv$Average_ko2[167]
+SR_averages_sd_cv$Average_ko2[169] <- SR_averages_sd_cv$Average_ko2[167]
+SR_averages_sd_cv$Average_ko2[170] <- SR_averages_sd_cv$Average_ko2[167]
+SR_averages_sd_cv$Average_ko2[171] <- SR_averages_sd_cv$Average_ko2[167]
 
 # Export results
 write.csv(SR_averages_sd_cv,
