@@ -763,6 +763,9 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
        plot = p.sr.V3.koa.4, width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate V3.2 -----------------------------------
+# Need to check the code!!
+
+
 # 3 WBs were not wiped and 3 WBs were wiped
 # Dominant hand used here
 # WBs were used to calculate PCB concentration
