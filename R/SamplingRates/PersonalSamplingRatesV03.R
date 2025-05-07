@@ -124,7 +124,7 @@ for(i in 1:length(SR.V1.nd[, 1])) {
   }
 }
 
-SR.V1.nd <- data.frame(SR.V1.nd, group = "ParticipantV1.nd")
+SR.V1.nd <- data.frame(SR.V1.nd, group = "V1.nd")
 colnames(SR.V1.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.V1.nd)[0, ])
 SR.V1.nd <- cbind(congener, SR.V1.nd)
@@ -163,7 +163,7 @@ for(i in 1:length(SR.V1.d[, 1])) {
   }
 }
 
-SR.V1.d <- data.frame(SR.V1.d, group = "ParticipantV1.d")
+SR.V1.d <- data.frame(SR.V1.d, group = "V1.d")
 colnames(SR.V1.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.V1.d)[0, ])
 SR.V1.d <- cbind(congener, SR.V1.d)
@@ -358,7 +358,7 @@ for(i in 1:length(SR.V2.d[, 1])) {
   }
 }
 
-SR.V2.d <- data.frame(SR.V2.d, group = "ParticipantV2.d")
+SR.V2.d <- data.frame(SR.V2.d, group = "V2.d")
 colnames(SR.V2.d) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.V2.d)[0, ])
 SR.V2.d <- cbind(congener, SR.V2.d)
@@ -494,7 +494,7 @@ for(i in 1:length(SR.V3.1st.nd[, 1])) {
   }
 }
 
-SR.V3.1st.nd <- data.frame(SR.V3.1st.nd, group = "ParticipantV3.1st.nd")
+SR.V3.1st.nd <- data.frame(SR.V3.1st.nd, group = "V3.1st.nd")
 colnames(SR.V3.1st.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.V3.1st.nd)[0, ])
 SR.V3.1st.nd <- cbind(congener, SR.V3.1st.nd)
@@ -550,7 +550,7 @@ for(i in 1:length(SR.V3.2nd.nd[, 1])) {
   }
 }
 
-SR.V3.2nd.nd <- data.frame(SR.V3.2nd.nd, group = "ParticipantV3.2nd.nd")
+SR.V3.2nd.nd <- data.frame(SR.V3.2nd.nd, group = "V3.2nd.nd")
 colnames(SR.V3.2nd.nd) <-c("Sampling_Rate (m3/d)", "R2", "p_value", "group")
 congener <- names(head(Veff.V3.2nd.nd)[0, ])
 SR.V3.2nd.nd <- cbind(congener, SR.V3.2nd.nd)
@@ -696,9 +696,9 @@ p.sr.V3.koa.3 <- ggplot(sr.long.V3.1st, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
   xlim(7, 11) +
-  annotate("text", x = 7.5, y = 7,
+  annotate("text", x = 7.6, y = 7,
            label = paste("Vol. 3 (nd 1st week)"),size = 5) +
-  annotate("text", x = 7.85, y = 6.7,
+  annotate("text", x = 8, y = 6.7,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
            size = 5) + 
@@ -882,8 +882,8 @@ rownames(SR_V3.2_nw) <- NULL
 rownames(SR_V3.2_w) <- NULL
 SR_V3.2_nw <- SR_V3.2_nw[, c("congener", setdiff(names(SR_V3.2_nw), "congener"))]
 SR_V3.2_w <- SR_V3.2_w[, c("congener", setdiff(names(SR_V3.2_w), "congener"))]
-SR_V3.2_nw$group <- "ParticipantV3.nw.d"
-SR_V3.2_w$group <- "ParticipantV3.w.d"
+SR_V3.2_nw$group <- "V3.nw.d"
+SR_V3.2_w$group <- "V3.w.d"
 
 # Save to separate CSV files
 write.csv(SR_V3.2_nw, "Output/Data/csv/SamplingRates/Personal/SR.V3.2_nw.csv", row.names = FALSE)
@@ -1001,11 +1001,10 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.w.png",
 
 # Plot individual congeners -----------------------------------------------
 # Combine plot
+# Only volunteers 1 and 2 with five samples
 # Combine data, padding shorter dataset with NA
 max_len <- max(length(Veff.V1.d.t), length(Veff.V1.nd.t),
-               length(Veff.V2.d.t), length(Veff.V3.1st.nd.t),
-               length(Veff.V3.2nd.nd.t), length(Veff.V3.w.t),
-               length(Veff.V3.nw.t))
+               length(Veff.V2.d.t))
 
 # PCBs 18+30
 up.V1.d <- data.frame(
@@ -1025,33 +1024,6 @@ up.V2.d <- data.frame(
   veff = c(Veff.V2.d$PCB18.30, rep(NA, max_len - length(Veff.V2.d[, 1]))),
   group = rep("Vol. 2 d")
 )
-
-up.V3.1st.nd <- data.frame(
-  time = c(Veff.V3.1st.nd.t, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  veff = c(Veff.V3.1st.nd$PCB18.30, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  group = rep("Vol. 3 1st nd")
-)
-
-up.V3.2nd.nd <- data.frame(
-  time = c(Veff.V3.2nd.nd.t, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  veff = c(Veff.V3.2nd.nd$PCB18.30, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  group = rep("Vol. 3 2nd nd")
-)
-
-up.V3.w.d <- data.frame(
-  time = c(Veff.V3.w.t, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  veff = c(Veff.V3.w$PCB18.30, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  group = rep("Vol. 3 w d")
-)
-
-up.V3.nw.d <- data.frame(
-  time = c(Veff.V3.nw.t, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  veff = c(Veff.V3.nw$PCB18.30, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  group = rep("Vol. 3 nw d")
-)
-
-combined_data <- rbind(up.V1.d, up.V1.nd, up.V2.d, up.V3.1st.nd,
-                       up.V3.2nd.nd, up.V3.w.d, up.V3.nw.d)
 
 combined_data <- rbind(up.V1.d, up.V1.nd, up.V2.d)
 
@@ -1131,30 +1103,6 @@ up.V2.d <- data.frame(
   time = c(Veff.V2.d.t, rep(NA, max_len - length(Veff.V2.d[, 1]))),
   veff = c(Veff.V2.d$PCB52, rep(NA, max_len - length(Veff.V2.d[, 1]))),
   group = rep("Vol. 2 d")
-)
-
-up.V3.1st.nd <- data.frame(
-  time = c(Veff.V3.1st.nd.t, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  veff = c(Veff.V3.1st.nd$PCB52, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  group = rep("Vol. 3 1st nd")
-)
-
-up.V3.2nd.nd <- data.frame(
-  time = c(Veff.V3.2nd.nd.t, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  veff = c(Veff.V3.2nd.nd$PCB52, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  group = rep("Vol. 3 2nd nd")
-)
-
-up.V3.w.d <- data.frame(
-  time = c(Veff.V3.w.t, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  veff = c(Veff.V3.w$PCB52, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  group = rep("Vol. 3 w d")
-)
-
-up.V3.nw.d <- data.frame(
-  time = c(Veff.V3.nw.t, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  veff = c(Veff.V3.nw$PCB52, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  group = rep("Vol. 3 nw d")
 )
 
 combined_data <- rbind(up.V1.d, up.V1.nd, up.V2.d)
@@ -1237,30 +1185,6 @@ up.V2.d <- data.frame(
   group = rep("Vol. 2 d")
 )
 
-up.V3.1st.nd <- data.frame(
-  time = c(Veff.V3.1st.nd.t, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  veff = c(Veff.V3.1st.nd$PCB118, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  group = rep("Vol. 3 1st nd")
-)
-
-up.V3.2nd.nd <- data.frame(
-  time = c(Veff.V3.2nd.nd.t, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  veff = c(Veff.V3.2nd.nd$PCB118, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  group = rep("Vol. 3 2nd nd")
-)
-
-up.V3.w.d <- data.frame(
-  time = c(Veff.V3.w.t, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  veff = c(Veff.V3.w$PCB118, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  group = rep("Vol. 3 w d")
-)
-
-up.V3.nw.d <- data.frame(
-  time = c(Veff.V3.nw.t, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  veff = c(Veff.V3.nw$PCB118, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  group = rep("Vol. 3 nw d")
-)
-
 combined_data <- rbind(up.V1.d, up.V1.nd, up.V2.d)
 
 slopes <- combined_data %>%
@@ -1341,30 +1265,6 @@ up.V2.d <- data.frame(
   group = rep("Vol. 2 d")
 )
 
-up.V3.1st.nd <- data.frame(
-  time = c(Veff.V3.1st.nd.t, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  veff = c(Veff.V3.1st.nd$PCB187, rep(NA, max_len - length(Veff.V3.1st.nd[, 1]))),
-  group = rep("Vol. 3 1st nd")
-)
-
-up.V3.2nd.nd <- data.frame(
-  time = c(Veff.V3.2nd.nd.t, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  veff = c(Veff.V3.2nd.nd$PCB187, rep(NA, max_len - length(Veff.V3.2nd.nd[, 1]))),
-  group = rep("Vol. 3 2nd nd")
-)
-
-up.V3.w.d <- data.frame(
-  time = c(Veff.V3.w.t, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  veff = c(Veff.V3.w$PCB187, rep(NA, max_len - length(Veff.V3.w[, 1]))),
-  group = rep("Vol. 3 w d")
-)
-
-up.V3.nw.d <- data.frame(
-  time = c(Veff.V3.nw.t, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  veff = c(Veff.V3.nw$PCB187, rep(NA, max_len - length(Veff.V3.nw[, 1]))),
-  group = rep("Vol. 3 nw d")
-)
-
 combined_data <- rbind(up.V1.d, up.V1.nd, up.V2.d)
 
 slopes <- combined_data %>%
@@ -1428,8 +1328,10 @@ ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV2.png",
 
 # Combine sampling rates --------------------------------------------------
 # Combine the all data frames
+
+
 combined_SR <- rbind(SR.V1.nd, SR.V1.d, SR.V2.d, SR.V3.1st.nd,
-                     SR.V3.2nd.nd, SR.V3.nw.d, SR.V3.w.d)
+                     SR.V3.2nd.nd, SR_V3.2_nw, SR_V3.2_w)
 
 # Look at SR and variability
 # Parameters calculated only with 3 or more values for each congener
