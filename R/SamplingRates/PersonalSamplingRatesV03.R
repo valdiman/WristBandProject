@@ -846,9 +846,11 @@ for (congener in logKoa.common$congener) {
 
 # Combine all results for all congeners
 SR_V3.2 <- do.call(rbind, SR.V3.2_results)
+# Change column name
+colnames(SR_V3.2)[colnames(SR_V3.2) == "Sampling_Rate"] <- "Sampling_Rate (m3/d)"
 
 # Convert columns to numeric
-SR_V3.2$Sampling_Rate <- as.numeric(SR_V3.2$Sampling_Rate)
+SR_V3.2$'Sampling_Rate (m3/d)' <- as.numeric(SR_V3.2$`Sampling_Rate (m3/d)`)
 SR_V3.2$R2 <- as.numeric(SR_V3.2$R2)
 SR_V3.2$p_value <- as.numeric(SR_V3.2$p_value)
 
@@ -856,7 +858,7 @@ SR_V3.2$p_value <- as.numeric(SR_V3.2$p_value)
 mask_filter <- SR_V3.2$R2 < 0.9 | SR_V3.2$p_value > 0.05
 
 # Apply NA to filtered rows
-SR_V3.2[mask_filter, c("Sampling_Rate", "R2", "p_value")] <- NA
+SR_V3.2[mask_filter, c("Sampling_Rate (m3/d)", "R2", "p_value")] <- NA
 
 # Define areas
 Awb.V3.nw <- data.V3.2$area.WB[3]  # NW
@@ -1328,13 +1330,16 @@ ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV2.png",
 
 # Combine sampling rates --------------------------------------------------
 # Combine the all data frames
-
-
 combined_SR <- rbind(SR.V1.nd, SR.V1.d, SR.V2.d, SR.V3.1st.nd,
                      SR.V3.2nd.nd, SR_V3.2_nw, SR_V3.2_w)
 
-# Look at SR and variability
-# Parameters calculated only with 3 or more values for each congener
+# Capture the original order
+congener_order <- combined_SR$congener %>% unique()
+
+# Convert congener to factor with preserved order
+combined_SR$congener <- factor(combined_SR$congener, levels = congener_order)
+
+# Proceed with summarizing (do NOT use arrange here)
 SR_averages_sd_cv <- combined_SR %>%
   group_by(congener) %>%
   summarise(
@@ -1345,7 +1350,7 @@ SR_averages_sd_cv <- combined_SR %>%
                                       mean(`Sampling_Rate (m3/d)`, na.rm = TRUE)) * 100 else NA_real_,
     Average_ko = if (n >= 3) mean(ko, na.rm = TRUE) else NA_real_
   ) %>%
-  arrange(congener)
+  ungroup()
 
 # Add ko values from averaging near values (4 above + center + 4 below)
 # This is for future use of ko to determine Veff
@@ -1361,8 +1366,7 @@ SR_averages_sd_cv$Average_ko2 <- ifelse(
   SR_averages_sd_cv$Average_ko
 )
 
-# Add manually values to PCBs 206 to 209
-SR_averages_sd_cv$Average_ko2[168] <- SR_averages_sd_cv$Average_ko2[167]
+# Add manually values to PCBs 207 to 209
 SR_averages_sd_cv$Average_ko2[169] <- SR_averages_sd_cv$Average_ko2[167]
 SR_averages_sd_cv$Average_ko2[170] <- SR_averages_sd_cv$Average_ko2[167]
 SR_averages_sd_cv$Average_ko2[171] <- SR_averages_sd_cv$Average_ko2[167]
