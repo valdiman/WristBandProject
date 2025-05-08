@@ -897,7 +897,7 @@ write.csv(SR_V3.2_w,  "Output/Data/csv/SamplingRates/Personal/SR.V3.2_w.csv",  r
 SR_V3.2_nw$congener <- factor(SR_V3.2_nw$congener,
                               levels = unique(SR_V3.2_nw$congener))
 
-ggplot(SR_V3.2_nw, aes(x = congener, y = `Sampling_Rate`, color = group)) +
+ggplot(SR_V3.2_nw, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -912,7 +912,7 @@ ggplot(SR_V3.2_nw, aes(x = congener, y = `Sampling_Rate`, color = group)) +
 SR_V3.2_w$congener <- factor(SR_V3.2_w$congener,
                               levels = unique(SR_V3.2_w$congener))
 
-ggplot(SR_V3.2_w, aes(x = congener, y = `Sampling_Rate`, color = group)) +
+ggplot(SR_V3.2_w, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
