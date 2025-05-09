@@ -23,7 +23,7 @@ install.packages("tibble")
   data.2 <- read.csv("Data/VolunteersV02.csv")
   logKoa <- read.csv("Data/logKoa.csv")
   # ko from SamplingRates_ko.R file
-  ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV3.csv")
+  ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]
   ko <- ko[c(2,6)]
 }
@@ -34,6 +34,11 @@ install.packages("tibble")
 logKwb <- data.frame(
   congener = logKoa$congener,
   logKwb = 0.6156 * logKoa$logKoa + 2.161) # R2 = 0.96
+
+# Have the same number of congeners
+common_ids <- intersect(ko$congener, logKwb$congener)
+ko <- ko[ko$congener %in% common_ids, ]
+logKwb <- logKwb[logKwb$congener %in% common_ids, ]
 
 # Calculate air PCB concentration from static WBs -------------------------
 {
@@ -74,39 +79,39 @@ logKwb <- data.frame(
 # Calculate air concentration from worn WBs -------------------------------
 # Read ko from PersonalSamplingRatesV02
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
-ko.p <- ko.p[5]
+ko.p <- ko.p[c(1,7)]
 
 {
   Vwb.V1 <- data.2$vol.WB[4] # [m3]
   Awb.V1 <- data.2$area.WB[4] # [m2]
   veff.V1.o <- 10^(logKwb$logKwb) * Vwb.V1 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V1 / Vwb.V1 / 10^(logKwb$logKwb) * data.2$office.time.day[4]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V1 / Vwb.V1 / 10^(logKwb$logKwb) * data.2$office.time.day[4]))
   veff.V1.h <- 10^(logKwb$logKwb) * Vwb.V1 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V1 / Vwb.V1 / 10^(logKwb$logKwb) * data.2$total.time.day[5]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V1 / Vwb.V1 / 10^(logKwb$logKwb) * data.2$total.time.day[5]))
   Vwb.V2 <- data.2$vol.WB[6] # [m3]
   Awb.V2 <- data.2$area.WB[6] # [m2]
   veff.V2.o <- 10^(logKwb$logKwb) * Vwb.V2 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V2 / Vwb.V2 / 10^(logKwb$logKwb) * data.2$office.time.day[7]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V2 / Vwb.V2 / 10^(logKwb$logKwb) * data.2$office.time.day[7]))
   veff.V2.h <- 10^(logKwb$logKwb) * Vwb.V2 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V2 / Vwb.V2 / 10^(logKwb$logKwb) * data.2$total.time.day[6]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V2 / Vwb.V2 / 10^(logKwb$logKwb) * data.2$total.time.day[6]))
   Vwb.V3 <- data.2$vol.WB[8] # [m3]
   Awb.V3 <- data.2$area.WB[8] # [m2]
   veff.V3.o <- 10^(logKwb$logKwb) * Vwb.V3 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V3 / Vwb.V3 / 10^(logKwb$logKwb) * data.2$office.time.day[8]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V3 / Vwb.V3 / 10^(logKwb$logKwb) * data.2$office.time.day[8]))
   veff.V3.h <- 10^(logKwb$logKwb) * Vwb.V3 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V3 / Vwb.V3 / 10^(logKwb$logKwb) * data.2$total.time.day[9]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V3 / Vwb.V3 / 10^(logKwb$logKwb) * data.2$total.time.day[9]))
   Vwb.V4 <- data.2$vol.WB[10] # [m3]
   Awb.V4 <- data.2$area.WB[10] # [m2]
   veff.V4.o <- 10^(logKwb$logKwb) * Vwb.V4 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V4 / Vwb.V4 / 10^(logKwb$logKwb) * data.2$office.time.day[11]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V4 / Vwb.V4 / 10^(logKwb$logKwb) * data.2$office.time.day[11]))
   veff.V4.h <- 10^(logKwb$logKwb) * Vwb.V4 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V4 / Vwb.V4 / 10^(logKwb$logKwb) * data.2$total.time.day[10]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V4 / Vwb.V4 / 10^(logKwb$logKwb) * data.2$total.time.day[10]))
   Vwb.V5 <- data.2$vol.WB[12] # [m3]
   Awb.V5 <- data.2$area.WB[12] # [m2]
   veff.V5.o <- 10^(logKwb$logKwb) * Vwb.V5 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V5 / Vwb.V5 / 10^(logKwb$logKwb) * data.2$office.time.day[13]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V5 / Vwb.V5 / 10^(logKwb$logKwb) * data.2$office.time.day[13]))
   veff.V5.h <- 10^(logKwb$logKwb) * Vwb.V5 * 
-    (1 - exp(-ko.p$Average_ko * Awb.V5 / Vwb.V5 / 10^(logKwb$logKwb) * data.2$total.time.day[12]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V5 / Vwb.V5 / 10^(logKwb$logKwb) * data.2$total.time.day[12]))
 }
 
 # Estimate air concentration in ng/m3 from WBs

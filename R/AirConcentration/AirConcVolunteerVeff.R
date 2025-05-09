@@ -2,7 +2,6 @@
 # Office only
 
 # Install packages
-install.packages("readxl")
 install.packages("ggplot2")
 install.packages("scales")
 install.packages("tidyr")
@@ -11,7 +10,6 @@ install.packages("tibble")
 
 # Load libraries
 {
-  library(readxl)
   library(ggplot2)
   library(scales)
   library(tidyr)
@@ -25,7 +23,7 @@ install.packages("tibble")
   data.2 <- read.csv("Data/VolunteersV02.csv")
   logKoa <- read.csv("Data/logKoa.csv")
   # ko from SamplingRates_ko.R file
-  ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV3.csv")
+  ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]
   ko <- ko[c(2,6)]
 }
@@ -36,6 +34,11 @@ install.packages("tibble")
 logKwb <- data.frame(
   congener = logKoa$congener,
   logKwb = 0.6156 * logKoa$logKoa + 2.161) # R2 = 0.96
+
+# Have the same number of congeners
+common_ids <- intersect(ko$congener, logKwb$congener)
+ko <- ko[ko$congener %in% common_ids, ]
+logKwb <- logKwb[logKwb$congener %in% common_ids, ]
 
 # Volunteers 1 to 8 (V)
 # Calculate air PCB concentration from static WBs -------------------------
@@ -105,69 +108,69 @@ tPCB.conc.air
 # Read ko from PersonalSamplingRatesV02
 # Need to add PCB 14 and 128. Did manually
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
-ko.p <- ko.p[5]
+ko.p <- ko.p[c(1,7)]
 
 {
   Vwb.V1.l <- data$vol.WB[1] # [m3]
   Awb.V1.l <- data$area.WB[1] # [m2]
   veff.V1.l <- 10^(logKwb$logKwb) * Vwb.V1.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V1.l / Vwb.V1.l / 10^(logKwb$logKwb) * data$time.day[1]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V1.l / Vwb.V1.l / 10^(logKwb$logKwb) * data$time.day[1]))
   Vwb.V1.r <- data$vol.WB[2] # [m3]
   Awb.V1.r <- data$area.WB[2] # [m2]
   veff.V1.r <- 10^(logKwb$logKwb) * Vwb.V1.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V1.r / Vwb.V1.r / 10^(logKwb$logKwb) * data$time.day[2]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V1.r / Vwb.V1.r / 10^(logKwb$logKwb) * data$time.day[2]))
   Vwb.V2.l <- data$vol.WB[3] # [m3]
   Awb.V2.l <- data$area.WB[3] # [m2]
   veff.V2.l <- 10^(logKwb$logKwb) * Vwb.V2.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V2.l / Vwb.V2.l / 10^(logKwb$logKwb) * data$time.day[3]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V2.l / Vwb.V2.l / 10^(logKwb$logKwb) * data$time.day[3]))
   Vwb.V2.r <- data$vol.WB[4] # [m3]
   Awb.V2.r <- data$area.WB[4] # [m2]
   veff.V2.r <- 10^(logKwb$logKwb) * Vwb.V2.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V2.r / Vwb.V2.r / 10^(logKwb$logKwb) * data$time.day[4]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V2.r / Vwb.V2.r / 10^(logKwb$logKwb) * data$time.day[4]))
   Vwb.V3.l <- data$vol.WB[5] # [m3]
   Awb.V3.l <- data$area.WB[5] # [m2]
   veff.V3.l <- 10^(logKwb$logKwb) * Vwb.V3.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V3.l / Vwb.V3.l / 10^(logKwb$logKwb) * data$time.day[5]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V3.l / Vwb.V3.l / 10^(logKwb$logKwb) * data$time.day[5]))
   Vwb.V3.r <- data$vol.WB[6] # [m3]
   Awb.V3.r <- data$area.WB[6] # [m2]
   veff.V3.r <- 10^(logKwb$logKwb) * Vwb.V3.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V3.r / Vwb.V3.r / 10^(logKwb$logKwb) * data$time.day[6]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V3.r / Vwb.V3.r / 10^(logKwb$logKwb) * data$time.day[6]))
   Vwb.V4.l <- data$vol.WB[9] # [m3]
   Awb.V4.l <- data$area.WB[9] # [m2]
   veff.V4.l <- 10^(logKwb$logKwb) * Vwb.V4.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V4.l / Vwb.V4.l / 10^(logKwb$logKwb) * data$time.day[9]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V4.l / Vwb.V4.l / 10^(logKwb$logKwb) * data$time.day[9]))
   Vwb.V4.r <- data$vol.WB[10] # [m3]
   Awb.V4.r <- data$area.WB[10] # [m2]
   veff.V4.r <- 10^(logKwb$logKwb) * Vwb.V4.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V4.r / Vwb.V4.r / 10^(logKwb$logKwb) * data$time.day[10]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V4.r / Vwb.V4.r / 10^(logKwb$logKwb) * data$time.day[10]))
   Vwb.V5.l <- data$vol.WB[11] # [m3]
   Awb.V5.l <- data$area.WB[11] # [m2]
   veff.V5.l <- 10^(logKwb$logKwb) * Vwb.V5.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V5.l / Vwb.V5.l / 10^(logKwb$logKwb) * data$time.day[11]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V5.l / Vwb.V5.l / 10^(logKwb$logKwb) * data$time.day[11]))
   Vwb.V5.r <- data$vol.WB[12] # [m3]
   Awb.V5.r <- data$area.WB[12] # [m2]
   veff.V5.r <- 10^(logKwb$logKwb) * Vwb.V5.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V5.r / Vwb.V5.r / 10^(logKwb$logKwb) * data$time.day[12]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V5.r / Vwb.V5.r / 10^(logKwb$logKwb) * data$time.day[12]))
   Vwb.V6.l <- data$vol.WB[17] # [m3]
   Awb.V6.l <- data$area.WB[17] # [m2]
   veff.V6.l <- 10^(logKwb$logKwb) * Vwb.V6.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V6.l / Vwb.V6.l / 10^(logKwb$logKwb) * data$time.day[17]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V6.l / Vwb.V6.l / 10^(logKwb$logKwb) * data$time.day[17]))
   Vwb.V6.r <- data$vol.WB[18] # [m3]
   Awb.V6.r <- data$area.WB[18] # [m2]
   veff.V6.r <- 10^(logKwb$logKwb) * Vwb.V6.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V6.r / Vwb.V6.r / 10^(logKwb$logKwb) * data$time.day[18]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V6.r / Vwb.V6.r / 10^(logKwb$logKwb) * data$time.day[18]))
   Vwb.V7.l <- data$vol.WB[25] # [m3]
   Awb.V7.l <- data$area.WB[25] # [m2]
   veff.V7.l <- 10^(logKwb$logKwb) * Vwb.V7.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V7.l / Vwb.V7.l / 10^(logKwb$logKwb) * data$time.day[25]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V7.l / Vwb.V7.l / 10^(logKwb$logKwb) * data$time.day[25]))
   Vwb.V7.r <- data$vol.WB[24] # [m3]
   Awb.V7.r <- data$area.WB[24] # [m2]
   veff.V7.r <- 10^(logKwb$logKwb) * Vwb.V7.r * 
-    (1 - exp(-ko.p$Average_ko * Awb.V7.r / Vwb.V7.r / 10^(logKwb$logKwb) * data$time.day[24]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V7.r / Vwb.V7.r / 10^(logKwb$logKwb) * data$time.day[24]))
   Vwb.V8.l <- data.2$vol.WB[13] # [m3]
   Awb.V8.l <- data.2$area.WB[13] # [m2]
   veff.V8.l <- 10^(logKwb$logKwb) * Vwb.V8.l * 
-    (1 - exp(-ko.p$Average_ko * Awb.V8.l / Vwb.V8.l / 10^(logKwb$logKwb) * data.2$office.time.day[13]))
+    (1 - exp(-ko.p$Average_ko2 * Awb.V8.l / Vwb.V8.l / 10^(logKwb$logKwb) * data.2$office.time.day[13]))
 }
 
 # Estimate air concentration in ng/m3 from WBs
@@ -282,7 +285,7 @@ ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCBV3.png", plot = plotAir
 data.conc$factor2 <- data.conc$Wb_Concentration/data.conc$Air_Concentration
 
 # Calculate the percentage of observations within the factor of 2
-factor2_percentage <- nrow(data[data.conc$factor2 > 0.5 & data.conc$factor2 < 2, ])/nrow(data.conc)*100
+factor2_percentage <- nrow(data.conc[data.conc$factor2 > 0.5 & data.conc$factor2 < 2, ])/nrow(data.conc)*100
 
 # Estimate percentage error ---------------------------------------------------
 # Calculate percentage error
