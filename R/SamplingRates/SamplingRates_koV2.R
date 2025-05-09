@@ -192,11 +192,14 @@ SR.st.sd <- sd(SR.st.2$`Sampling Rate (m3/d)`, na.rm = TRUE)
 SR.ko.ave <- mean(SR.st.2$ko, na.rm = TRUE) 
 SR.ko.sd <- sd(SR.st.2$ko, na.rm = TRUE)
 
-# Add averege of ko to the Na values.
+# Add average of ko to the Na values.
 SR.st.2$ko[is.na(SR.st.2$ko)] <- SR.ko.ave
 
 #export
 write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2.csv")
+
+
+
 
 # Plots
 # Change number congener in [] 
