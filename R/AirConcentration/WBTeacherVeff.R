@@ -112,21 +112,15 @@ for(i in 1:dim(wt.1)[1]) {
 
 # Transform to data.frame
 wt.2 <- data.frame(wt.2)
-# Add school year
-wt.2 <- cbind(wt$school.year, wt.2)
-# Add time back
-wt.2 <- cbind(wt$time.day, wt.2)
 # Add sample
 wt.2 <- cbind(wt$code.teacher, wt.2)
-# Change column names
-names(wt.2)[names(wt.2) == 'wt$school.year'] <- 'school.year'
+# Change column name
 names(wt.2)[names(wt.2) == 'wt$code.teacher'] <- 'code.teacher'
-names(wt.2)[names(wt.2) == 'wt$time.day'] <- 'time.day'
 # Add column names
-colnames(wt.2)[4:176] <- colnames(wt)[2:174]
+colnames(wt.2)[2:174] <- colnames(wt)[2:174]
 
 # Individual PCB detection frequency --------------------------------------
-wt.fr <- as.data.frame(colSums(wt.2[, 4:176] > 0)/length(wt.2[, 1])*100)
+wt.fr <- as.data.frame(colSums(wt.2[2:174] > 0)/length(wt.2[, 1])*100)
 colnames(wt.fr) <- c("Detection.Frequency")
 
 wt.fr.stats <- wt.fr %>%
@@ -138,7 +132,7 @@ wt.fr.stats <- wt.fr %>%
   )
 
 # Add PCB names as a new column in wt.fr
-wt.fr$congener <- colnames(wt.2)[4:176]
+wt.fr$congener <- colnames(wt.2)[2:174]
 wt.fr$congener <- gsub('\\.', '+', wt.fr$congener) # replace dot for +
 wt.fr$congener <- factor(wt.fr$congener,
                                  levels = rev(wt.fr$congener)) # change the order to be plotted.
@@ -158,12 +152,12 @@ plot.cong.freq <- ggplot(wt.fr, aes(x = Detection.Frequency, y = congener)) +
 # Display the plot
 print(plot.cong.freq)
 
-# Save map in folder
+# Save plot in folder
 ggsave("Output/Plots/Teachers/FreqPCBWT.png", plot = plot.cong.freq,
        width = 5, height = 10, dpi = 1200)
 
 # Plot tPCB ---------------------------------------------------------------
-ggplot(wt.2, aes(y = rowSums(wt.2[, 4:176]), x = factor(code.teacher))) +
+ggplot(wt.2, aes(y = rowSums(wt.2[2:174]), x = factor(code.teacher))) +
   geom_bar(stat = 'identity', width = 0.8, fill = "black") +
   theme_bw() +
   theme(aspect.ratio = 6/35) +
@@ -242,8 +236,11 @@ rownames(costheta) <- colnames(prof.cos)
 write.csv(costheta, file = "Output/Data/csv/Teachers/costheta.csv")
 
 # Predict Concentrations  ------------------------------------------------
+# Read kos
+ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
+pcb_list <- ko.p$congener
+# Read logKoa
 logKoa <- read.csv("Data/logKoa.csv")
-
 # Calculate logKws
 # Regression created with data from Tromp et al 2019 (Table 2, Wristband)
 # & Frederiksen et al 2022 (Table 3)
@@ -251,49 +248,50 @@ logKwb <- data.frame(
   congener = logKoa$congener,
   logKwb = 0.6156 * logKoa$logKoa + 2.161) # R2 = 0.96
 
-ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
-ko.p <- ko.p[5]
+# Subset logKwb to include same congeners as ko
+logKwb <- logKwb[logKwb$congener %in% pcb_list, ]
+# Get ko
+ko.p <- ko.p[7]
+# Subset wt.1
+wt.3 <- wt.1[, intersect(pcb_list, colnames(wt.1))]
+# Add school year
+wt.3 <- cbind(wt$school.year, wt.3)
+# Add time back
+wt.3 <- cbind(wt$time.day, wt.3)
+# Add sample
+wt.3 <- cbind(wt$code.teacher, wt.3)
+# Add WB volume
+wt.3 <- cbind(wt$vol.WB, wt.3)
+# Add WB area
+wt.3 <- cbind(wt$area.WB, wt.3)
+# Change column names
+names(wt.3)[names(wt.3) == 'wt$school.year'] <- 'school.year'
+names(wt.3)[names(wt.3) == 'wt$code.teacher'] <- 'code.teacher'
+names(wt.3)[names(wt.3) == 'wt$time.day'] <- 'time.day'
+names(wt.3)[names(wt.3) == 'wt$vol.WB'] <- 'vol.WB'
+names(wt.3)[names(wt.3) == 'wt$area.WB'] <- 'area.WB'
 
-Vwb.V1 <- wt$vol.WB[1] # [m3]
-Awb.V1 <- wt$area.WB[1] # [m2]
-veff.V1.l <- 10^(logKwb$logKwb) * Vwb.V1[i] * 
-  (1 - exp(-ko.p$Average_ko * Awb.V1[i] / Vwb.V1[i] / 10^(logKwb$logKwb) * wt$time.day[i]))
+# Calculate Veff
+vol_matrix <- matrix(rep(wt.3$vol.WB, each = 171), nrow = 36, byrow = TRUE)
+area_matrix <- matrix(rep(wt.3$area.WB, each = 171), nrow = 36, byrow = TRUE)
+time_matrix <- matrix(rep(wt.3$time.day, each = 171), nrow = 36, byrow = TRUE)
+logK_matrix <- matrix(rep(logKwb$logKwb, times = 36), nrow = 36, byrow = FALSE)
+ko2 <- ko.p$Average_ko2
 
-# Create a matrix to store Veff values
-veff_matrix <- matrix(NA, nrow = nrow(wt), ncol = nrow(logKwb))
-colnames(veff_matrix) <- logKwb$congener
-rownames(veff_matrix) <- wt$Congener.Sample
-
-# Extract ko vector
-ko_values <- ko.p$Average_ko
-
-# Loop over samples (rows)
-for (i in 1:nrow(wt)) {
-  Vwb <- wt$vol.WB[i]
-  Awb <- wt$area.WB[i]
-  time <- wt$time.day[i]
-  
-  # Loop over congeners (columns in veff_matrix)
-  for (j in 1:nrow(logKwb)) {
-    kow <- 10^logKwb$logKwb[j]
-    veff_matrix[i, j] <- kow * Vwb * (1 - exp(-ko_values[j] * Awb / Vwb / kow * time))
-  }
-}
-
-veff <- as.data.frame(veff_matrix)
-veff$Sample <- rownames(veff_matrix)
+# Calculate veff.teacher as a 36 x 171 matrix
+veff.teacher <- 10^logK_matrix * vol_matrix * 
+  (1 - exp(-ko2 * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
 
 # Estimate concentration from worn WBs
-wt.mass <- wt[, 2:174]
-veff.pcb <- veff[, 1:173]
-conc.WB <- wt.mass / veff.pcb
+wt.mass <- wt.3[, 6:176]
+conc.WB <- wt.mass / veff.teacher
 conc.WB <- as.data.frame(conc.WB)
 conc.WB$code.teacher <- wt$code.teacher
 conc.WB$school.year <- wt$school.year
 conc.WB$sample <- wt$Congener.Sample
 
 # Predicted Total PCB Concentration ---------------------------------------
-tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:173], na.rm = TRUE))
+tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:171], na.rm = TRUE))
 tPCB.conc.WB$code.teacher <- conc.WB$code.teacher
 tPCB.conc.WB$school.year <- conc.WB$school.year
 # Change columns names
@@ -357,7 +355,7 @@ tPCB.wt <- ggplot(plot_data, aes(x = factor(label), y = mean_tPCB)) +
 print(tPCB.wt)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCBVeff.png", plot = tPCB.wt,
+ggsave("Output/Plots/Teachers/WTtPCBVeff2.png", plot = tPCB.wt,
        width = 10, height = 5, dpi = 1200)
 
 # Create a cleaned version of 'code.teacher' without the .l or .r
@@ -399,7 +397,7 @@ tPCB.wt.yr <- ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB)) +
 print(tPCB.wt.yr)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCByrVeff.png", plot = tPCB.wt.yr,
+ggsave("Output/Plots/Teachers/WTtPCByrVeff2.png", plot = tPCB.wt.yr,
        width = 10, height = 5, dpi = 1200)
 
 # Add year renovations to schools. This is too much speculation
@@ -421,9 +419,9 @@ ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB, label = code.teacher.cle
 
 # Predicted PCBi Concentrations -------------------------------------------
 # Calculate means and standard deviations for columns 1 to 173
-median_conc <- apply(conc.WB[, 1:173], 2, median, na.rm = TRUE)
-mean_conc <- colMeans(conc.WB[, 1:173], na.rm = TRUE)
-st_conc <- apply(conc.WB[, 1:173], 2, sd, na.rm = TRUE)
+median_conc <- apply(conc.WB[, 1:171], 2, median, na.rm = TRUE)
+mean_conc <- colMeans(conc.WB[, 1:171], na.rm = TRUE)
+st_conc <- apply(conc.WB[, 1:171], 2, sd, na.rm = TRUE)
 cov_conc <- st_conc / mean_conc * 100
 
 PCB.conc.WB.ave <- data.frame(
@@ -445,7 +443,7 @@ top_10_PCB.means <- PCB.conc.WB.ave %>%
 print(top_10_PCB.means)
 
 # Plot PCBi
-plot.pcb.data <- conc.WB[, 1:173]
+plot.pcb.data <- conc.WB[, 1:171]
 
 # Reshape the data from wide to long format
 plot.pcb.long <- pivot_longer(
@@ -475,16 +473,16 @@ plot.pcbi <- ggplot(plot.pcb.long, aes(x = Congener, y = Concentration)) +
 plot.pcbi
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTPCBiVeff.png", plot = plot.pcbi,
+ggsave("Output/Plots/Teachers/WTPCBiVeff2.png", plot = plot.pcbi,
        width = 10, height = 5, dpi = 1200)
 
 # Concentration Profile Analysis ------------------------------------------
 # Profiles
-tmp <- rowSums(conc.WB[, 1:173], na.rm = TRUE)
-prof.WB.conc <- sweep(conc.WB[, 1:173], 1, tmp, FUN = "/")
+tmp <- rowSums(conc.WB[, 1:171], na.rm = TRUE)
+prof.WB.conc <- sweep(conc.WB[, 1:171], 1, tmp, FUN = "/")
 prof.WB.conc <- cbind(conc.WB$code.teacher, prof.WB.conc)
 # Check sum of all PCBs (i.e., = 1)
-rowSums(prof.WB.conc[, 2:174], na.rm = TRUE)
+rowSums(prof.WB.conc[, 2:172], na.rm = TRUE)
 
 # See top PCBi for each sample
 # Extract numeric columns and their names
@@ -519,7 +517,7 @@ ggplot(top_10_PCBi_df, aes(x = Top10_PCBi_1, y = `conc.WB$school.year`)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # PCA
-t.prof.WB.conc <- data.frame(t(prof.WB.conc[, 2:174]))
+t.prof.WB.conc <- data.frame(t(prof.WB.conc[, 2:172]))
 colnames(t.prof.WB.conc) <- conc.WB$code.teacher
 PCA <- prcomp(t.prof.WB.conc, scale. = TRUE)
 summary(PCA)
@@ -555,11 +553,11 @@ costheta_df <- as.data.frame(costheta.samples)
 costheta_df$school.year <- conc.WB$school.year
 
 # Export
-write.csv(costheta_df, file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff.csv")
+write.csv(costheta_df, file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff2.csv")
 
 # Cosine theta visualization ----------------------------------------------
 # Calculate tPCB values to be added to the plot
-tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:173], na.rm = TRUE))
+tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:171], na.rm = TRUE))
 colnames(tPCB.conc.WB) <- "tPCB"
 
 # Add the tPCB values to costheta_df
@@ -624,7 +622,7 @@ plot.cos.theta.low <- ggplot(data = costheta_correlations[1:13, ], # low values 
 plot.cos.theta.low
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff.png", plot = plot.cos.theta.low,
+ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff2.png", plot = plot.cos.theta.low,
        width = 10, height = 10, dpi = 1200)
 
 plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high values >= 0.95
@@ -643,13 +641,13 @@ plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high va
 plot.cos.theta.high
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff.png", plot = plot.cos.theta.high,
+ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.theta.high,
        width = 10, height = 10, dpi = 1200)
 
 # Plot Individual PCB Profiles --------------------------------------------
 # Select rows for the sample
 selected_rows <- prof.WB.conc %>%
-  filter(conc.WB$code.teacher %in% c("wt.19.l")) # need to change the sample!
+  filter(conc.WB$code.teacher %in% c("wt.25.r")) # need to change the sample!
 
 # Create Source vector with correct length and values
 source_vector <- rep(selected_rows[[1]], each = ncol(selected_rows) - 1)
@@ -670,7 +668,7 @@ prof_combined$congener <- factor(prof_combined$congener,
                                  levels = unique(prof_combined$congener))
 
 # Create the bar plot
-plot.19.l <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
+plot.25.r <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 0.9, 
            color = "black", linewidth = 0.2) +
   xlab("") +
@@ -686,7 +684,7 @@ plot.19.l <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
         axis.text.x = element_text(face = "bold", size = 10, angle = 90,
                                    hjust = 1, vjust = 0.5),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("wt.19.l" = "blue"), # change as needed
+  scale_fill_manual(values = c("wt.25.r" = "blue"), # change as needed
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +
   theme(legend.position = c(0.95, 0.9),
         legend.background = element_rect(fill = "white", color = NA),
@@ -698,6 +696,6 @@ plot.19.l
 plot.25.r
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/wt25rVeff.png", plot = plot.25.r,
+ggsave("Output/Plots/Profiles/Teachers/wt25rVeff2.png", plot = plot.25.r,
        width = 20, height = 5, dpi = 1200)
 
