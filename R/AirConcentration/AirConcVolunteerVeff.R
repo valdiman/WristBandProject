@@ -104,6 +104,10 @@ tPCB.conc.air <- colSums(conc.air, na.rm = TRUE)
 # See
 tPCB.conc.air
 
+# Export results
+write.csv(conc.air,
+          file = "Output/Data/csv/Volunteer/VolunteerConcStaticWB.csv")
+
 # Estimate air concentration from volunteers WBs --------------------------
 # Read ko from PersonalSamplingRatesV02
 # Need to add PCB 14 and 128. Did manually
@@ -207,6 +211,10 @@ tPCB.conc.wb <- colSums(conc.wb, na.rm = TRUE)
 
 print(tPCB.conc.wb)
 print(tPCB.conc.air)
+
+# Export results
+write.csv(conc.wb,
+          file = "Output/Data/csv/Volunteer/VolunteerConcWB.csv")
 
 # Total PCB plots ---------------------------------------------------------
 # Create a data frame with the combined data

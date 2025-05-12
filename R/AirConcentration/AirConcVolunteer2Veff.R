@@ -144,6 +144,13 @@ tPCB.conc.air <- colSums(conc.air, na.rm = TRUE)
 print(tPCB.conc.wb)
 print(tPCB.conc.air)
 
+# Export results
+write.csv(conc.air,
+          file = "Output/Data/csv/Volunteer/VolunteerConcStaticWB2.csv")
+write.csv(conc.wb,
+          file = "Output/Data/csv/Volunteer/VolunteerConcWB2.csv")
+
+
 # Plots -------------------------------------------------------------------
 # tPCB
 # Create a data frame with the combined data
