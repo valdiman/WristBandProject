@@ -591,7 +591,7 @@ ggplot(SR.V3.2nd.nd, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group
         axis.title.x = element_text(face = "bold", size = 7))
 
 # V3 SR vs logKoa regression 1 ----------------------------------------------
-# (1) Average both d and nd
+# (1) Average both nds
 sr.ave.V3 <- as.data.frame(rowMeans(cbind(SR.V3.1st.nd$`Sampling_Rate (m3/d)`, 
                                               SR.V3.2nd.nd$`Sampling_Rate (m3/d)`), 
                                         na.rm = TRUE))
@@ -655,7 +655,9 @@ r2 <- summary(model.V3.2)$r.squared
 p.sr.V3.koa.2 <- ggplot(sr.long.V3, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = min(sr.long.V3$logKoa) + 1.4, y = max(sr.long.V3$sr) * 1.2,
+  annotate("text", x = 7.8, y = 7,
+           label = paste("Vol. 3 (nd 1st & 2nd weeks)"),size = 5) +
+  annotate("text", x = min(sr.long.V3$logKoa) + 1.45, y = max(sr.long.V3$sr) * 1.2,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
   annotate("text", x = min(sr.long.V3$logKoa) + 0.35, y = max(sr.long.V3$sr) * 1.13,
@@ -942,12 +944,14 @@ r2 <- summary(model.V3.nw)$r.squared
 p.sr.V3.koa.nw <- ggplot(sr.V3.nw, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.3, y = 5.2,
+  annotate("text", x = 6.9, y = 5.4, label = paste("Vol. 3 (non-wiped)"),
+           size = 5) +
+  annotate("text", x = 7.6, y = 5.1,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
-           size = 4) + 
-  annotate("text", x = 6.48, y = 5,
-           label = paste("R² = ", round(r2, 2)), size = 4) + 
+           size = 5) + 
+  annotate("text", x = 6.52, y = 4.8,
+           label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
@@ -980,11 +984,12 @@ r2 <- summary(model.V3.w)$r.squared
 p.sr.V3.koa.w <- ggplot(sr.V3.w, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.3, y = 6,
+  annotate("text", x = 6.7, y = 6.2, label = paste("Vol. 3 (wiped)")) +
+  annotate("text", x = 7.5, y = 6,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
            size = 4) + 
-  annotate("text", x = 6.45, y = 5.8,
+  annotate("text", x = 6.6, y = 5.8,
            label = paste("R² = ", round(r2, 2)), size = 4) + 
   theme_bw() +
   theme(aspect.ratio = 1) +

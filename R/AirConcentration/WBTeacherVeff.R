@@ -7,15 +7,17 @@ install.packages("tidyverse")
 install.packages("ggplot2")
 install.packages("tibble")
 install.packages("ggfortify")
+install.packages("stringr")
 
 # Library
 {
-  suppressPackageStartupMessages(library(ggplot2))
-  suppressPackageStartupMessages(library(reshape2)) # For melt function
-  suppressPackageStartupMessages(library(tidyverse)) # Data manipulation
-  suppressPackageStartupMessages(library(dplyr)) # performs %>%
-  suppressPackageStartupMessages(library(tibble)) # add column
-  suppressPackageStartupMessages(library(ggfortify)) # PCA analysis
+  library(ggplot2)
+  library(reshape2) # For melt function
+  library(tidyr) # Data manipulation
+  library(dplyr) # performs %>%
+  library(tibble) # add column
+  library(ggfortify) # PCA analysis
+  library(stringr)
 }
 
 # Read data ---------------------------------------------------------------
@@ -301,6 +303,8 @@ colnames(tPCB.conc.WB) <- c("tPCB", "code.teacher", "school.year")
 tPCB.conc.WB
 min(tPCB.conc.WB$tPCB)
 max(tPCB.conc.WB$tPCB)
+mean(tPCB.conc.WB$tPCB)
+sd(tPCB.conc.WB$tPCB)
 
 # Need to change format to include duplicate
 tPCB.conc.WB <- tPCB.conc.WB %>%
@@ -606,7 +610,7 @@ costheta_correlations <- costheta_long %>%
   filter(Var1 != Var2)  # Exclude self-correlations (diagonal values)
 
 # Plot the data
-plot.cos.theta.low <- ggplot(data = costheta_correlations[1:13, ], # low values =< 0.276
+plot.cos.theta.low <- ggplot(data = costheta_correlations[1:13, ], # low values =< 0.14
                              aes(x = Var1, y = Var2, fill = Value)) +
   geom_tile(color = "white") +
   scale_fill_gradient(low = "blue", high = "red") +
@@ -625,7 +629,7 @@ plot.cos.theta.low
 ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff2.png", plot = plot.cos.theta.low,
        width = 10, height = 10, dpi = 1200)
 
-plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high values >= 0.95
+plot.cos.theta.high <- ggplot(data = costheta_correlations[586:595, ], # high values >= 0.86
                               aes(x = Var1, y = Var2, fill = Value)) +
   geom_tile(color = "white") +
   scale_fill_gradient(low = "blue", high = "red") +
