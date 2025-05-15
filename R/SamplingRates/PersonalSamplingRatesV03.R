@@ -1056,10 +1056,10 @@ plot.18.30 <- ggplot(combined_data, aes(x = time * 24, y = veff,
   ylab(expression(bold("Effective Volume PCBs 18+30 (m"^"3"*")"))) +
   scale_color_manual(values = group_colors) +
   scale_fill_manual(values = group_colors) +
-  theme(axis.text.y = element_text(face = "bold", size = 22),
-        axis.title.y = element_text(face = "bold", size = 24),
-        axis.text.x = element_text(face = "bold", size = 22),
-        axis.title.x = element_text(face = "bold", size = 24),
+  theme(axis.text.y = element_text(face = "bold", size = 28),
+        axis.title.y = element_text(face = "bold", size = 28),
+        axis.text.x = element_text(face = "bold", size = 28),
+        axis.title.x = element_text(face = "bold", size = 28),
         legend.position = "none",  # Remove the existing legend
         aspect.ratio = 1.5)
 
@@ -1090,7 +1090,7 @@ plot.18.30 <- plot.18.30 +
 plot.18.30
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRatesv2.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRatesv3.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
@@ -1136,10 +1136,10 @@ plot.52 <- ggplot(combined_data, aes(x = time * 24, y = veff,
   ylab(expression(bold("Effective Volume PCB 52 (m"^"3"*")"))) +
   scale_color_manual(values = group_colors) +
   scale_fill_manual(values = group_colors) +
-  theme(axis.text.y = element_text(face = "bold", size = 22),
-        axis.title.y = element_text(face = "bold", size = 24),
-        axis.text.x = element_text(face = "bold", size = 22),
-        axis.title.x = element_text(face = "bold", size = 24),
+  theme(axis.text.y = element_text(face = "bold", size = 28),
+        axis.title.y = element_text(face = "bold", size = 28),
+        axis.text.x = element_text(face = "bold", size = 28),
+        axis.title.x = element_text(face = "bold", size = 28),
         legend.position = "none",
         aspect.ratio = 1.5)
 
@@ -1170,7 +1170,7 @@ plot.52 <- plot.52 +
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRatesV2.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRatesV3.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -1296,10 +1296,10 @@ plot.187 <- ggplot(combined_data, aes(x = time * 24, y = veff,
   ylab(expression(bold("Effective Volume PCB 187 (m"^"3"*")"))) +
   scale_color_manual(values = group_colors) +
   scale_fill_manual(values = group_colors) +
-  theme(axis.text.y = element_text(face = "bold", size = 22),
-        axis.title.y = element_text(face = "bold", size = 24),
-        axis.text.x = element_text(face = "bold", size = 22),
-        axis.title.x = element_text(face = "bold", size = 24),
+  theme(axis.text.y = element_text(face = "bold", size = 28),
+        axis.title.y = element_text(face = "bold", size = 28),
+        axis.text.x = element_text(face = "bold", size = 28),
+        axis.title.x = element_text(face = "bold", size = 28),
         legend.position = "none",
         aspect.ratio = 1.5)
 
@@ -1330,7 +1330,7 @@ plot.187 <- plot.187 +
 plot.187
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV2.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV3.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
 
 # Combine sampling rates --------------------------------------------------
