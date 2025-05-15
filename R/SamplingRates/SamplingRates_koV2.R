@@ -198,9 +198,6 @@ SR.st.2$ko[is.na(SR.st.2$ko)] <- SR.ko.ave
 #export
 write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2.csv")
 
-
-
-
 # Plots
 # Change number congener in [] 
 
@@ -402,10 +399,10 @@ plot.52 <- ggplot(combined_data, aes(x = time, y = PCB52_comb,
   ylab(expression(bold("Effective Volume PCB 52 (m"^3*")"))) +
   scale_color_manual(values = group_colors) +
   scale_fill_manual(values = group_colors) +
-  theme(axis.text.y = element_text(face = "bold", size = 22),
-        axis.title.y = element_text(face = "bold", size = 24),
-        axis.text.x = element_text(face = "bold", size = 22),
-        axis.title.x = element_text(face = "bold", size = 24),
+  theme(axis.text.y = element_text(face = "bold", size = 28),
+        axis.title.y = element_text(face = "bold", size = 28),
+        axis.text.x = element_text(face = "bold", size = 28),
+        axis.title.x = element_text(face = "bold", size = 28),
         legend.position = "none",  # Remove the existing legend
         aspect.ratio = 1.5)
 
@@ -433,7 +430,7 @@ plot.52 <- plot.52 +
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates2.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates3.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
