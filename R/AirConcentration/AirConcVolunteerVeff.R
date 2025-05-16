@@ -39,6 +39,8 @@ logKwb <- data.frame(
 common_ids <- intersect(ko$congener, logKwb$congener)
 ko <- ko[ko$congener %in% common_ids, ]
 logKwb <- logKwb[logKwb$congener %in% common_ids, ]
+data.1 <- data[, common_ids]
+data.2.1 <- data.2[, common_ids]
 
 # Volunteers 1 to 8 (V)
 # Calculate air PCB concentration from static WBs -------------------------
@@ -76,19 +78,19 @@ logKwb <- logKwb[logKwb$congener %in% common_ids, ]
   
   # Calculate air concentration in ng/m3 from static WBs
   # For V1 & V2
-  conc.V1.V2 <- as.data.frame(t(data[8, 6:178] / veff_static.V1.V2))
+  conc.V1.V2 <- as.data.frame(t(data.1[8, ] / veff_static.V1.V2))
   # For V3
-  conc.V3 <- as.data.frame(t(data[7, 6:178] / veff_static.V3))
+  conc.V3 <- as.data.frame(t(data.1[7, ] / veff_static.V3))
   # For V4
-  conc.V4 <- data.frame(colMeans(data[14:15, 6:178])) / veff_static.V4
+  conc.V4 <- data.frame(colMeans(data.1[14:15, ])) / veff_static.V4
   # For V5
-  conc.V5 <- as.data.frame(t(data[13, 6:178] / veff_static.V5))
+  conc.V5 <- as.data.frame(t(data.1[13, ] / veff_static.V5))
   # For V6
-  conc.V6 <- data.frame(colMeans(data[19:21, 6:178])) / veff_static.V6
+  conc.V6 <- data.frame(colMeans(data.1[19:21, ])) / veff_static.V6
   # For V7
-  conc.V7 <- data.frame(colMeans(data[22:23, 6:178])) / veff_static.V7
+  conc.V7 <- data.frame(colMeans(data.1[22:23, ])) / veff_static.V7
   # For V8
-  conc.V8 <- as.data.frame(t(data.2[3, 6:178] / veff_static.V8))
+  conc.V8 <- as.data.frame(t(data.2.1[3, ] / veff_static.V8))
   
   # Combine concentrations
   conc.air <- cbind(conc.V1.V2, conc.V3, conc.V4, conc.V5, conc.V6, conc.V7,
@@ -181,21 +183,21 @@ ko.p <- ko.p[c(1,7)]
 # Using Veff
 
 {
-  conc.V1.l <- as.data.frame(t(data[1, 6:178] / veff.V1.l))
-  conc.V1.r <- as.data.frame(t(data[2, 6:178] / veff.V1.r))
-  conc.V2.l <- as.data.frame(t(data[3, 6:178] / veff.V2.l))
-  conc.V2.r <- as.data.frame(t(data[4, 6:178] / veff.V2.l))
-  conc.V3.l <- as.data.frame(t(data[5, 6:178] / veff.V3.l))
-  conc.V3.r <- as.data.frame(t(data[6, 6:178] / veff.V3.r))
-  conc.V4.l <- as.data.frame(t(data[9, 6:178] / veff.V4.l))
-  conc.V4.r <- as.data.frame(t(data[10, 6:178] / veff.V4.r))
-  conc.V5.l <- as.data.frame(t(data[11, 6:178] / veff.V5.l))
-  conc.V5.r <- as.data.frame(t(data[12, 6:178] / veff.V5.r))
-  conc.V6.l <- as.data.frame(t(data[17, 6:178] / veff.V6.l))
-  conc.V6.r <- as.data.frame(t(data[18, 6:178] / veff.V6.r))
-  conc.V7.l <- as.data.frame(t(data[25, 6:178] / veff.V7.l))
-  conc.V7.r <- as.data.frame(t(data[24, 6:178] / veff.V7.r))
-  conc.V8.l <- as.data.frame(t(data.2[13, 6:178] / veff.V8.l))
+  conc.V1.l <- as.data.frame(t(data.1[1, ] / veff.V1.l))
+  conc.V1.r <- as.data.frame(t(data.1[2, ] / veff.V1.r))
+  conc.V2.l <- as.data.frame(t(data.1[3, ] / veff.V2.l))
+  conc.V2.r <- as.data.frame(t(data.1[4, ] / veff.V2.l))
+  conc.V3.l <- as.data.frame(t(data.1[5, ] / veff.V3.l))
+  conc.V3.r <- as.data.frame(t(data.1[6, ] / veff.V3.r))
+  conc.V4.l <- as.data.frame(t(data.1[9, ] / veff.V4.l))
+  conc.V4.r <- as.data.frame(t(data.1[10, ] / veff.V4.r))
+  conc.V5.l <- as.data.frame(t(data.1[11, ] / veff.V5.l))
+  conc.V5.r <- as.data.frame(t(data.1[12, ] / veff.V5.r))
+  conc.V6.l <- as.data.frame(t(data.1[17, ] / veff.V6.l))
+  conc.V6.r <- as.data.frame(t(data.1[18, ] / veff.V6.r))
+  conc.V7.l <- as.data.frame(t(data.1[25, ] / veff.V7.l))
+  conc.V7.r <- as.data.frame(t(data.1[24, ] / veff.V7.r))
+  conc.V8.l <- as.data.frame(t(data.2.1[13, ] / veff.V8.l))
 }
 
 # Combined conc WBs
@@ -271,7 +273,8 @@ plotAirWBtPCB <- ggplot(data.conc, aes(x = Air_Concentration, y = Wb_Concentrati
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
         axis.text.x = element_text(face = "bold", size = 14),
-        axis.title.x = element_text(face = "bold", size = 14)) +
+        axis.title.x = element_text(face = "bold", size = 14),
+        legend.text = element_text(size = 12)) +
   geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
@@ -431,7 +434,8 @@ plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
     theme(axis.text.y = element_text(face = "bold", size = 14),
           axis.title.y = element_text(face = "bold", size = 14),
           axis.text.x = element_text(face = "bold", size = 14),
-          axis.title.x = element_text(face = "bold", size = 14)) +
+          axis.title.x = element_text(face = "bold", size = 14),
+          legend.text = element_text(size = 12)) +
     geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
     geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
     geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
