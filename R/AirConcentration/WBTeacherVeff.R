@@ -292,6 +292,9 @@ conc.WB$code.teacher <- wt$code.teacher
 conc.WB$school.year <- wt$school.year
 conc.WB$sample <- wt$Congener.Sample
 
+# Export data
+write.csv(conc.WB, file = "Output/Data/csv/Teachers/ConcentrationTeachers.csv")
+
 # Predicted Total PCB Concentration ---------------------------------------
 tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:171], na.rm = TRUE))
 tPCB.conc.WB$code.teacher <- conc.WB$code.teacher
