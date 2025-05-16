@@ -66,19 +66,24 @@ plot.FerdVol2 <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB, fill = con
                 labels = scales::trans_format("log10", math_format(10^.x))) +
   xlab(expression(bold("Indoor Air Concentration PCBi (ng/m"^3*")"))) +
   ylab(expression(bold("Predicted Concentration PCBi (ng/m"^3*")"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 14),
-        axis.title.y = element_text(face = "bold", size = 14),
-        axis.text.x = element_text(face = "bold", size = 14),
-        axis.title.x = element_text(face = "bold", size = 14)) +
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        legend.text = element_text(size = 12)) +
   geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
   scale_shape_manual(values = shape_palette2, labels = c("Frederiksen et. al. 2022",
                                                          "This study")) +
-  scale_fill_manual(values = color_palette2) +  # Apply custom color palette for congener
+  scale_fill_manual(values = color_palette2,
+                    labels = gsub("\\.", "+", congener_names)) +
   labs(fill = "Congener", shape = "Data Source") +
-  theme(legend.position = "right") + 
-  guides(fill = guide_legend(override.aes = list(shape = 21)))
+  theme(legend.position = "right",
+        legend.spacing.y = unit(0.1, "pt"),  # Tightens vertical space
+        legend.box = "vertical") + 
+  guides(fill = guide_legend(override.aes = list(shape = 21), order = 2),
+         shape = guide_legend(order = 1))
 
 # See plot
 plot.FerdVol2

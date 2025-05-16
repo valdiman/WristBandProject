@@ -39,6 +39,7 @@ logKwb <- data.frame(
 common_ids <- intersect(ko$congener, logKwb$congener)
 ko <- ko[ko$congener %in% common_ids, ]
 logKwb <- logKwb[logKwb$congener %in% common_ids, ]
+data.2.1 <- data.2[, common_ids]
 
 # Calculate air PCB concentration from static WBs -------------------------
 {
@@ -60,16 +61,16 @@ logKwb <- logKwb[logKwb$congener %in% common_ids, ]
 
   # Calculate air concentration in ng/m3 from static WBs
   # For of1.1
-  conc.of1.1 <- as.data.frame(t(data.2[1, 6:178] / veff_static.of1.1))
+  conc.of1.1 <- as.data.frame(t(data.2.1[1, ] / veff_static.of1.1))
   # For of1.2
-  conc.of1.2 <- as.data.frame(t(data.2[2, 6:178] / veff_static.of1.2))
+  conc.of1.2 <- as.data.frame(t(data.2.1[2, ] / veff_static.of1.2))
   # Bind the data frames together row-wise
   conc.of1 <- cbind(conc.of1.1, conc.of1.2)
   # Average 1.1 & 1.2
   conc.of1 <- as.data.frame(colMeans(t(conc.of1)))
   # Bind the data frames together row-wise
   # For of2
-  conc.of2 <- as.data.frame(t(data.2[3, 6:178] / veff_static.of2))
+  conc.of2 <- as.data.frame(t(data.2.1[3, ] / veff_static.of2))
   # Combine concentrations
   conc.air <- cbind(conc.of1, conc.of2)
   # Change column names of the last three columns
@@ -117,16 +118,16 @@ ko.p <- ko.p[c(1,7)]
 # Estimate air concentration in ng/m3 from WBs
 # Using Veff
 {
-  conc.V1.o <- as.data.frame(t(data.2[4, 6:178] / veff.V1.o))
-  conc.V1.h <- as.data.frame(t(data.2[5, 6:178] / veff.V1.h))
-  conc.V2.o <- as.data.frame(t(data.2[7, 6:178] / veff.V2.o))
-  conc.V2.h <- as.data.frame(t(data.2[6, 6:178] / veff.V2.h))
-  conc.V3.o <- as.data.frame(t(data.2[8, 6:178] / veff.V3.o))
-  conc.V3.h <- as.data.frame(t(data.2[9, 6:178] / veff.V3.h))
-  conc.V4.o <- as.data.frame(t(data.2[11, 6:178] / veff.V4.o))
-  conc.V4.h <- as.data.frame(t(data.2[10, 6:178] / veff.V4.h))
-  conc.V5.o <- as.data.frame(t(data.2[13, 6:178] / veff.V5.o))
-  conc.V5.h <- as.data.frame(t(data.2[12, 6:178] / veff.V5.h))
+  conc.V1.o <- as.data.frame(t(data.2.1[4, ] / veff.V1.o))
+  conc.V1.h <- as.data.frame(t(data.2.1[5, ] / veff.V1.h))
+  conc.V2.o <- as.data.frame(t(data.2.1[7, ] / veff.V2.o))
+  conc.V2.h <- as.data.frame(t(data.2.1[6, ] / veff.V2.h))
+  conc.V3.o <- as.data.frame(t(data.2.1[8, ] / veff.V3.o))
+  conc.V3.h <- as.data.frame(t(data.2.1[9, ] / veff.V3.h))
+  conc.V4.o <- as.data.frame(t(data.2.1[11, ] / veff.V4.o))
+  conc.V4.h <- as.data.frame(t(data.2.1[10, ] / veff.V4.h))
+  conc.V5.o <- as.data.frame(t(data.2.1[13, ] / veff.V5.o))
+  conc.V5.h <- as.data.frame(t(data.2.1[12, ] / veff.V5.h))
 }
 
 # Combined wore WBs
@@ -263,7 +264,8 @@ plot <- ggplot(data.plot, aes(x = Air_Concentration, y = Wb_Concentration,
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
         axis.text.x = element_text(face = "bold", size = 14),
-        axis.title.x = element_text(face = "bold", size = 14)) +
+        axis.title.x = element_text(face = "bold", size = 14),
+        legend.text = element_text(size = 12)) +
   geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
@@ -417,7 +419,8 @@ p.AirWBPCBi.volun2 <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
   theme(axis.text.y = element_text(face = "bold", size = 14),
         axis.title.y = element_text(face = "bold", size = 14),
         axis.text.x = element_text(face = "bold", size = 14),
-        axis.title.x = element_text(face = "bold", size = 14)) +
+        axis.title.x = element_text(face = "bold", size = 14),
+        legend.text = element_text(size = 12)) +
   geom_abline(intercept = 0, slope = 1, col = "black", linewidth = 0.7) +
   geom_abline(intercept = log10(2), slope = 1, col = "blue", linewidth = 0.7) +
   geom_abline(intercept = log10(0.5), slope = 1, col = "blue", linewidth = 0.7) +
