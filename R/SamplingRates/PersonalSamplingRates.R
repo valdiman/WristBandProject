@@ -29,7 +29,7 @@ install.packages("rollapply")
   data.V3.1 <- read.csv("Data/Volunteer3.1.csv")
   data.V3.2 <- read.csv("Data/Volunteer3.2.csv")
   logKoa <- read.csv("Data/logKoa.csv")
-  # ko from SamplingRates_ko.R file
+  # ko from SamplingRates.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]
   ko <- ko[c(2,6)]
@@ -50,10 +50,10 @@ common_pcbs <- Reduce(intersect, list(pcbs_V1, pcbs_V2, pcbs_V3.1, pcbs_V3.2,
 length(common_pcbs)
 
 # Subset each dataset to include only the common PCBs
-data.V1.pcbs <- data.V1[, c("time.day", "congeners", common_pcbs)]
-data.V2.pcbs <- data.V2[, c("time.day", "congeners", common_pcbs)]
-data.V3.1.pcbs <- data.V3.1[, c("time.day", "congeners", common_pcbs)]
-data.V3.2.pcbs <- data.V3.2[, c("time.day", "congeners", common_pcbs)]
+data.V1.pcbs <- data.V1[, c("time.day", "sample.code", common_pcbs)]
+data.V2.pcbs <- data.V2[, c("time.day", "sample.code", common_pcbs)]
+data.V3.1.pcbs <- data.V3.1[, c("time.day", "sample.code", common_pcbs)]
+data.V3.2.pcbs <- data.V3.2[, c("time.day", "sample.code", common_pcbs)]
 
 # Subset ko and logKoa data frames
 ko.common <- ko[ko$congener %in% common_pcbs, ]
