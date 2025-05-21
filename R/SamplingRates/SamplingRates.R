@@ -1,6 +1,7 @@
-## Script to calcualte individual PCB calculate sampling rates
+## Script to calcualte individual PCB sampling rates
 # for silicone wristbands. Sampling rates were calculated with
 # (i) static (2 times) and (ii) rotating set up.
+# Airborne concentration was measured using low volume samplers (PUF)
 
 # Install packages
 install.packages("gridExtra")
@@ -17,7 +18,7 @@ install.packages("dplyr")
 # Sampling rates calculations under static conditions ---------------------
 # Read data
 {
-  PUF <- read.csv("Data/PUF.csv")
+  PUF <- read.csv("Data/PUF.csv") # ng/m3
   WB <- read.csv("Data/WB.csv")
   logKoa <- read.csv("Data/logKoaVstat.csv")
 }
@@ -130,7 +131,7 @@ ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[16])) +
 # Sampling rates calculations under static and rotating conditions -------------------
 # Read data
 {
-  PUF.v2 <- read.csv("Data/PUF2.csv")
+  PUF.v2 <- read.csv("Data/PUF2.csv") # ng/m3
   WB.st <- read.csv("Data/WB2.csv")
   WB.rot <- read.csv("Data/WBROT.csv")
 }
@@ -358,6 +359,7 @@ ggsave("Output/Plots/SamplingRates/SR/PCB18.30SamplingRates.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
+# This plot is included in the paper (Fig. 2)
 WB$PCB52_comb <- WB.1$PCB52 / PUF.mean[45]
 WB.rot.2$PCB52_comb <- WB.rot.2$PCB52 / PUF.mean.2[45]
 
