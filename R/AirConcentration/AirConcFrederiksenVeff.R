@@ -18,7 +18,7 @@ install.packages("RColorBrewer")
   library(scales)
 }
 
-# Read data from excel ----------------------------------------------------
+# Read data ---------------------------------------------------------------
 {
   data.Fred <- read.csv("Data/Frederiksen.csv")
   logKoa <- read.csv("Data/logKoa.csv")
@@ -248,3 +248,4 @@ ggsave("Output/Plots/AirConcentrations/Frederiksen/Frederiksen7dVeff.png", plot 
 # Export data
 write.csv(plot_data.2,
           file = "Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiV3.csv")
+
