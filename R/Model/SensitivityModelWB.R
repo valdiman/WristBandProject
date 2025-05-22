@@ -128,3 +128,4 @@ percent_change_Ca <- (model.Ca$Mwb - model.bl$Mwb) / model.bl$Mwb * 100
 percent_change_Ca
 
 # Outcome: Both increase Mbw at a very similar amount, 50% more.
+
