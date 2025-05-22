@@ -53,7 +53,8 @@ color_palette2 <- c("red", "blue", "green", "yellow", "purple", "orange",
 shape_palette2 <- c(21, 24)  # Shape 21 for one source and 24 for another
 
 # Plot
-plot.FerdVol2 <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB, fill = congener, shape = source)) +
+plot.FerdVol2 <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB,
+                                           fill = congener, shape = source)) +
   geom_point(size = 2, stroke = 0.5, color = "black") +  # Black borders, solid color fill
   theme_bw() +
   theme(aspect.ratio = 1) +
