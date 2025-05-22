@@ -1014,6 +1014,7 @@ max_len <- max(length(Veff.V1.d.t), length(Veff.V1.nd.t),
                length(Veff.V2.d.t))
 
 # PCBs 18+30
+# Plot included in the manuscript
 up.V1.d <- data.frame(
   time = c(Veff.V1.d.t, rep(NA, max_len - length(Veff.V1.d[, 1]))),
   veff = c(Veff.V1.d$PCB18.30, rep(NA, max_len - length(Veff.V1.d[, 1]))),
@@ -1094,6 +1095,7 @@ ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRatesv3.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
+# Plot included in the manuscript
 up.V1.d <- data.frame(
   time = c(Veff.V1.d.t, rep(NA, max_len - length(Veff.V1.d[, 1]))),
   veff = c(Veff.V1.d$PCB52, rep(NA, max_len - length(Veff.V1.d[, 1]))),
@@ -1254,6 +1256,7 @@ ggsave("Output/Plots/SamplingRates/Personal/PCB118VoluntSamplingRatesV2.png",
        plot = plot.118, width = 8, height = 10, dpi = 1300)
 
 # PCB 187
+# Plot included in the manuscript
 up.V1.d <- data.frame(
   time = c(Veff.V1.d.t, rep(NA, max_len - length(Veff.V1.d[, 1]))),
   veff = c(Veff.V1.d$PCB187, rep(NA, max_len - length(Veff.V1.d[, 1]))),
