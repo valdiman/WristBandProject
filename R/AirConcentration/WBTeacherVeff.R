@@ -22,13 +22,13 @@ install.packages("stringr")
 
 # Read data ---------------------------------------------------------------
 {
-  bl <- read.csv("Data/BlanksWBT.csv")
-  wt <- read.csv("Data/SamplesWBT.csv")
+  bl <- read.csv("Data/WBTeBlanks.csv")
+  wt <- read.csv("Data/WBteSamples.csv")
 }
 
 # Distribution analysis ---------------------------------------------------
 # Remove metadata from blank data
-bl.1 <- subset(bl, select = -c(Congener.Blank))
+bl.1 <- subset(bl, select = -c(sample.code))
 # Look at the distribution of the blank data
 # Create matrix to storage data
 normality <- matrix(nrow = length(bl.1[1,]), ncol = 2)
