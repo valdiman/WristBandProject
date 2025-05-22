@@ -81,7 +81,6 @@ data.2.1 <- data.2[, common_ids]
 # Read ko from PersonalSamplingRatesV02
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
 ko.p <- ko.p[c(1,7)]
-
 {
   Vwb.V1 <- data.2$vol.WB[4] # [m3]
   Awb.V1 <- data.2$area.WB[4] # [m2]
@@ -150,7 +149,6 @@ write.csv(conc.air,
           file = "Output/Data/csv/Volunteer/VolunteerConcStaticWB2.csv")
 write.csv(conc.wb,
           file = "Output/Data/csv/Volunteer/VolunteerConcWB2.csv")
-
 
 # Plots -------------------------------------------------------------------
 # tPCB

@@ -181,7 +181,6 @@ ko.p <- ko.p[c(1,7)]
 
 # Estimate air concentration in ng/m3 from WBs
 # Using Veff
-
 {
   conc.V1.l <- as.data.frame(t(data.1[1, ] / veff.V1.l))
   conc.V1.r <- as.data.frame(t(data.1[2, ] / veff.V1.r))
