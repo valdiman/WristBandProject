@@ -20,7 +20,7 @@ install.packages("dplyr")
 {
   PUF <- read.csv("Data/PUF.csv") # ng/m3
   WB <- read.csv("Data/WB.csv")
-  logKoa <- read.csv("Data/logKoaVstat.csv")
+  logKoa <- read.csv("Data/logKoa.csv")
 }
 
 # Remove metadata
@@ -425,14 +425,17 @@ plot.52 <- plot.52 +
            label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   # Add label for "Study 1"
-  annotate("text", x = 90, y = 0.1,
-           label = "Study 1", hjust = 0, size = 10, color = "black")
+  annotate("text", x = 90, y = 0.4,
+           label = "Study 1", hjust = 0, size = 10, color = "black") +
+  # Add label for panel (a)
+  annotate("text", x = 110, y = 0.1,
+           label = "(a)", hjust = 0, size = 10, color = "black")
 
 # See plot
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates3.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates4.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -551,8 +554,8 @@ ggsave("Output/Plots/SamplingRates/SR/PCB187SamplingRates.png",
 
 # SR vs logKoa regressions ------------------------------------------------
 # (1) Static 1
-# Remove PCB14
-logKoa.0 <- logKoa[logKoa$congener != "PCB14", ]
+# Remove PCB14 & PCBs128+166
+logKoa.0 <- logKoa[!logKoa$congener %in% c("PCB14", "PCB128.166"), ]
 sr.stat.1 <- data.frame(
   sr = SR.st.1$`Sampling Rate (m3/d)`,
   logKoa = logKoa.0$logKoa)
@@ -593,9 +596,10 @@ ggsave("Output/Plots/SamplingRates/SR/Stat1_logKoa.png", plot = p.sr.stat.1.koa,
        width = 6, height = 6, dpi = 500)
 
 # (2) Static 2
+logKoa.1 <- logKoa[logKoa$congener != "PCB14", ]
 sr.stat.2 <- data.frame(
   sr = SR.st.2$`Sampling Rate (m3/d)`,
-  logKoa = logKoa$logKoa)
+  logKoa = logKoa.1$logKoa)
 
 # Remove any NA values
 sr.stat.2 <- na.omit(sr.stat.2)
@@ -635,7 +639,7 @@ ggsave("Output/Plots/SamplingRates/SR/Stat2_logKoa.png", plot = p.sr.stat.2.koa,
 # (3) Rot
 sr.rot <- data.frame(
   sr = SR.rot$`Sampling Rate (m3/d)`,
-  logKoa = logKoa$logKoa)
+  logKoa = logKoa.1$logKoa)
 
 # Remove any NA values
 sr.rot <- na.omit(sr.rot)
@@ -653,10 +657,10 @@ p.sr.rot.koa <- ggplot(sr.rot, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
   annotate("text", x = min(sr.rot$logKoa) + 1.05, y = max(sr.rot$sr) * 1.2,
-           label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
+           label = paste("sr =", round(a, 3), "* exp(", round(b, 3), "* log Koa)"),
            size = 5) +
   annotate("text", x = min(sr.rot$logKoa) + 0.35, y = max(sr.rot$sr) * 1.13,
-           label = paste("R² =", round(r2, 3)), size = 5) +
+           label = paste("R² =", round(r2, 5)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log Koa"))) +
