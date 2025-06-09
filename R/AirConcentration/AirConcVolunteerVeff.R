@@ -281,13 +281,17 @@ plotAirWBtPCB <- ggplot(data.conc, aes(x = Air_Concentration, y = Wb_Concentrati
   scale_fill_manual(values = color_palette) +
   scale_shape_manual(values = shape_palette) +
   labs(fill = "Volunteers", shape = "Volunteers") +
-  theme(legend.position = "right") # Optional: Adjust legend position
+  theme(legend.position = "right") + 
+  annotate("text", x = 1, y = 1000,
+           label = "(a)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
+
 
 # Print the plot
 print(plotAirWBtPCB)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCBV3.png", plot = plotAirWBtPCB, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBtPCBV4.png", plot = plotAirWBtPCB, width = 6,
        height = 5, dpi = 500)
 
 # Estimate error (factor of 2) --------------------------------------------
@@ -442,12 +446,15 @@ plotAirWBPCBi <- ggplot(filtered_data, aes(x = Conc.Air, y = Conc.WB,
   scale_fill_manual(values = color_palette) +
   scale_shape_manual(values = shape_palette) +
   labs(fill = "Volunteers", shape = "Volunteers") +
-  theme(legend.position = "right")
+  theme(legend.position = "right") +
+  annotate("text", x = 0.00001, y = 1000,
+           label = "(b)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
 
 # Print the plots
 print(plotAirWBPCBi)
 
 # Save plot in folder
-ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV3.png", plot = plotAirWBPCBi, width = 6,
+ggsave("Output/Plots/AirConcentrations/VolunteerAirWBPCBiV4.png", plot = plotAirWBPCBi, width = 6,
        height = 5, dpi = 500)
 
