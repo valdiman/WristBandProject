@@ -1084,14 +1084,17 @@ plot.18.30 <- plot.18.30 +
   annotate("text", x = 2, y = 1.7,
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 35, y = 0.05,
-           label = "Study 2", hjust = 0, size = 10, color = "black")
+  annotate("text", x = 35, y = 0.1,
+           label = "Study 2", hjust = 0, size = 10, color = "black") +
+  annotate("text", x = Inf, y = Inf,
+           label = "(b)", hjust = 1.1, vjust = 1.5, 
+           size = 10, color = "black")
 
 # See plot
 plot.18.30
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRatesv3.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRatesv5.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
@@ -1166,13 +1169,15 @@ plot.52 <- plot.52 +
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   annotate("text", x = 35, y = 0.1,
-           label = "Study 2", hjust = 0, size = 10, color = "black")
+           label = "Study 2", hjust = 0, size = 10, color = "black") +
+  annotate("text", x = Inf, y = Inf, label = "(c)", hjust = 1.1, vjust = 1.5, 
+           size = 10, color = "black")
 
 # See plot
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRatesV3.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRatesV5.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -1326,14 +1331,16 @@ plot.187 <- plot.187 +
   annotate("text", x = 2, y = 14.0,
            label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
-  annotate("text", x = 35, y = 0.6,
-           label = "Study 2", hjust = 0, size = 10, color = "black")
+  annotate("text", x = 35, y = 0.1,
+           label = "Study 2", hjust = 0, size = 10, color = "black") +
+  annotate("text", x = Inf, y = Inf, label = "(d)", hjust = 1.1, vjust = 1.5, 
+           size = 10, color = "black")
 
 # See plot
 plot.187
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV3.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV5.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
 
 # Combine sampling rates --------------------------------------------------

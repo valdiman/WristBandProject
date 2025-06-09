@@ -411,31 +411,32 @@ plot.52 <- ggplot(combined_data, aes(x = time, y = PCB52_comb,
 # Adding color symbols before text with increased spacing
 plot.52 <- plot.52 + 
   # Add color dot for "Dynamic"
-  geom_point(aes(x = 1, y = 5.5), size = 6, shape = 21,
+  geom_point(aes(x = 1, y = 6), size = 6, shape = 21,
              fill = group_colors["Dynamic"], color = "black",
              show.legend = FALSE) +
-  annotate("text", x = 5, y = 5.5,
+  annotate("text", x = 5, y = 6,
            label = bquote("Dynamic" ~ "=" ~ .(round(slopes$slope[slopes$group == "Dynamic"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   # Add color dot for "Static"
-  geom_point(aes(x = 1, y = 5.0), size = 6, shape = 21,
+  geom_point(aes(x = 1, y = 5.5), size = 6, shape = 21,
              fill = group_colors["Static"], color = "black",
              show.legend = FALSE) +
-  annotate("text", x = 5, y = 5.0,
+  annotate("text", x = 5, y = 5.5,
            label = bquote("Static" ~ "=" ~ .(round(slopes$slope[slopes$group == "Static"], 2)) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   # Add label for "Study 1"
-  annotate("text", x = 90, y = 0.4,
+  annotate("text", x = 90, y = 0.1,
            label = "Study 1", hjust = 0, size = 10, color = "black") +
   # Add label for panel (a)
-  annotate("text", x = 110, y = 0.1,
-           label = "(a)", hjust = 0, size = 10, color = "black")
+  annotate("text", x = Inf, y = Inf,
+           label = "(a)", hjust = 1.1, vjust = 1.5, 
+           size = 10, color = "black")
 
 # See plot
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates4.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates5.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
