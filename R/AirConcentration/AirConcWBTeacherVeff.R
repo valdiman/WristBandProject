@@ -654,6 +654,9 @@ ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.t
 # Plot Individual PCB Profiles --------------------------------------------
 # Select rows for the sample
 selected_rows <- prof.WB.conc %>%
+  #wt.19.1 = Teacher 1
+  #wt.16.r = Teacher 2
+  #wt.25.r = Teacher 3
   filter(conc.WB$code.teacher %in% c("wt.25.r")) # need to change the sample!
 
 # Create Source vector with correct length and values
@@ -691,18 +694,23 @@ plot.25.r <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
         axis.text.x = element_text(face = "bold", size = 10, angle = 90,
                                    hjust = 1, vjust = 0.5),
         axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("wt.25.r" = "blue"), # change as needed
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  scale_fill_manual(
+    values = c("wt.25.r" = "blue"), 
+    labels = c("wt.25.r" = "Teacher 3"),  # map code to legend label
+    guide = guide_legend(key.size = unit(0.5, "lines"))) +
   theme(legend.position = c(0.95, 0.9),
         legend.background = element_rect(fill = "white", color = NA),
         legend.title = element_blank(),
-        legend.text = element_text(size = 10, face = "bold"))
+        legend.text = element_text(size = 10, face = "bold")) +
+  annotate("text", x = -Inf, y = Inf,
+           label = "(c)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
 
 plot.16.r
 plot.19.l
 plot.25.r
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/wt25rVeff2.png", plot = plot.25.r,
+ggsave("Output/Plots/Profiles/Teachers/wt25rVeff2V2.png", plot = plot.25.r,
        width = 20, height = 5, dpi = 1200)
 
