@@ -387,16 +387,19 @@ p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
                                "Vol. 8 full-day" = "#009E73",
                                "Vol. 9 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.92, 0.8),  # Inside the plot
+  theme(legend.position = c(0.9, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
         legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+        legend.text = element_text(size = 12, face = "bold")) +
+  annotate("text", x = -Inf, y = Inf,
+           label = "(c)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
 
 # Print the plots
 print(p_prof_comb.2)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Office2Veff.png",
+ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Office2VeffV2.png",
        plot = p_prof_comb.2, width = 10, height = 5, dpi = 500)
 
 # Calculate cosine theta --------------------------------------------------

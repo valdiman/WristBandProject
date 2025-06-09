@@ -90,13 +90,16 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
         legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+        legend.text = element_text(size = 12, face = "bold")) +
+  annotate("text", x = -Inf, y = Inf,
+           label = "(a)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
 
 # Print the plots
 print(p_prof_comb.V1)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol1Veff.png", plot = p_prof_comb.V1,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol1VeffV2.png", plot = p_prof_comb.V1,
        width = 10, height = 5, dpi = 500)
 
 # Vol 2
@@ -375,13 +378,16 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener, y = Conc,
   theme(legend.position = c(0.93, 0.8),  # Inside the plot
         legend.background = element_rect(fill = "white", color = NA),
         legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+        legend.text = element_text(size = 12, face = "bold")) +
+  annotate("text", x = -Inf, y = Inf,
+           label = "(b)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
 
 # Print the plots
 print(p_prof_comb.V7)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol7Veff.png", plot = p_prof_comb.V7,
+ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol7VeffV2.png", plot = p_prof_comb.V7,
        width = 10, height = 5, dpi = 500)
 
 # Vol 8
