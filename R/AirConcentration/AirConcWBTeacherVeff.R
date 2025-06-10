@@ -654,9 +654,8 @@ ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.t
 # Plot Individual PCB Profiles --------------------------------------------
 # Select rows for the sample
 selected_rows <- prof.WB.conc %>%
-  #wt.19.1 = Teacher 1
-  #wt.16.r = Teacher 2
-  #wt.25.r = Teacher 3
+  #wt.19.l = Teacher 1
+  #wt.25.r = Teacher 2
   filter(conc.WB$code.teacher %in% c("wt.25.r")) # need to change the sample!
 
 # Create Source vector with correct length and values
@@ -682,28 +681,28 @@ plot.25.r <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 0.9, 
            color = "black", linewidth = 0.2) +
   xlab("") +
+  ylab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(face = "bold", size = 10, angle = 90,
-                                   hjust = 1, vjust = 0.5),
+        axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(
     values = c("wt.25.r" = "blue"), 
-    labels = c("wt.25.r" = "Teacher 3"),  # map code to legend label
+    labels = c("wt.25.r" = "Teacher 2"),
     guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(0.95, 0.9),
-        legend.background = element_rect(fill = "white", color = NA),
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
         legend.title = element_blank(),
-        legend.text = element_text(size = 10, face = "bold")) +
+        legend.text = element_text(size = 12, face = "bold")) +
   annotate("text", x = -Inf, y = Inf,
-           label = "(c)", hjust = 0, vjust = 1, 
+           label = "(e)", hjust = 0, vjust = 1, 
            size = 6, color = "black")
 
 plot.16.r
@@ -711,6 +710,6 @@ plot.19.l
 plot.25.r
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/wt25rVeff2V2.png", plot = plot.25.r,
-       width = 20, height = 5, dpi = 1200)
+ggsave("Output/Plots/Profiles/Teachers/Teacher2.png", plot = plot.25.r,
+       width = 10, height = 3, dpi = 1200)
 
