@@ -653,6 +653,7 @@ ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.t
 
 # Plot Individual PCB Profiles --------------------------------------------
 # Select rows for the sample
+# Only 2 teachers
 selected_rows <- prof.WB.conc %>%
   #wt.19.l = Teacher 1
   #wt.25.r = Teacher 2
@@ -705,7 +706,6 @@ plot.25.r <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
            label = "(e)", hjust = 0, vjust = 1, 
            size = 6, color = "black")
 
-plot.16.r
 plot.19.l
 plot.25.r
 

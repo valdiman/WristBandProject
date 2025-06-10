@@ -374,8 +374,8 @@ p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -387,9 +387,10 @@ p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
                                "Vol. 8 full-day" = "#009E73",
                                "Vol. 9 full-day" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.9, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
         legend.text = element_text(size = 12, face = "bold")) +
   annotate("text", x = -Inf, y = Inf,
            label = "(c)", hjust = 0, vjust = 1, 
@@ -400,7 +401,7 @@ print(p_prof_comb.2)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Office2VeffV2.png",
-       plot = p_prof_comb.2, width = 10, height = 5, dpi = 500)
+       plot = p_prof_comb.2, width = 10, height = 3, dpi = 500)
 
 # Calculate cosine theta --------------------------------------------------
 # Need to change the format of prof_combined...

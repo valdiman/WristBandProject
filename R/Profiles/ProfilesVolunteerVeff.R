@@ -72,10 +72,10 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
            color = "black",  # Add black edges to the bars
            linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
+  ylab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -87,9 +87,10 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
                                "Vol. 1 nd" = "#009E73",
                                "Vol. 1 d" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
         legend.text = element_text(size = 12, face = "bold")) +
   annotate("text", x = -Inf, y = Inf,
            label = "(a)", hjust = 0, vjust = 1, 
@@ -100,7 +101,7 @@ print(p_prof_comb.V1)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol1VeffV2.png", plot = p_prof_comb.V1,
-       width = 10, height = 5, dpi = 500)
+       width = 10, height = 3, dpi = 500)
 
 # Vol 2
 prof_combined.V2 <- prof.air.conc %>%
@@ -360,10 +361,10 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener, y = Conc,
            color = "black",  # Add black edges to the bars
            linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
   xlab("") +
-  ylim(0, 0.7) +
+  ylab("") +
+  scale_y_continuous(limits = c(0, 0.7), labels = scales::label_number(accuracy = 0.01)) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -375,9 +376,10 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener, y = Conc,
                                "Vol. 7 nd" = "#009E73",
                                "Vol. 7 d" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
         legend.text = element_text(size = 12, face = "bold")) +
   annotate("text", x = -Inf, y = Inf,
            label = "(b)", hjust = 0, vjust = 1, 
@@ -388,7 +390,7 @@ print(p_prof_comb.V7)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol7VeffV2.png", plot = p_prof_comb.V7,
-       width = 10, height = 5, dpi = 500)
+       width = 10, height = 3, dpi = 500)
 
 # Vol 8
 prof_combined.V8 <- prof.air.conc %>%
