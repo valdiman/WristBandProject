@@ -344,15 +344,18 @@ plot_data <- updated_tPCB %>%
   group_by(prefix = str_sub(code.teacher, 1, -3)) %>%  # Group by prefix
   slice(1) %>%  # Keep only the first entry for each prefix group
   ungroup() %>%
-  mutate(label = str_remove(prefix, "\\."))  # Remove dot and last character from label
+  mutate(
+    label = str_remove(prefix, "\\."),                 # Remove dot for label
+    tea_label = str_replace(prefix, "^wt", "tea")      # Replace "wt" with "tea" at the start
+  )
 
 # Plot the data
-tPCB.wt <- ggplot(plot_data, aes(x = factor(label), y = mean_tPCB)) +
+tPCB.wt <- ggplot(plot_data, aes(x = factor(tea_label), y = mean_tPCB)) +
   geom_bar(stat = 'identity', width = 0.8, fill = "black") +
   geom_errorbar(aes(ymin = mean_tPCB - sd_tPCB, ymax = mean_tPCB + sd_tPCB), width = 0.2) +
   theme_bw() +
   theme(aspect.ratio = 0.5) +
-  ylab(expression(bold("Estimated Air Concentration " *Sigma*"PCB (ng/m3)"))) +
+  ylab(expression(bold("Estimated Air Concentration " *Sigma*"PCB (ng/m"^3 *")"))) +
   xlab("") +
   theme(axis.text.x = element_text(size = 8, face = "bold"),
         axis.text.y = element_text(size = 12, face = "bold"),
@@ -652,12 +655,17 @@ ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.t
        width = 10, height = 10, dpi = 1200)
 
 # Plot Individual PCB Profiles --------------------------------------------
-# Select rows for the sample
-# Only 2 teachers
+# wt.19.l = Teacher 19.l & wt.25.r = Teacher 25.r plots included in main text
+
 selected_rows <- prof.WB.conc %>%
-  #wt.19.l = Teacher 1
-  #wt.25.r = Teacher 2
-  filter(conc.WB$code.teacher %in% c("wt.25.r")) # need to change the sample!
+  filter(conc.WB$code.teacher %in% c("wt.25.l")) # need to change the sample!
+
+# Get selected teacher ID (assumes 1 row selected)
+selected_teacher <- selected_rows$code.teacher[1]
+
+# Define color and label dynamically
+fill_values <- setNames("blue", selected_teacher)
+fill_labels <- setNames("Teacher 25.l", selected_teacher) # need to change the sample!
 
 # Create Source vector with correct length and values
 source_vector <- rep(selected_rows[[1]], each = ncol(selected_rows) - 1)
@@ -678,7 +686,7 @@ prof_combined$congener <- factor(prof_combined$congener,
                                  levels = unique(prof_combined$congener))
 
 # Create the bar plot
-plot.25.r <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
+plot.tea <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 0.9, 
            color = "black", linewidth = 0.2) +
   xlab("") +
@@ -694,22 +702,22 @@ plot.25.r <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   scale_fill_manual(
-    values = c("wt.25.r" = "blue"), 
-    labels = c("wt.25.r" = "Teacher 2"),
-    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+    values = fill_values,
+    labels = fill_labels,
+    guide = guide_legend(key.size = unit(0.5, "lines"))
+  ) +
   theme(legend.position = c(1, 1),
         legend.justification = c(1 ,1),
         legend.background = element_rect(fill = NA, color = NA),
         legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold")) +
+        legend.text = element_text(size = 12, face = "bold"))
   annotate("text", x = -Inf, y = Inf,
            label = "(e)", hjust = 0, vjust = 1, 
            size = 6, color = "black")
 
-plot.19.l
-plot.25.r
+plot.tea
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/Teacher2.png", plot = plot.25.r,
+ggsave("Output/Plots/Profiles/Teachers/Teacher25_l.png", plot = plot.tea,
        width = 10, height = 3, dpi = 1200)
 
