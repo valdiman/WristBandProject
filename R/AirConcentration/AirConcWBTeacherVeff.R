@@ -601,7 +601,6 @@ costheta_long <- costheta_long %>%
   ) %>%
   select(-Var1_year, -Var2_year, -Var1_tPCB, -Var2_tPCB)
 
-
 # Remove NAs text from the long data
 costheta_long <- costheta_long %>%
   filter(
@@ -615,8 +614,15 @@ costheta_correlations <- costheta_long %>%
   arrange(Value) %>%
   filter(Var1 != Var2)  # Exclude self-correlations (diagonal values)
 
+# Change wt to tea
+costheta_correlations <- costheta_correlations %>%
+  mutate(
+    Var1 = str_replace(Var1, "^wt", "tea"),
+    Var2 = str_replace(Var2, "^wt", "tea")
+  )
+
 # Plot the data
-plot.cos.theta.low <- ggplot(data = costheta_correlations[1:13, ], # low values =< 0.14
+plot.cos.theta.low <- ggplot(data = costheta_correlations[1:13, ], # low values =< 0.15
                              aes(x = Var1, y = Var2, fill = Value)) +
   geom_tile(color = "white") +
   scale_fill_gradient(low = "blue", high = "red") +
