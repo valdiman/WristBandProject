@@ -249,7 +249,7 @@ p.sr.V1.koa.1 <- ggplot(sr.ave.V1, aes(x = logKoa, y = ave_sr)) +
            label = paste("R² = ", round(r2, 2)), size = 4) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Ave Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 10),
         axis.title.y = element_text(face = "bold", size = 10)) +
@@ -293,7 +293,7 @@ p.sr.V1.koa.2 <- ggplot(sr.long.V1, aes(x = logKoa, y = sr)) +
            label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
@@ -425,7 +425,7 @@ p.sr.V2.koa <- ggplot(sr.V2, aes(x = logKoa, y = sr)) +
   annotate("text", x = 6.58, y = 4.4, label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
@@ -620,7 +620,7 @@ p.sr.V3.koa.1 <- ggplot(sr.ave.V3, aes(x = logKoa, y = ave_sr)) +
            label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Average Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
@@ -664,12 +664,12 @@ p.sr.V3.koa.2 <- ggplot(sr.long.V3, aes(x = logKoa, y = sr)) +
            label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 10),
-        axis.title.x = element_text(face = "bold", size = 10))
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
 
 p.sr.V3.koa.2
 
@@ -708,7 +708,7 @@ p.sr.V3.koa.3 <- ggplot(sr.long.V3.1st, aes(x = logKoa, y = sr)) +
            label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
@@ -751,7 +751,7 @@ p.sr.V3.koa.4 <- ggplot(sr.long.V3.2nd, aes(x = logKoa, y = sr)) +
            label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
@@ -954,7 +954,7 @@ p.sr.V3.koa.nw <- ggplot(sr.V3.nw, aes(x = logKoa, y = sr)) +
            label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 12)) +
@@ -993,12 +993,12 @@ p.sr.V3.koa.w <- ggplot(sr.V3.w, aes(x = logKoa, y = sr)) +
            label = paste("R² = ", round(r2, 2)), size = 4) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
-  xlab(expression(bold("log Koa"))) +
+  xlab(expression(bold("log "*italic(K)[OA]))) +
   ylab(expression(bold("Sampling Rate (m"^3*"/d)"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 10),
-        axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 10),
-        axis.title.x = element_text(face = "bold", size = 10))
+  theme(axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12)) +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12))
 
 p.sr.V3.koa.w
 
