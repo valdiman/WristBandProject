@@ -76,7 +76,7 @@ logKwb <- data.frame(
   # Select WBs to calculate air concentration
   data.V1.1 <- data.V1.pcbs[1:3, ]
   # Average 3 WBs. NA values not included in the calculations
-  data.V1.2 <- colMeans(data.V1.1[, 3:173], na.rm = TRUE)
+  data.V1.2 <- colMeans(data.V1.1[, 3:175], na.rm = TRUE)
   # Calculate air concentration in ng/m3
   # Use effective volume. Adult WBs
   Vwb <- data.V1$vol.WB[1]
@@ -87,7 +87,7 @@ logKwb <- data.frame(
   # Compute concentration
   conc.V1 <- data.V1.2 / veff_static.V1
   # Calculate effective volume (Veff)
-  subset_data <- data.V1.pcbs[4:13, 3:173]
+  subset_data <- data.V1.pcbs[4:13, 3:175]
   Veff.V1 <- t(apply(subset_data, 1, function(row) row / conc.V1))
   # Add metadata to Veff.V1 and change format
   Veff.V1 <- cbind(data.V1.pcbs[4:13, 2], data.V1.pcbs[4:13, 1], Veff.V1)
@@ -96,13 +96,13 @@ logKwb <- data.frame(
   # Add names to first 2 columns
   colnames(Veff.V1)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.V1[, 2:173] <- apply(Veff.V1[, 2:173], 2, as.numeric)
+  Veff.V1[, 2:175] <- apply(Veff.V1[, 2:175], 2, as.numeric)
   # Select right, remove metadata
-  Veff.V1.nd <- Veff.V1[1:5, 3:173]
+  Veff.V1.nd <- Veff.V1[1:5, 3:175]
   # Select time
   Veff.V1.nd.t <- Veff.V1[1:5, 2]
   # Select left, remove metadata
-  Veff.V1.d <- Veff.V1[6:10, 3:173]
+  Veff.V1.d <- Veff.V1[6:10, 3:175]
   # Select time
   Veff.V1.d.t <- Veff.V1[6:10, 2]
 }
@@ -315,7 +315,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.
   # Select WBs to calculate air concentration
   data.V2.1 <- data.V2.pcbs[1:3,]
   # Average 3 WBs
-  data.V2.2 <- colMeans(data.V2.1[, 3:173])
+  data.V2.2 <- colMeans(data.V2.1[, 3:175])
   # Calculate air concentration in ng/m3
   # Use effective volume. Adult WBs
   Vwb <- data.V1$vol.WB[1]
@@ -325,7 +325,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.
   # Compute concentration
   conc.V2 <- data.V2.2 / veff_stat.V2
   # Calculate effective volume (Veff)
-  subset_data <- data.V2.pcbs[4:8, 3:173]
+  subset_data <- data.V2.pcbs[4:8, 3:175]
   Veff.V2 <- t(apply(subset_data, 1, function(row) row / conc.V2))
   # Add metadata to Veff.V2 and change format
   Veff.V2 <- cbind(data.V2.pcbs[4:8, 2], data.V2.pcbs[4:8, 1], Veff.V2)
@@ -334,9 +334,9 @@ ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.
   # Add names to first 2 columns
   colnames(Veff.V2)[1:2] <- c("sample", "time.day")
   # Change characters to numbers format
-  Veff.V2[, 2:173] <- apply(Veff.V2[, 2:173], 2, as.numeric)
+  Veff.V2[, 2:175] <- apply(Veff.V2[, 2:175], 2, as.numeric)
   # Select right, remove metadata
-  Veff.V2.d <- Veff.V2[1:5, 3:173]
+  Veff.V2.d <- Veff.V2[1:5, 3:175]
   # Select time
   Veff.V2.d.t <- Veff.V2[1:5, 2]
 }
@@ -447,7 +447,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
   Vwb <- data.V1$vol.WB[1]
   Awb <- data.V1$area.WB[1]
   # Prepare data
-  data.V3.1.1 <- data.V3.1.pcbs[1:6, 3:173]
+  data.V3.1.1 <- data.V3.1.pcbs[1:6, 3:175]
   Kwb_val <- 10^logKwb$logKwb
   ko_val <- ko.common$ko
   # Initialize lists to store results
@@ -462,7 +462,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
     conc <- data.V3.1.1[i, ] / veff_stat
     conc_list[[i]] <- conc
     # Effective volume (Veff)
-    Veff <- data.V3.1.pcbs[i + 6, 3:173] / conc
+    Veff <- data.V3.1.pcbs[i + 6, 3:175] / conc
     Veff_list[[i]] <- Veff
   }
   
@@ -471,9 +471,9 @@ ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
   Veff.V3.1 <- cbind(data.V3.1[7:12, 1:2], Veff.V3.1)
   Veff.V3.1 <- as.data.frame(Veff.V3.1)
   # Select weeks
-  Veff.V3.1st.nd <- Veff.V3.1[1:3, 3:173]
+  Veff.V3.1st.nd <- Veff.V3.1[1:3, 3:175]
   Veff.V3.1st.nd.t <- Veff.V3.1[1:3, 1]
-  Veff.V3.2nd.nd <- Veff.V3.1[4:6, 3:173]
+  Veff.V3.2nd.nd <- Veff.V3.1[4:6, 3:175]
   Veff.V3.2nd.nd.t <- Veff.V3.1[4:6, 1]
 }
 
@@ -1382,9 +1382,9 @@ SR_averages_sd_cv$Average_ko2 <- ifelse(
 )
 
 # Add manually values to PCBs 207 to 209
-SR_averages_sd_cv$Average_ko2[169] <- SR_averages_sd_cv$Average_ko2[167]
-SR_averages_sd_cv$Average_ko2[170] <- SR_averages_sd_cv$Average_ko2[167]
 SR_averages_sd_cv$Average_ko2[171] <- SR_averages_sd_cv$Average_ko2[167]
+SR_averages_sd_cv$Average_ko2[172] <- SR_averages_sd_cv$Average_ko2[167]
+SR_averages_sd_cv$Average_ko2[173] <- SR_averages_sd_cv$Average_ko2[167]
 
 # Export results
 write.csv(SR_averages_sd_cv,

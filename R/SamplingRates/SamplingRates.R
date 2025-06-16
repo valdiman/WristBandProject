@@ -108,7 +108,7 @@ write.csv(SR.st.1, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1
 # Change number congener in [] 
 
 fit1 <- lm(WB.1$PCB18.30/PUF.mean[16] ~ 0 + time)
-ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[16])) +
+ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[17])) +
   theme_bw() +
   theme(aspect.ratio = 15/15) +
   xlab(expression(bold("Deployment time (hr)"))) +
@@ -202,8 +202,8 @@ write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2
 # Plots
 # Change number congener in [] 
 
-fit1 <- lm(WB.st.2[, 153]/PUF.mean.2[153] ~ 0 + time.2)
-ggplot(WB.st.2, aes(x = time.2*24, y = WB.st.2[, 153]/PUF.mean.2[153])) +
+fit1 <- lm(WB.st.2[, 154]/PUF.mean.2[154] ~ 0 + time.2)
+ggplot(WB.st.2, aes(x = time.2*24, y = WB.st.2[, 154]/PUF.mean.2[154])) +
   theme_bw() +
   theme(aspect.ratio = 10/15) +
   xlab(expression(bold("Deployment time (hr)"))) +
@@ -302,7 +302,7 @@ ggplot(WB.rot.2, aes(x = time.2*24, y = `PCB18.30`/PUF.mean.2[17])) +
 # Plot both 'stat' and 'dyn' sampling rates -------------------------------
 # Combine plot
 # PCB 18+30
-WB$PCB18.30_comb <- WB.1$PCB18.30 / PUF.mean[16]
+WB$PCB18.30_comb <- WB.1$PCB18.30 / PUF.mean[17]
 WB.rot.2$PCB18.30_comb <- WB.rot.2$PCB18.30 / PUF.mean.2[17]
 
 # Combine data, padding shorter dataset with NA
@@ -360,8 +360,8 @@ ggsave("Output/Plots/SamplingRates/SR/PCB18.30SamplingRates.png",
 
 # PCB 52
 # This plot is included in the paper (Fig. 2)
-WB$PCB52_comb <- WB.1$PCB52 / PUF.mean[45]
-WB.rot.2$PCB52_comb <- WB.rot.2$PCB52 / PUF.mean.2[45]
+WB$PCB52_comb <- WB.1$PCB52 / PUF.mean[46]
+WB.rot.2$PCB52_comb <- WB.rot.2$PCB52 / PUF.mean.2[46]
 
 # Combine data, padding shorter dataset with NA
 max_len <- max(nrow(WB), nrow(WB.rot.2))
@@ -440,8 +440,8 @@ ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates5.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
-WB$PCB118_comb <- WB.1$PCB118 / PUF.mean[96]
-WB.rot.2$PCB118_comb <- WB.rot.2$PCB118 / PUF.mean.2[96]
+WB$PCB118_comb <- WB.1$PCB118 / PUF.mean[97]
+WB.rot.2$PCB118_comb <- WB.rot.2$PCB118 / PUF.mean.2[97]
 
 # Combine data, padding shorter dataset with NA
 max_len <- max(nrow(WB), nrow(WB.rot.2))
@@ -497,8 +497,8 @@ ggsave("Output/Plots/SamplingRates/SR/PCB118SamplingRates.png",
        plot = plot.118, width = 8, height = 10, dpi = 1300)
 
 # PCB 187
-WB$PCB187_comb <- WB.1$PCB187 / PUF.mean[152]
-WB.rot.2$PCB187_comb <- WB.rot.2$PCB187 / PUF.mean.2[153]
+WB$PCB187_comb <- WB.1$PCB187 / PUF.mean[154]
+WB.rot.2$PCB187_comb <- WB.rot.2$PCB187 / PUF.mean.2[154]
 
 # Combine data, padding shorter dataset with NA
 max_len <- max(nrow(WB), nrow(WB.rot.2))
@@ -555,11 +555,9 @@ ggsave("Output/Plots/SamplingRates/SR/PCB187SamplingRates.png",
 
 # SR vs logKoa regressions ------------------------------------------------
 # (1) Static 1
-# Remove PCB14 & PCBs128+166
-logKoa.0 <- logKoa[!logKoa$congener %in% c("PCB14", "PCB128.166"), ]
 sr.stat.1 <- data.frame(
   sr = SR.st.1$`Sampling Rate (m3/d)`,
-  logKoa = logKoa.0$logKoa)
+  logKoa = logKoa$logKoa)
 
 # Remove any NA values
 sr.stat.1 <- na.omit(sr.stat.1)
@@ -597,10 +595,9 @@ ggsave("Output/Plots/SamplingRates/SR/Stat1_logKoa.png", plot = p.sr.stat.1.koa,
        width = 6, height = 6, dpi = 500)
 
 # (2) Static 2
-logKoa.1 <- logKoa[logKoa$congener != "PCB14", ]
 sr.stat.2 <- data.frame(
   sr = SR.st.2$`Sampling Rate (m3/d)`,
-  logKoa = logKoa.1$logKoa)
+  logKoa = logKoa$logKoa)
 
 # Remove any NA values
 sr.stat.2 <- na.omit(sr.stat.2)
@@ -640,7 +637,7 @@ ggsave("Output/Plots/SamplingRates/SR/Stat2_logKoa.png", plot = p.sr.stat.2.koa,
 # (3) Rot
 sr.rot <- data.frame(
   sr = SR.rot$`Sampling Rate (m3/d)`,
-  logKoa = logKoa.1$logKoa)
+  logKoa = logKoa$logKoa)
 
 # Remove any NA values
 sr.rot <- na.omit(sr.rot)
