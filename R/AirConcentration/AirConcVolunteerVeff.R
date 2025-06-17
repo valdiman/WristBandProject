@@ -82,7 +82,7 @@ data.2.1 <- data.2[, common_ids]
   # For V3
   conc.V3 <- as.data.frame(t(data.1[7, ] / veff_static.V3))
   # For V4
-  conc.V4 <- data.frame(colMeans(data.1[14:15, ])) / veff_static.V4
+  conc.V4 <- data.frame(colMeans(data.1[14:16, ])) / veff_static.V4
   # For V5
   conc.V5 <- as.data.frame(t(data.1[13, ] / veff_static.V5))
   # For V6
