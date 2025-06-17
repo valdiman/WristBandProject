@@ -274,9 +274,9 @@ names(wt.3)[names(wt.3) == 'wt$vol.WB'] <- 'vol.WB'
 names(wt.3)[names(wt.3) == 'wt$area.WB'] <- 'area.WB'
 
 # Calculate Veff
-vol_matrix <- matrix(rep(wt.3$vol.WB, each = 171), nrow = 36, byrow = TRUE)
-area_matrix <- matrix(rep(wt.3$area.WB, each = 171), nrow = 36, byrow = TRUE)
-time_matrix <- matrix(rep(wt.3$time.day, each = 171), nrow = 36, byrow = TRUE)
+vol_matrix <- matrix(rep(wt.3$vol.WB, each = 173), nrow = 36, byrow = TRUE)
+area_matrix <- matrix(rep(wt.3$area.WB, each = 173), nrow = 36, byrow = TRUE)
+time_matrix <- matrix(rep(wt.3$time.day, each = 173), nrow = 36, byrow = TRUE)
 logK_matrix <- matrix(rep(logKwb$logKwb, times = 36), nrow = 36, byrow = FALSE)
 ko2 <- ko.p$Average_ko2
 
@@ -285,7 +285,7 @@ veff.teacher <- 10^logK_matrix * vol_matrix *
   (1 - exp(-ko2 * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
 
 # Estimate concentration from worn WBs
-wt.mass <- wt.3[, 6:176]
+wt.mass <- wt.3[, 6:178]
 conc.WB <- wt.mass / veff.teacher
 conc.WB <- as.data.frame(conc.WB)
 conc.WB$code.teacher <- wt$code.teacher
@@ -488,11 +488,11 @@ ggsave("Output/Plots/Teachers/WTPCBiVeff2.png", plot = plot.pcbi,
 
 # Concentration Profile Analysis ------------------------------------------
 # Profiles
-tmp <- rowSums(conc.WB[, 1:171], na.rm = TRUE)
-prof.WB.conc <- sweep(conc.WB[, 1:171], 1, tmp, FUN = "/")
+tmp <- rowSums(conc.WB[, 1:173], na.rm = TRUE)
+prof.WB.conc <- sweep(conc.WB[, 1:173], 1, tmp, FUN = "/")
 prof.WB.conc <- cbind(conc.WB$code.teacher, prof.WB.conc)
 # Check sum of all PCBs (i.e., = 1)
-rowSums(prof.WB.conc[, 2:172], na.rm = TRUE)
+rowSums(prof.WB.conc[, 2:174], na.rm = TRUE)
 
 # See top PCBi for each sample
 # Extract numeric columns and their names
@@ -527,7 +527,7 @@ ggplot(top_10_PCBi_df, aes(x = Top10_PCBi_1, y = `conc.WB$school.year`)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # PCA
-t.prof.WB.conc <- data.frame(t(prof.WB.conc[, 2:172]))
+t.prof.WB.conc <- data.frame(t(prof.WB.conc[, 2:174]))
 colnames(t.prof.WB.conc) <- conc.WB$code.teacher
 PCA <- prcomp(t.prof.WB.conc, scale. = TRUE)
 summary(PCA)
@@ -567,7 +567,7 @@ write.csv(costheta_df, file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff2
 
 # Cosine theta visualization ----------------------------------------------
 # Calculate tPCB values to be added to the plot
-tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:171], na.rm = TRUE))
+tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:173], na.rm = TRUE))
 colnames(tPCB.conc.WB) <- "tPCB"
 
 # Add the tPCB values to costheta_df
@@ -622,7 +622,7 @@ costheta_correlations <- costheta_correlations %>%
   )
 
 # Plot the data
-plot.cos.theta.low <- ggplot(data = costheta_correlations[1:13, ], # low values =< 0.15
+plot.cos.theta.low <- ggplot(data = costheta_correlations[1:16, ], # low values =< 0.2
                              aes(x = Var1, y = Var2, fill = Value)) +
   geom_tile(color = "white") +
   scale_fill_gradient(low = "blue", high = "red") +
@@ -641,7 +641,7 @@ plot.cos.theta.low
 ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff2.png", plot = plot.cos.theta.low,
        width = 10, height = 10, dpi = 1200)
 
-plot.cos.theta.high <- ggplot(data = costheta_correlations[586:595, ], # high values >= 0.86
+plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high values >= 0.85
                               aes(x = Var1, y = Var2, fill = Value)) +
   geom_tile(color = "white") +
   scale_fill_gradient(low = "blue", high = "red") +
