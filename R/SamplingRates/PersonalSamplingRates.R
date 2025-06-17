@@ -82,10 +82,10 @@ logKwb <- data.frame(
   Vwb <- data.V1$vol.WB[1]
   Awb <- data.V1$area.WB[1]
   # Calculate efective volume for static WBs
-  veff_static.V1 <- 10^(logKwb$logKwb) * Vwb * 
+  veff_stat.V1 <- 10^(logKwb$logKwb) * Vwb * 
     (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V1[1, 1]))
   # Compute concentration
-  conc.V1 <- data.V1.2 / veff_static.V1
+  conc.V1 <- data.V1.2 / veff_stat.V1
   # Calculate effective volume (Veff)
   subset_data <- data.V1.pcbs[4:13, 3:175]
   Veff.V1 <- t(apply(subset_data, 1, function(row) row / conc.V1))
