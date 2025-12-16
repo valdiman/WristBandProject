@@ -69,7 +69,7 @@ prof_combined.V1 <- prof.air.conc %>%
               rename(Conc = conc.V1.r) %>%
               mutate(Source = "Vol. 1 d"))  # Change this label
 
-# Plot
+# Bar plot
 # Create the plot with the legend moved inside
 p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
                                                  fill = Source)) +
@@ -105,9 +105,10 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
 print(p_prof_comb.V1)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol1VeffV2.png", plot = p_prof_comb.V1,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1VeffV2.png",
+       plot = p_prof_comb.V1, width = 10, height = 3, dpi = 500)
 
+# Scatter 1:1 plot
 # Convert to wide format
 prof_wide <- prof_combined.V1 %>%
   pivot_wider(names_from = Source, values_from = Conc)
@@ -120,30 +121,33 @@ plot_data <- prof_wide %>%
     values_to = "Conc"
   )
 
-ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+p_scat_comb.V1 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
   geom_point(size = 2.5, shape = 21) +
   geom_abline(slope = 1, intercept = 0, color = "black") +
   theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
   ylim(0, 0.15) +
   xlim(0, 0.15) +
   theme(
     aspect.ratio = 1,
     legend.text = element_text(size = 10, face = "bold"),
-    legend.title = element_text(face = "bold", size = 11),
+    legend.title = element_blank(),
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) +
-  labs(x = "Air PCB Profile", y = "Volunteer PCB Profile",
-       color = "Volunteer") +
+    axis.title.x = element_text(face = "bold", size = 13)) +
   scale_color_manual(
     values = c("Vol. 1 nd" = "#009E73",
                "Vol. 1 d" = "#E69F00"),
-    guide = guide_legend(key.size = unit(0.5, "lines"))
-  )
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V1)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol1Veff.png",
+       plot = p_scat_comb.V1, width = 5, height = 5, dpi = 500)
 
 # Vol 2
 prof_combined.V2 <- prof.air.conc %>%
@@ -194,8 +198,8 @@ p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener, y = Conc,
 print(p_prof_comb.V2)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol2Veff.png", plot = p_prof_comb.V2,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal//Barplot/prof_combined.Vol2Veff.png",
+       plot = p_prof_comb.V2, width = 10, height = 3, dpi = 500)
 
 # Vol 3
 prof_combined.V3 <- prof.air.conc %>%
@@ -245,8 +249,8 @@ p_prof_comb.V3 <- ggplot(prof_combined.V3, aes(x = congener, y = Conc, fill = So
 print(p_prof_comb.V3)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol3Veff.png", plot = p_prof_comb.V3,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol3Veff.png",
+       plot = p_prof_comb.V3, width = 10, height = 3, dpi = 500)
 
 # Vol 4
 prof_combined.V4 <- prof.air.conc %>%
@@ -296,8 +300,8 @@ p_prof_comb.V4 <- ggplot(prof_combined.V4, aes(x = congener, y = Conc,
 print(p_prof_comb.V4)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol4Veff.png", plot = p_prof_comb.V4,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol4Veff.png",
+       plot = p_prof_comb.V4, width = 10, height = 3, dpi = 500)
 
 # Vol 5
 prof_combined.V5 <- prof.air.conc %>%
@@ -347,8 +351,8 @@ p_prof_comb.V5 <- ggplot(prof_combined.V5, aes(x = congener, y = Conc,
 print(p_prof_comb.V5)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol5Veff.png", plot = p_prof_comb.V5,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol5Veff.png",
+       plot = p_prof_comb.V5, width = 10, height = 3, dpi = 500)
 
 # Vol 6
 prof_combined.V6 <- prof.air.conc %>%
@@ -399,8 +403,8 @@ p_prof_comb.V6 <- ggplot(prof_combined.V6, aes(x = congener, y = Conc,
 print(p_prof_comb.V6)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol6Veff.png", plot = p_prof_comb.V6,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol6Veff.png",
+       plot = p_prof_comb.V6, width = 10, height = 3, dpi = 500)
 
 # Vol 7
 prof_combined.V7 <- prof.air.conc %>%
@@ -451,8 +455,8 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener, y = Conc,
 print(p_prof_comb.V7)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol7VeffV2.png", plot = p_prof_comb.V7,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol7VeffV2.png",
+       plot = p_prof_comb.V7, width = 10, height = 3, dpi = 500)
 
 # Convert to wide format
 prof_wide <- prof_combined.V7 %>%
@@ -535,8 +539,8 @@ p_prof_comb.V8 <- ggplot(prof_combined.V8, aes(x = congener, y = Conc,
 print(p_prof_comb.V8)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol8Veff.png", plot = p_prof_comb.V8,
-       width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol8Veff.png",
+       plot = p_prof_comb.V8, width = 10, height = 3, dpi = 500)
 
 # Calculate cosine theta --------------------------------------------------
 # Need to change the format of prof_combined...
