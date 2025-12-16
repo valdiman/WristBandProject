@@ -1,4 +1,4 @@
-## Script to fabricate PCB profiles &
+## Script to fabricate PCB profiles
 # and calculate cosine theta for similarity analysis
 
 # Install packages
@@ -74,8 +74,8 @@ prof_combined.V1 <- prof.air.conc %>%
 p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
+           color = "black",
+           linewidth = 0.2) +
   xlab("") +
   ylab("") +
   ylim(0, 0.15) +
@@ -91,7 +91,7 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB" = "blue",
                                "Vol. 1 nd" = "#009E73",
                                "Vol. 1 d" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
   theme(legend.position = c(1, 1),
         legend.justification = c(1 ,1),
         legend.background = element_rect(fill = NA, color = NA),
@@ -105,7 +105,7 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
 print(p_prof_comb.V1)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1VeffV2.png",
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff.png",
        plot = p_prof_comb.V1, width = 10, height = 3, dpi = 500)
 
 # Scatter 1:1 plot
@@ -148,6 +148,12 @@ print(p_scat_comb.V1)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol1Veff.png",
        plot = p_scat_comb.V1, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V1 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V1
 
 # Vol 2
 prof_combined.V2 <- prof.air.conc %>%
@@ -201,6 +207,53 @@ print(p_prof_comb.V2)
 ggsave("Output/Plots/Profiles/Personal//Barplot/prof_combined.Vol2Veff.png",
        plot = p_prof_comb.V2, width = 10, height = 3, dpi = 500)
 
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V2 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 2 nd`, `Vol. 2 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V2 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 2 nd" = "#009E73",
+               "Vol. 2 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V2)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol2Veff.png",
+       plot = p_scat_comb.V2, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V2 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V2
+
 # Vol 3
 prof_combined.V3 <- prof.air.conc %>%
   select(congener, Conc.Air.V3) %>%
@@ -251,6 +304,53 @@ print(p_prof_comb.V3)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol3Veff.png",
        plot = p_prof_comb.V3, width = 10, height = 3, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V3 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 3 nd`, `Vol. 3 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V3 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 3 nd" = "#009E73",
+               "Vol. 3 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V3)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol3Veff.png",
+       plot = p_scat_comb.V3, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V3 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V3
 
 # Vol 4
 prof_combined.V4 <- prof.air.conc %>%
@@ -303,6 +403,53 @@ print(p_prof_comb.V4)
 ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol4Veff.png",
        plot = p_prof_comb.V4, width = 10, height = 3, dpi = 500)
 
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V4 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 4 nd`, `Vol. 4 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V4 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 4 nd" = "#009E73",
+               "Vol. 4 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V4)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol4Veff.png",
+       plot = p_scat_comb.V4, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V4 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V4
+
 # Vol 5
 prof_combined.V5 <- prof.air.conc %>%
   select(congener, Conc.Air.V5) %>%
@@ -353,6 +500,53 @@ print(p_prof_comb.V5)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol5Veff.png",
        plot = p_prof_comb.V5, width = 10, height = 3, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V5 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 5 nd`, `Vol. 5 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V5 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 5 nd" = "#009E73",
+               "Vol. 5 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V5)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol5Veff.png",
+       plot = p_scat_comb.V5, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V5 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V5
 
 # Vol 6
 prof_combined.V6 <- prof.air.conc %>%
@@ -406,6 +600,53 @@ print(p_prof_comb.V6)
 ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol6Veff.png",
        plot = p_prof_comb.V6, width = 10, height = 3, dpi = 500)
 
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V6 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 6 nd`, `Vol. 6 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V6 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 6 nd" = "#009E73",
+               "Vol. 6 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V6)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol6Veff.png",
+       plot = p_scat_comb.V6, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V6 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V6
+
 # Vol 7
 prof_combined.V7 <- prof.air.conc %>%
   select(congener, Conc.Air.V7) %>%
@@ -455,9 +696,10 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener, y = Conc,
 print(p_prof_comb.V7)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol7VeffV2.png",
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol7Veff.png",
        plot = p_prof_comb.V7, width = 10, height = 3, dpi = 500)
 
+# Scatter 1:1 plot
 # Convert to wide format
 prof_wide <- prof_combined.V7 %>%
   pivot_wider(names_from = Source, values_from = Conc)
@@ -470,30 +712,39 @@ plot_data <- prof_wide %>%
     values_to = "Conc"
   )
 
-ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+p_scat_comb.V7 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
   geom_point(size = 2.5, shape = 21) +
   geom_abline(slope = 1, intercept = 0, color = "black") +
   theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
   ylim(0, 0.5) +
   xlim(0, 0.5) +
   theme(
     aspect.ratio = 1,
     legend.text = element_text(size = 10, face = "bold"),
-    legend.title = element_text(face = "bold", size = 11),
+    legend.title = element_blank(),
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) +
-  labs(x = "Air PCB Profile", y = "Volunteer PCB Profile",
-       color = "Volunteer") +
+    axis.title.x = element_text(face = "bold", size = 13)) +
   scale_color_manual(
     values = c("Vol. 7 nd" = "#009E73",
                "Vol. 7 d" = "#E69F00"),
-    guide = guide_legend(key.size = unit(0.5, "lines"))
-  )
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V7)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol7Veff.png",
+       plot = p_scat_comb.V7, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V7 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V7
 
 # Vol 8
 prof_combined.V8 <- prof.air.conc %>%
@@ -541,6 +792,52 @@ print(p_prof_comb.V8)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol8Veff.png",
        plot = p_prof_comb.V8, width = 10, height = 3, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V8 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 8 nd`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V8 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 8 nd" = "#009E73"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V8)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Scatterplot/prof_combined.Vol8Veff.png",
+       plot = p_scat_comb.V8, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V8 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V8
 
 # Calculate cosine theta --------------------------------------------------
 # Need to change the format of prof_combined...

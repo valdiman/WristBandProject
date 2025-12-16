@@ -1,4 +1,4 @@
-## Script to fabricate PCB profiles &
+## Script to fabricate PCB profiles
 # and calculate cosine theta for similarity analysis
 
 # Install packages
@@ -71,13 +71,13 @@ prof_combined.V1 <- prof.air.conc %>%
 p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
                                                  fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
+           color = "black",
            linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -88,18 +88,66 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 1 office-only" = "#009E73",
                                "Vol. 1 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.V1)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol1Veff.png",
-       plot = p_prof_comb.V1, width = 10, height = 5, dpi = 500)
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol1Veff.png",
+       plot = p_prof_comb.V1, width = 10, height = 3, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V1 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 1 office-only`, `Vol. 1 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V1 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 1 office-only" = "#009E73",
+               "Vol. 1 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V1)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Vol1Veff.png",
+       plot = p_scat_comb.V1, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V1 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 1` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V1
 
 # Vol 2
 prof_combined.V2 <- prof.air.conc %>%
@@ -121,13 +169,13 @@ prof_combined.V2 <- prof.air.conc %>%
 p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener, y = Conc,
                                                fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
+           color = "black",
+           linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -138,18 +186,66 @@ p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 2 office-only" = "#009E73",
                                "Vol. 2 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.V2)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol2Veff.png",
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol2Veff.png",
        plot = p_prof_comb.V2, width = 10, height = 5, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V2 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 2 office-only`, `Vol. 2 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V2 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 2 office-only" = "#009E73",
+               "Vol. 2 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V2)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Vol2Veff.png",
+       plot = p_scat_comb.V2, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V2 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 1` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V2
 
 # Vol 3
 prof_combined.V3 <- prof.air.conc %>%
@@ -169,15 +265,15 @@ prof_combined.V3 <- prof.air.conc %>%
 
 # Plots
 p_prof_comb.V3 <- ggplot(prof_combined.V3, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
+                                               fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
+           color = "black",
+           linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -188,18 +284,66 @@ p_prof_comb.V3 <- ggplot(prof_combined.V3, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 3 office-only" = "#009E73",
                                "Vol. 3 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.V3)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol3Veff.png",
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol3Veff.png",
        plot = p_prof_comb.V3, width = 10, height = 5, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V3 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 3 office-only`, `Vol. 3 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V3 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 3 office-only" = "#009E73",
+               "Vol. 3 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V3)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Vol3Veff.png",
+       plot = p_scat_comb.V3, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V3 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 1` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V3
 
 # Vol 8 (data say Vol 5)
 prof_combined.V8 <- prof.air.conc %>%
@@ -218,16 +362,16 @@ prof_combined.V8 <- prof.air.conc %>%
                                             "Vol. 8 full-day")))
 
 # Plots
-p_prof_comb.V8 <- ggplot(prof_combined.V8, aes(x = congener, y = Conc,
-                                               fill = Source)) +
+p_prof_comb.V8 <-  ggplot(prof_combined.V8, aes(x = congener, y = Conc,
+                                                fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
+           color = "black",
+           linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -238,18 +382,66 @@ p_prof_comb.V8 <- ggplot(prof_combined.V8, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 2" = "blue",
                                "Vol. 8 office-only" = "#009E73",
                                "Vol. 8 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.V8)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol8Veff.png",
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol8Veff.png",
        plot = p_prof_comb.V8, width = 10, height = 5, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V8 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 8 office-only`, `Vol. 8 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V8 <- ggplot(plot_data, aes(x = `Air PCB office 2`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 8 office-only" = "#009E73",
+               "Vol. 8 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V8)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Vol8Veff.png",
+       plot = p_scat_comb.V8, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V8 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 2` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V8
 
 # Vol 9 (data say Vol 4)
 prof_combined.V9 <- prof.air.conc %>%
@@ -271,13 +463,13 @@ prof_combined.V9 <- prof.air.conc %>%
 p_prof_comb.V9 <- ggplot(prof_combined.V9, aes(x = congener, y = Conc,
                                                fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
+           color = "black",
+           linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -288,18 +480,66 @@ p_prof_comb.V9 <- ggplot(prof_combined.V9, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 2" = "blue",
                                "Vol. 9 office-only" = "#009E73",
                                "Vol. 9 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.93, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.V9)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Vol9Veff.png",
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol9Veff.png",
        plot = p_prof_comb.V9, width = 10, height = 5, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.V9 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 9 office-only`, `Vol. 9 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.V9 <- ggplot(plot_data, aes(x = `Air PCB office 2`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 9 office-only" = "#009E73",
+               "Vol. 9 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.V9)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Vol9Veff.png",
+       plot = p_scat_comb.V9, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.V9 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 2` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.V9
 
 # Volunteers in location 1 (Conc.Air.1) Vol. 2 out
 prof_combined.1 <-  prof.air.conc %>%
@@ -318,15 +558,15 @@ prof_combined.1 <-  prof.air.conc %>%
                                             "Vol. 3 full-day")))
 
 p_prof_comb.1 <- ggplot(prof_combined.1, aes(x = congener, y = Conc,
-                                               fill = Source)) +
+                                              fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
+           color = "black",
            linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 5/20) +
-  ylab(expression(bold("Concentration fraction "*Sigma*"PCB"))) +
+  theme(aspect.ratio = 3/20) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -337,18 +577,66 @@ p_prof_comb.1 <- ggplot(prof_combined.1, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 1 full-day" = "#009E73",
                                "Vol. 3 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(0.92, 0.8),  # Inside the plot
-        legend.background = element_rect(fill = "white", color = NA),
-        legend.title = element_blank(),  # Removes the legend title
-        legend.text = element_text(size = 8, face = "bold"))
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.1)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Office1Veff.png",
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Office1Veff.png",
        plot = p_prof_comb.1, width = 10, height = 5, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.1 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 1 full-day`, `Vol. 3 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.1 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 1 full-day" = "#009E73",
+               "Vol. 3 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.1)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Office1Veff.png",
+       plot = p_scat_comb.1, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.1 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 1` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.1
 
 # Volunteers in location 2 (Conc.Air.2)
 prof_combined.2 <-  prof.air.conc %>%
@@ -369,13 +657,13 @@ prof_combined.2 <-  prof.air.conc %>%
 p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
                                              fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
+           color = "black",
            linewidth = 0.2) +
   xlab("") +
   ylim(0, 0.15) +
   theme_bw() +
   theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. fraction "*Sigma*"PCB"))) +
+  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
         axis.title.y = element_text(face = "bold", size = 13),
         panel.grid.major = element_blank(),
@@ -386,22 +674,66 @@ p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
   scale_fill_manual(values = c("Air PCB office 2" = "blue",
                                "Vol. 8 full-day" = "#009E73",
                                "Vol. 9 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
   theme(legend.position = c(1, 1),
         legend.justification = c(1 ,1),
         legend.background = element_rect(fill = NA, color = NA),
         legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold")) +
-  annotate("text", x = -Inf, y = Inf,
-           label = "(c)", hjust = 0, vjust = 1, 
-           size = 6, color = "black")
+        legend.text = element_text(size = 12, face = "bold"))
 
 # Print the plots
 print(p_prof_comb.2)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/OfficeHome/prof_combined.Office2VeffV2.png",
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Office2Veff.png",
        plot = p_prof_comb.2, width = 10, height = 3, dpi = 500)
+
+# Scatter 1:1 plot
+# Convert to wide format
+prof_wide <- prof_combined.2 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 8 full-day`, `Vol. 9 full-day`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+p_scat_comb.2 <- ggplot(plot_data, aes(x = `Air PCB office 2`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  xlab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylab(expression(bold("Volunteer Predited Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_blank(),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13)) +
+  scale_color_manual(
+    values = c("Vol. 8 full-day" = "#009E73",
+               "Vol. 9 full-day" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines")))
+
+# Print the plots
+print(p_scat_comb.2)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Scatterplot/prof_combined.Office2Veff.png",
+       plot = p_scat_comb.2, width = 5, height = 5, dpi = 500)
+
+# See max abs difference
+diff.2 <- plot_data %>%
+  mutate(abs_diff = abs(`Air PCB office 2` - Conc)) %>%
+  slice_max(abs_diff, n = 1, with_ties = FALSE)
+diff.2
 
 # Calculate cosine theta --------------------------------------------------
 # Need to change the format of prof_combined...
