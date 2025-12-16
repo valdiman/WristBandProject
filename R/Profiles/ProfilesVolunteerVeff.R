@@ -27,6 +27,11 @@ install.packages("lsa")
   conc.wb <- read.csv("Output/Data/csv/Volunteer/VolunteerConcWB.csv")
 }
 
+# Have the same number of congeners
+common_ids <- intersect(conc.air$X, conc.wb$X)
+conc.air <- conc.air[conc.air$X %in% common_ids, ]
+conc.wb  <- conc.wb[conc.wb$X %in% common_ids, ]
+
 # Create PCB profiles -----------------------------------------------------
 # (1) Air WBs
 tmp.wb.air <- colSums(conc.air[, 2:8], na.rm = TRUE)
@@ -43,7 +48,7 @@ colSums(prof.air.conc[, 2:8], na.rm = TRUE)
 tmp.wb.wr <- colSums(conc.wb[, 2:16], na.rm = TRUE)
 prof.wb.conc <- sweep(conc.wb[, 2:16], 2, tmp.wb.wr, FUN = "/")
 prof.wb.conc <- cbind(congener, prof.wb.conc)
-#Then turn it back into a factor with the levels in the correct order
+# Then turn it back into a factor with the levels in the correct order
 prof.wb.conc$congener <- factor(prof.wb.conc$congener,
                                levels = unique(prof.wb.conc$congener))
 # Check sum of all PCBs (i.e., = 1)
@@ -102,6 +107,43 @@ print(p_prof_comb.V1)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol1VeffV2.png", plot = p_prof_comb.V1,
        width = 10, height = 3, dpi = 500)
+
+# Convert to wide format
+prof_wide <- prof_combined.V1 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 1 nd`, `Vol. 1 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  ylim(0, 0.15) +
+  xlim(0, 0.15) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_text(face = "bold", size = 11),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(x = "Air PCB Profile", y = "Volunteer PCB Profile",
+       color = "Volunteer") +
+  scale_color_manual(
+    values = c("Vol. 1 nd" = "#009E73",
+               "Vol. 1 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines"))
+  )
 
 # Vol 2
 prof_combined.V2 <- prof.air.conc %>%
@@ -411,6 +453,43 @@ print(p_prof_comb.V7)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/prof_combined.Vol7VeffV2.png", plot = p_prof_comb.V7,
        width = 10, height = 3, dpi = 500)
+
+# Convert to wide format
+prof_wide <- prof_combined.V7 %>%
+  pivot_wider(names_from = Source, values_from = Conc)
+
+# Make a long-format for plotting multiple y-values against Air PCB
+plot_data <- prof_wide %>%
+  pivot_longer(
+    cols = c(`Vol. 7 nd`, `Vol. 7 d`),  # use exact column names
+    names_to = "Vol_Type",
+    values_to = "Conc"
+  )
+
+ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Type)) +
+  geom_point(size = 2.5, shape = 21) +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  theme_bw() +
+  ylim(0, 0.5) +
+  xlim(0, 0.5) +
+  theme(
+    aspect.ratio = 1,
+    legend.text = element_text(size = 10, face = "bold"),
+    legend.title = element_text(face = "bold", size = 11),
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(x = "Air PCB Profile", y = "Volunteer PCB Profile",
+       color = "Volunteer") +
+  scale_color_manual(
+    values = c("Vol. 7 nd" = "#009E73",
+               "Vol. 7 d" = "#E69F00"),
+    guide = guide_legend(key.size = unit(0.5, "lines"))
+  )
 
 # Vol 8
 prof_combined.V8 <- prof.air.conc %>%
