@@ -130,7 +130,8 @@ p_scat_comb.V1 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color 
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 1 office-only" = "#009E73",
                "Vol. 1 full-day" = "#E69F00"),
@@ -228,7 +229,8 @@ p_scat_comb.V2 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color 
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 2 office-only" = "#009E73",
                "Vol. 2 full-day" = "#E69F00"),
@@ -326,7 +328,8 @@ p_scat_comb.V3 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color 
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 3 office-only" = "#009E73",
                "Vol. 3 full-day" = "#E69F00"),
@@ -424,7 +427,8 @@ p_scat_comb.V8 <- ggplot(plot_data, aes(x = `Air PCB office 2`, y = Conc, color 
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 8 office-only" = "#009E73",
                "Vol. 8 full-day" = "#E69F00"),
@@ -522,7 +526,8 @@ p_scat_comb.V9 <- ggplot(plot_data, aes(x = `Air PCB office 2`, y = Conc, color 
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 9 office-only" = "#009E73",
                "Vol. 9 full-day" = "#E69F00"),
@@ -619,7 +624,8 @@ p_scat_comb.1 <- ggplot(plot_data, aes(x = `Air PCB office 1`, y = Conc, color =
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 1 full-day" = "#009E73",
                "Vol. 3 full-day" = "#E69F00"),
@@ -716,7 +722,8 @@ p_scat_comb.2 <- ggplot(plot_data, aes(x = `Air PCB office 2`, y = Conc, color =
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.2, 0.9)) +
   scale_color_manual(
     values = c("Vol. 8 full-day" = "#009E73",
                "Vol. 9 full-day" = "#E69F00"),

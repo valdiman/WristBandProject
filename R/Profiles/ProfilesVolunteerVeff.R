@@ -136,7 +136,8 @@ p_scat_comb.V1 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 1 nd" = "#009E73",
                "Vol. 1 d" = "#E69F00"),
@@ -235,7 +236,8 @@ p_scat_comb.V2 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 2 nd" = "#009E73",
                "Vol. 2 d" = "#E69F00"),
@@ -333,7 +335,8 @@ p_scat_comb.V3 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 3 nd" = "#009E73",
                "Vol. 3 d" = "#E69F00"),
@@ -431,7 +434,8 @@ p_scat_comb.V4 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 4 nd" = "#009E73",
                "Vol. 4 d" = "#E69F00"),
@@ -529,7 +533,8 @@ p_scat_comb.V5 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 5 nd" = "#009E73",
                "Vol. 5 d" = "#E69F00"),
@@ -628,7 +633,8 @@ p_scat_comb.V6 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 6 nd" = "#009E73",
                "Vol. 6 d" = "#E69F00"),
@@ -727,7 +733,8 @@ p_scat_comb.V7 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 7 nd" = "#009E73",
                "Vol. 7 d" = "#E69F00"),
@@ -821,7 +828,8 @@ p_scat_comb.V8 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
     axis.text.y = element_text(face = "bold", size = 12),
     axis.title.y = element_text(face = "bold", size = 13),
     axis.text.x = element_text(face = "bold", size = 12),
-    axis.title.x = element_text(face = "bold", size = 13)) +
+    axis.title.x = element_text(face = "bold", size = 13),
+    legend.position = c(0.15, 0.9)) +
   scale_color_manual(
     values = c("Vol. 8 nd" = "#009E73"),
     guide = guide_legend(key.size = unit(0.5, "lines")))
