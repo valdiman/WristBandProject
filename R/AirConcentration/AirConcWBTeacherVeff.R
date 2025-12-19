@@ -664,14 +664,14 @@ ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.t
 # wt.19.l = Teacher 19.l & wt.25.r = Teacher 25.r plots included in main text
 
 selected_rows <- prof.WB.conc %>%
-  filter(conc.WB$code.teacher %in% c("wt.25.l")) # need to change the sample!
+  filter(conc.WB$code.teacher %in% c("wt.17.r")) # need to change the sample!
 
 # Get selected teacher ID (assumes 1 row selected)
-selected_teacher <- selected_rows$code.teacher[1]
+selected_teacher <- selected_rows$`conc.WB$code.teacher`
 
 # Define color and label dynamically
 fill_values <- setNames("blue", selected_teacher)
-fill_labels <- setNames("Teacher 25.l", selected_teacher) # need to change the sample!
+fill_labels <- setNames("Teacher 17.r", selected_teacher) # need to change the sample!
 
 # Create Source vector with correct length and values
 source_vector <- rep(selected_rows[[1]], each = ncol(selected_rows) - 1)
@@ -697,7 +697,7 @@ plot.tea <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
            color = "black", linewidth = 0.2) +
   xlab("") +
   ylab("") +
-  ylim(0, 0.15) +
+  ylim(0, 0.20) +
   theme_bw() +
   theme(aspect.ratio = 3/20) +
   theme(axis.text.y = element_text(face = "bold", size = 12),
@@ -717,7 +717,8 @@ plot.tea <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
         legend.background = element_rect(fill = NA, color = NA),
         legend.title = element_blank(),
         legend.text = element_text(size = 12, face = "bold"))
-  annotate("text", x = -Inf, y = Inf,
+  
+annotate("text", x = -Inf, y = Inf,
            label = "(e)", hjust = 0, vjust = 1, 
            size = 6, color = "black")
 

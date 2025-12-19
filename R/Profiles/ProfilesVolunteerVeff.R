@@ -71,58 +71,22 @@ prof_combined.V1 <- prof.air.conc %>%
               rename(Conc = conc.V1.r) %>%
               mutate(Source = "Vol. 1 d"))  # Change this label
 
-# Bar plot
-# Create the plot with the legend moved inside
-p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylab("") +
-  ylim(0, 0.15) +
-  theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 1 nd" = "#009E73",
-                               "Vol. 1 d" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold")) +
-  annotate("text", x = -Inf, y = Inf,
-           label = "(a)", hjust = 0, vjust = 1, 
-           size = 6, color = "black")
-
-# Print the plots
-print(p_prof_comb.V1)
-
-# Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff.png",
-       plot = p_prof_comb.V1, width = 10, height = 3, dpi = 500)
-
-# Zoom plot
-prof_combined.V1 <- prof_combined.V1 %>%
+# Zoom plot (Figure in manuscript)
+prof_combined.V1.z <- prof_combined.V1 %>%
   mutate(
     congener_chr = as.character(congener),
     congener_num = as.numeric(str_extract(congener_chr, "\\d+\\.?\\d*"))
   )
 
-prof_subset <- prof_combined.V1 %>%
-  filter(congener_num >= 42 & congener_num <= 120)
+prof_subset <- prof_combined.V1.z %>%
+  filter(congener_num >= 42 & congener_num <= 120) %>%
+  mutate(congener_chr = gsub("\\.", "+", congener_chr))
 
 p_prof_comb.V1_subset <- ggplot(prof_subset, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
            color = "black", linewidth = 0.2) +
+  scale_x_discrete(
+    labels = prof_subset$congener_chr) +
   xlab("") + ylab("") +
   ylim(0, 0.15) +
   theme_bw() +
@@ -132,8 +96,13 @@ p_prof_comb.V1_subset <- ggplot(prof_subset, aes(x = congener, y = Conc, fill = 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(
+          angle = 90,
+          vjust = 0.5,
+          hjust = 1,
+          size = 8,
+          face = "bold"),
+        axis.ticks.x = element_line(),
         legend.position = c(1, 1),
         legend.justification = c(1 ,1),
         legend.background = element_rect(fill = NA, color = NA),
@@ -144,14 +113,51 @@ p_prof_comb.V1_subset <- ggplot(prof_subset, aes(x = congener, y = Conc, fill = 
                                "Vol. 1 d" = "#E69F00"),
                     guide = guide_legend(key.size = unit(0.5, "lines"))) +
   annotate("text", x = -Inf, y = Inf, label = "(a)", hjust = 0, vjust = 1, 
-           size = 6, color = "black") +
-  scale_x_discrete(breaks = unique(prof_subset$congener))
+           size = 6, color = "black")
 
 p_prof_comb.V1_subset
 
-ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff2.png",
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1VeffZoom.png",
        plot = p_prof_comb.V1_subset, width = 10, height = 3, dpi = 500)
 
+# Bar plot all congeners
+# Create the plot with the legend moved inside
+p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  ylim(0, 0.15) +
+  theme_bw() +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 8, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1,
+      size = 8,
+      face = "bold"), axis.ticks.x.bottom = element_line()) +
+  scale_fill_manual(values = c("Air PCB" = "blue", "Vol. 1 nd" = "#009E73",
+    "Vol. 1 d" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
+
+
+# Print the plots
+print(p_prof_comb.V1)
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff.png",
+       plot = p_prof_comb.V1, width = 16, height = 4, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -216,42 +222,44 @@ prof_combined.V2 <- prof.air.conc %>%
               mutate(Source = "Vol. 2 nd"))
 
 # Plots
-p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",  # Add black edges to the bars
-           linewidth = 0.2) +  # Set the thickness of the black edges (fine line)
-  xlab("") +
-  ylab("") +
+# Bar plot all congeners
+# Create the plot with the legend moved inside
+p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
   ylim(0, 0.15) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(values = c("Air PCB" = "blue",
-                               "Vol. 2 nd" = "#009E73",
-                               "Vol. 2 d" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +  # Smaller legend squares
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold")) +
-  annotate("text", x = -Inf, y = Inf,
-           label = "(a)", hjust = 0, vjust = 1, 
-           size = 6, color = "black")
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 8, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1,
+      size = 8,
+      face = "bold"), axis.ticks.x.bottom = element_line()) +
+  scale_fill_manual(values = c("Air PCB" = "blue", "Vol. 2 nd" = "#009E73",
+                               "Vol. 2 d" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
+
 
 # Print the plots
 print(p_prof_comb.V2)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal//Barplot/prof_combined.Vol2Veff.png",
-       plot = p_prof_comb.V2, width = 10, height = 3, dpi = 500)
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol2Veff.png",
+       plot = p_prof_comb.V2, width = 16, height = 4, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -711,6 +719,56 @@ prof_combined.V7 <- prof.air.conc %>%
               select(congener, conc.V7.r) %>%
               rename(Conc = conc.V7.r) %>%
               mutate(Source = "Vol. 7 d"))
+
+# Zoom plot (Figure in manuscript)
+prof_combined.V7.z <- prof_combined.V7 %>%
+  mutate(
+    congener_chr = as.character(congener),
+    congener_num = as.numeric(str_extract(congener_chr, "\\d+\\.?\\d*"))
+  )
+
+prof_subset <- prof_combined.V7.z %>%
+  filter(congener_num >= 1 & congener_num <= 78) %>%
+  mutate(congener_chr = gsub("\\.", "+", congener_chr))
+
+p_prof_comb.V7_subset <- ggplot(prof_subset, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
+           color = "black", linewidth = 0.2) +
+  scale_x_discrete(
+    labels = prof_subset$congener_chr) +
+  xlab("") +
+  ylab(expression(bold("Air Conc. Fraction " *Sigma*"PCB"))) +
+  ylim(0, 0.5) +
+  theme_bw() +
+  theme(aspect.ratio = 3/20,
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 12),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(
+          angle = 90,
+          vjust = 0.5,
+          hjust = 1,
+          size = 8,
+          face = "bold"),
+        axis.ticks.x = element_line(),
+        legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold")) +
+  scale_fill_manual(values = c("Air PCB" = "blue",
+                               "Vol. 7 nd" = "#009E73",
+                               "Vol. 7 d" = "#E69F00"),
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  annotate("text", x = -Inf, y = Inf, label = "(b)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
+
+p_prof_comb.V7_subset
+
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol7VeffZoom.png",
+       plot = p_prof_comb.V7_subset, width = 10, height = 3, dpi = 500)
 
 # Plots
 p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener, y = Conc,

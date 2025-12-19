@@ -7,6 +7,7 @@ install.packages("scales")
 install.packages("tidyr")
 install.packages("dplyr")
 install.packages("tibble")
+install.packages("stringr")
 install.packages("ggpubr")
 install.packages("lsa")
 
@@ -17,6 +18,7 @@ install.packages("lsa")
   library(tidyr)
   library(dplyr)
   library(tibble)
+  library(stringr)
   library(ggpubr) # ggarrange
   library(lsa) # cosine theta function
 }
@@ -660,6 +662,56 @@ prof_combined.2 <-  prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 2", "Vol. 8 full-day",
                                             "Vol. 9 full-day")))
 
+# Zoom plot (Figure in manuscript)
+prof_combined.2.z <- prof_combined.2 %>%
+  mutate(
+    congener_chr = as.character(congener),
+    congener_num = as.numeric(str_extract(congener_chr, "\\d+\\.?\\d*"))
+  )
+
+prof_subset <- prof_combined.2.z %>%
+  filter(congener_num >= 42 & congener_num <= 120) %>%
+  mutate(congener_chr = gsub("\\.", "+", congener_chr))
+
+p_prof_comb.2_subset <- ggplot(prof_subset, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
+           color = "black", linewidth = 0.2) +
+  scale_x_discrete(
+    labels = prof_subset$congener_chr) +
+  xlab("") + ylab("") +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/20,
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(
+          angle = 90,
+          vjust = 0.5,
+          hjust = 1,
+          size = 8,
+          face = "bold"),
+        axis.ticks.x = element_line(),
+        legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold")) +
+  scale_fill_manual(values = c("Air PCB office 2" = "blue",
+                               "Vol. 8 full-day" = "#009E73",
+                               "Vol. 9 full-day" = "#E69F00"),
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  annotate("text", x = -Inf, y = Inf, label = "(c)", hjust = 0, vjust = 1, 
+           size = 6, color = "black")
+
+p_prof_comb.2_subset
+
+# Save plot in folder
+ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Office2VeffZoom.png",
+       plot = p_prof_comb.2_subset, width = 10, height = 5, dpi = 500)
+
 p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
                                              fill = Source)) +
   geom_bar(position = position_dodge(), stat = "identity", width = 1, 
@@ -815,6 +867,5 @@ cosine_matrix <- as.matrix(prof_combined_wide.2[, -1])
 cosine_similarity.2 <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.2
-
 
 
