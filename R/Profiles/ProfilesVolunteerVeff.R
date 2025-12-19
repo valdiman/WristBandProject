@@ -7,6 +7,7 @@ install.packages("scales")
 install.packages("tidyr")
 install.packages("dplyr")
 install.packages("tibble")
+install.packages("stringr")
 install.packages("ggpubr")
 install.packages("lsa")
 
@@ -17,6 +18,7 @@ install.packages("lsa")
   library(tidyr)
   library(dplyr)
   library(tibble)
+  library(stringr)
   library(ggpubr) # ggarrange
   library(lsa) # cosine theta function
 }
@@ -107,6 +109,49 @@ print(p_prof_comb.V1)
 # Save plot in folder
 ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff.png",
        plot = p_prof_comb.V1, width = 10, height = 3, dpi = 500)
+
+# Zoom plot
+prof_combined.V1 <- prof_combined.V1 %>%
+  mutate(
+    congener_chr = as.character(congener),
+    congener_num = as.numeric(str_extract(congener_chr, "\\d+\\.?\\d*"))
+  )
+
+prof_subset <- prof_combined.V1 %>%
+  filter(congener_num >= 42 & congener_num <= 120)
+
+p_prof_comb.V1_subset <- ggplot(prof_subset, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
+           color = "black", linewidth = 0.2) +
+  xlab("") + ylab("") +
+  ylim(0, 0.15) +
+  theme_bw() +
+  theme(aspect.ratio = 3/20,
+        axis.text.y = element_text(face = "bold", size = 12),
+        axis.title.y = element_text(face = "bold", size = 13),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = c(1, 1),
+        legend.justification = c(1 ,1),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12, face = "bold")) +
+  scale_fill_manual(values = c("Air PCB" = "blue",
+                               "Vol. 1 nd" = "#009E73",
+                               "Vol. 1 d" = "#E69F00"),
+                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
+  annotate("text", x = -Inf, y = Inf, label = "(a)", hjust = 0, vjust = 1, 
+           size = 6, color = "black") +
+  scale_x_discrete(breaks = unique(prof_subset$congener))
+
+p_prof_comb.V1_subset
+
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff2.png",
+       plot = p_prof_comb.V1_subset, width = 10, height = 3, dpi = 500)
+
 
 # Scatter 1:1 plot
 # Convert to wide format
