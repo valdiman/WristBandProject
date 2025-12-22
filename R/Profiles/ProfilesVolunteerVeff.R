@@ -139,21 +139,21 @@ p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener,
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     strip.text = element_text(size = 12, face = "bold"),
-    legend.position = "none",
-    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
-                                      size = 9, face = "bold"),
-    axis.ticks.x.bottom = element_line()) +
+    legend.position = "none") + #,
+    # To remove congeners in x-axis
+    #axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+    #                                  size = 9, face = "bold"),
+    #axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB" = "blue", "Vol. 1 nd" = "#009E73",
                                "Vol. 1 d" = "#E69F00")) + 
   scale_x_discrete(
     labels = function(x) gsub("\\.", "+", x))
 
-
 # Print the plots
 print(p_prof_comb.V1)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1Veff.png",
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol1VeffWOCongeners.png",
        plot = p_prof_comb.V1, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
@@ -770,9 +770,10 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener,
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     strip.text = element_text(size = 12, face = "bold"),
-    legend.position = "none",
-    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
-      size = 9, face = "bold"), axis.ticks.x.bottom = element_line()) +
+    legend.position = "none") + #,
+  # Remove congeners from x-axis
+    #axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+    #  size = 9, face = "bold"), axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB" = "blue", "Vol. 7 nd" = "#009E73",
                                "Vol. 7 d" = "#E69F00")) + 
   scale_x_discrete(
@@ -782,7 +783,7 @@ p_prof_comb.V7 <- ggplot(prof_combined.V7, aes(x = congener,
 print(p_prof_comb.V7)
 
 # Save plot in folder
-ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol7Veff.png",
+ggsave("Output/Plots/Profiles/Personal/Barplot/prof_combined.Vol7VeffWOCongeners.png",
        plot = p_prof_comb.V7, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
