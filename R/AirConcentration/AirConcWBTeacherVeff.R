@@ -393,15 +393,13 @@ ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB, label = code.teacher.cle
 tPCB.wt.yr <- ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB)) +
   geom_point(size = 4, shape =21, color = "black", fill = "white") +  # Plot the mean as points
   theme_bw() +
-  ylim(0, 10) +
   ylab(expression(bold("Estimated Air Concentration " * Sigma * "PCB (ng/m³)"))) +
   xlab("School Built") +
   theme(
     axis.text.x = element_text(face = "bold", size = 14, angle = 45, hjust = 1),
     axis.text.y = element_text(face = "bold", size = 14),
     axis.title.x = element_text(face = "bold", size = 14),
-    axis.title.y = element_text(face = "bold", size = 14)
-  )
+    axis.title.y = element_text(face = "bold", size = 14))
 
 # Display the plot
 print(tPCB.wt.yr)
@@ -664,14 +662,14 @@ ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.t
 # wt.19.l = Teacher 19.l & wt.25.r = Teacher 25.r plots included in main text
 
 selected_rows <- prof.WB.conc %>%
-  filter(conc.WB$code.teacher %in% c("wt.17.r")) # need to change the sample!
+  filter(conc.WB$code.teacher %in% c("wt.01.l")) # need to change the sample!
 
 # Get selected teacher ID (assumes 1 row selected)
 selected_teacher <- selected_rows$`conc.WB$code.teacher`
 
 # Define color and label dynamically
 fill_values <- setNames("blue", selected_teacher)
-fill_labels <- setNames("Teacher 17.r", selected_teacher) # need to change the sample!
+fill_labels <- setNames("Teacher 1.l", selected_teacher) # need to change the sample!
 
 # Create Source vector with correct length and values
 source_vector <- rep(selected_rows[[1]], each = ncol(selected_rows) - 1)
@@ -725,6 +723,6 @@ annotate("text", x = -Inf, y = Inf,
 plot.tea
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/Teacher25_l.png", plot = plot.tea,
+ggsave("Output/Plots/Profiles/Teachers/Teacher1_l.png", plot = plot.tea,
        width = 10, height = 3, dpi = 1200)
 
