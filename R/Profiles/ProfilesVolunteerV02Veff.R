@@ -68,41 +68,40 @@ prof_combined.V1 <- prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 1 office-only",
                                             "Vol. 1 full-day")))
 
-# Plot
-# Create the plot with the legend moved inside
-p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener, y = Conc,
-                                                 fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.V1 <- ggplot(prof_combined.V1, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 1 office-only" = "#009E73",
-                               "Vol. 1 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 1 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.V1)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol1Veff.png",
-       plot = p_prof_comb.V1, width = 10, height = 3, dpi = 500)
+       plot = p_prof_comb.V1, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -168,40 +167,40 @@ prof_combined.V2 <- prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 2 office-only",
                                             "Vol. 2 full-day")))
 
-# Plots
-p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener, y = Conc,
-                                               fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 2 office-only" = "#009E73",
-                               "Vol. 2 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 2 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.V2)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol2Veff.png",
-       plot = p_prof_comb.V2, width = 10, height = 5, dpi = 500)
+       plot = p_prof_comb.V2, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -267,40 +266,40 @@ prof_combined.V3 <- prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 3 office-only",
                                             "Vol. 3 full-day")))
 
-# Plots
-p_prof_comb.V3 <- ggplot(prof_combined.V3, aes(x = congener, y = Conc,
-                                               fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.V3 <- ggplot(prof_combined.V3, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 3 office-only" = "#009E73",
-                               "Vol. 3 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 3 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.V3)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol3Veff.png",
-       plot = p_prof_comb.V3, width = 10, height = 5, dpi = 500)
+       plot = p_prof_comb.V3, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -350,7 +349,7 @@ diff.V3 <- plot_data %>%
   slice_max(abs_diff, n = 1, with_ties = FALSE)
 diff.V3
 
-# Vol 8 (data say Vol 5)
+# Vol 8
 prof_combined.V8 <- prof.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
@@ -366,40 +365,40 @@ prof_combined.V8 <- prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 2", "Vol. 8 office-only",
                                             "Vol. 8 full-day")))
 
-# Plots
-p_prof_comb.V8 <-  ggplot(prof_combined.V8, aes(x = congener, y = Conc,
-                                                fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.V8 <- ggplot(prof_combined.V8, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 2" = "blue",
                                "Vol. 8 office-only" = "#009E73",
-                               "Vol. 8 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 8 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.V8)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol8Veff.png",
-       plot = p_prof_comb.V8, width = 10, height = 5, dpi = 500)
+       plot = p_prof_comb.V8, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -449,7 +448,7 @@ diff.V8 <- plot_data %>%
   slice_max(abs_diff, n = 1, with_ties = FALSE)
 diff.V8
 
-# Vol 9 (data say Vol 4)
+# Vol 9
 prof_combined.V9 <- prof.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
@@ -465,40 +464,40 @@ prof_combined.V9 <- prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 2", "Vol. 9 office-only",
                                             "Vol. 9 full-day")))
 
-# Plots
-p_prof_comb.V9 <- ggplot(prof_combined.V9, aes(x = congener, y = Conc,
-                                               fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.V9 <- ggplot(prof_combined.V9, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 2" = "blue",
                                "Vol. 9 office-only" = "#009E73",
-                               "Vol. 9 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 9 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.V9)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Vol9Veff.png",
-       plot = p_prof_comb.V9, width = 10, height = 5, dpi = 500)
+       plot = p_prof_comb.V9, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -564,39 +563,40 @@ prof_combined.1 <-  prof.air.conc %>%
   mutate(Source = factor(Source, levels = c("Air PCB office 1", "Vol. 1 full-day",
                                             "Vol. 3 full-day")))
 
-p_prof_comb.1 <- ggplot(prof_combined.1, aes(x = congener, y = Conc,
-                                              fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.1 <- ggplot(prof_combined.1, aes(x = congener,
+                                               y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 1" = "blue",
                                "Vol. 1 full-day" = "#009E73",
-                               "Vol. 3 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 3 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.1)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Office1Veff.png",
-       plot = p_prof_comb.1, width = 10, height = 5, dpi = 500)
+       plot = p_prof_comb.1, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
@@ -712,39 +712,40 @@ p_prof_comb.2_subset
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Office2VeffZoom.png",
        plot = p_prof_comb.2_subset, width = 10, height = 5, dpi = 500)
 
-p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener, y = Conc,
-                                             fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 1, 
-           color = "black",
-           linewidth = 0.2) +
-  xlab("") +
-  ylim(0, 0.15) +
+# Create 3 plots
+p_prof_comb.2 <- ggplot(prof_combined.2, aes(x = congener,
+                                             y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1) +
+  scale_y_continuous( limits = c(0, 0.15), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  ylab(expression(bold("Conc. Fraction "*Sigma*"PCB"))) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
+  ylab(expression(bold("Conc. Fraction " *Sigma*"PCB"))) +
+  theme(
+    aspect.ratio = NULL,
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(angle = 90, vjust = 0.5, hjust = 1,
+                                      size = 9, face = "bold"),
+    axis.ticks.x.bottom = element_line()) +
   scale_fill_manual(values = c("Air PCB office 2" = "blue",
                                "Vol. 8 full-day" = "#009E73",
-                               "Vol. 9 full-day" = "#E69F00"),
-                    guide = guide_legend(key.size = unit(0.5, "lines"))) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
+                               "Vol. 9 full-day" = "#E69F00")) + 
+  scale_x_discrete(
+    labels = function(x) gsub("\\.", "+", x))
 
 # Print the plots
 print(p_prof_comb.2)
 
 # Save plot in folder
 ggsave("Output/Plots/Profiles/OfficeHome/Barplot/prof_combined.Office2Veff.png",
-       plot = p_prof_comb.2, width = 10, height = 3, dpi = 500)
+       plot = p_prof_comb.2, width = 22, height = 5, dpi = 500)
 
 # Scatter 1:1 plot
 # Convert to wide format
