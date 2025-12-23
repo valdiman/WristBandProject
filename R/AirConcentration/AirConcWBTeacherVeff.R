@@ -334,10 +334,11 @@ updated_tPCB <- tPCB.conc.WB %>%
   mutate(
     mean_tPCB = ifelse(n() > 1, mean(tPCB, na.rm = TRUE), tPCB),
     sd_tPCB = ifelse(n() > 1, sd(tPCB, na.rm = TRUE), NA),
-    rsd_tPCB = ifelse(!is.na(sd_tPCB) & mean_tPCB != 0, (sd_tPCB / mean_tPCB) * 100, NA)
+    rsd_tPCB = ifelse(!is.na(sd_tPCB) & mean_tPCB != 0,
+                      (sd_tPCB / mean_tPCB) * 100, NA)
   ) %>%
   ungroup() %>%
-  select(-prefix)  # Remove the temporary prefix column
+  select(-prefix)
 
 # Remove duplicates and keep only one row for each prefix
 plot_data <- updated_tPCB %>%
@@ -352,7 +353,8 @@ plot_data <- updated_tPCB %>%
 # Plot the data
 tPCB.wt <- ggplot(plot_data, aes(x = factor(tea_label), y = mean_tPCB)) +
   geom_bar(stat = 'identity', width = 0.8, fill = "black") +
-  geom_errorbar(aes(ymin = mean_tPCB - sd_tPCB, ymax = mean_tPCB + sd_tPCB), width = 0.2) +
+  geom_errorbar(aes(ymin = mean_tPCB - sd_tPCB, ymax = mean_tPCB + sd_tPCB),
+                width = 0.2) +
   theme_bw() +
   theme(aspect.ratio = 0.5) +
   ylab(expression(bold("Estimated Air Concentration " *Sigma*"PCB (ng/m"^3 *")"))) +
@@ -365,7 +367,7 @@ tPCB.wt <- ggplot(plot_data, aes(x = factor(tea_label), y = mean_tPCB)) +
 print(tPCB.wt)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCBVeff2.png", plot = tPCB.wt,
+ggsave("Output/Plots/Teachers/WTtPCBVeff.png", plot = tPCB.wt,
        width = 10, height = 5, dpi = 1200)
 
 # Create a cleaned version of 'code.teacher' without the .l or .r
@@ -405,25 +407,8 @@ tPCB.wt.yr <- ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB)) +
 print(tPCB.wt.yr)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCByrVeff2.png", plot = tPCB.wt.yr,
+ggsave("Output/Plots/Teachers/WTtPCByrVeff.png", plot = tPCB.wt.yr,
        width = 10, height = 5, dpi = 1200)
-
-# Add year renovations to schools. This is too much speculation
-# Change Lincoln Elementary from 1918 to 1974
-unique_tPCB[2, 3] <- 1974
-# Change Helen Lemme Elementary from 1970 to 2011
-unique_tPCB[15, 3] <- 2011
-
-# Plot the mean PCB concentrations against 'school.year'
-ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB, label = code.teacher.clean)) +
-  geom_point(size = 4, color = "black") +  # Plot the mean as points
-  geom_text(vjust = -1, hjust = 0.5, fontface = "bold", size = 3.5) +  # Add cleaned 'code.teacher' labels
-  theme_bw() +
-  ylab(expression(Sigma*"PCB (ng/m3)")) +
-  xlab("School Year") +
-  theme(axis.text.x = element_text(face = "bold", size = 10, angle = 45, hjust = 1),
-        axis.text.y = element_text(face = "bold", size = 10),
-        axis.title = element_text(face = "bold", size = 12))
 
 # Predicted PCBi Concentrations -------------------------------------------
 # Calculate means and standard deviations for columns 1 to 173
@@ -451,7 +436,7 @@ top_10_PCB.means <- PCB.conc.WB.ave %>%
 print(top_10_PCB.means)
 
 # Plot PCBi
-plot.pcb.data <- conc.WB[, 1:171]
+plot.pcb.data <- conc.WB[, 1:173]
 
 # Reshape the data from wide to long format
 plot.pcb.long <- pivot_longer(
@@ -481,7 +466,7 @@ plot.pcbi <- ggplot(plot.pcb.long, aes(x = Congener, y = Concentration)) +
 plot.pcbi
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTPCBiVeff2.png", plot = plot.pcbi,
+ggsave("Output/Plots/Teachers/WTPCBiVeff.png", plot = plot.pcbi,
        width = 10, height = 5, dpi = 1200)
 
 # Concentration Profile Analysis ------------------------------------------
@@ -491,51 +476,8 @@ prof.WB.conc <- sweep(conc.WB[, 1:173], 1, tmp, FUN = "/")
 prof.WB.conc <- cbind(conc.WB$code.teacher, prof.WB.conc)
 # Check sum of all PCBs (i.e., = 1)
 rowSums(prof.WB.conc[, 2:174], na.rm = TRUE)
-
-# See top PCBi for each sample
-# Extract numeric columns and their names
-numeric_data <- prof.WB.conc[, -1]
-column_names <- colnames(numeric_data)
-
-# Function to get the names of the top 10 columns
-top_10_PCBi <- function(row) {
-  top_indices <- order(row, decreasing = TRUE)[1:10]
-  column_names[top_indices]
-}
-
-# Apply the function to each row
-top_10_PCBi_matrix <- t(apply(numeric_data, 1, top_10_PCBi))
-
-# Convert to dataframe and add the non-numeric column
-top_10_PCBi_df <- as.data.frame(top_10_PCBi_matrix)
-top_10_PCBi_df <- cbind(prof.WB.conc[, 1], top_10_PCBi_df)
-
-# Rename columns
-colnames(top_10_PCBi_df) <- c("code.teacher", paste0("Top10_PCBi_", 1:10))
-
-# Add school built year
-top_10_PCBi_df <- cbind(conc.WB$school.year, top_10_PCBi_df)
-
-# Create the plot
-ggplot(top_10_PCBi_df, aes(x = Top10_PCBi_1, y = `conc.WB$school.year`)) +
-  geom_point(color = "blue") +  # Scatter plot with blue points
-  labs(x = "School Year", y = "Top 10 PCB Concentration (Top10_PCBi_1)",
-       title = "School Year vs. Top 10 PCB Concentration") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# PCA
 t.prof.WB.conc <- data.frame(t(prof.WB.conc[, 2:174]))
 colnames(t.prof.WB.conc) <- conc.WB$code.teacher
-PCA <- prcomp(t.prof.WB.conc, scale. = TRUE)
-summary(PCA)
-
-# Plot PCA results
-ggplot2::autoplot(PCA, data = t.prof.WB.conc, size = 1.5, shape = 21) +
-  theme_bw() +
-  xlim(-0.4, 0.6) +
-  ylim(-0.4, 0.6) +
-  theme(aspect.ratio = 10/10)
 
 # Cosine theta analysis
 # Create matrix to storage results
@@ -561,7 +503,7 @@ costheta_df <- as.data.frame(costheta.samples)
 costheta_df$school.year <- conc.WB$school.year
 
 # Export
-write.csv(costheta_df, file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff2.csv")
+write.csv(costheta_df, file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff.csv")
 
 # Cosine theta visualization ----------------------------------------------
 # Calculate tPCB values to be added to the plot
@@ -636,7 +578,7 @@ plot.cos.theta.low <- ggplot(data = costheta_correlations[1:16, ], # low values 
 plot.cos.theta.low
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff2.png", plot = plot.cos.theta.low,
+ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff.png", plot = plot.cos.theta.low,
        width = 10, height = 10, dpi = 1200)
 
 plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high values >= 0.85
@@ -655,74 +597,115 @@ plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high va
 plot.cos.theta.high
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff2.png", plot = plot.cos.theta.high,
+ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff.png", plot = plot.cos.theta.high,
        width = 10, height = 10, dpi = 1200)
 
 # Plot Individual PCB Profiles --------------------------------------------
-# wt.19.l = Teacher 19.l & wt.25.r = Teacher 25.r plots included in main text
+# e.g., wt.19.l = Teacher 19.l & wt.25.r = Teacher 25.r plots included in main text
+prof_long <- prof.WB.conc %>%
+  pivot_longer(
+    cols = starts_with("PCB"),
+    names_to = "congener",
+    values_to = "Conc") %>%
+  mutate(
+    congener = gsub("\\.", "+", congener),
+    congener = factor(congener, levels = unique(congener)),
+    Source = `conc.WB$code.teacher`)
 
-selected_rows <- prof.WB.conc %>%
-  filter(conc.WB$code.teacher %in% c("wt.01.l")) # need to change the sample!
+# 2 PCB profiles for main text
+prof_long_sel <- prof_long %>%
+  filter(Source %in% c("wt.19.l", "wt.25.l"))
 
-# Get selected teacher ID (assumes 1 row selected)
-selected_teacher <- selected_rows$`conc.WB$code.teacher`
+teacher_labeller <- function(x) {
+  # Extract the teacher number
+  num <- sub("wt\\.0*(\\d+)\\..*", "\\1", x)
+  # Extract the wrist (.l or .r)
+  wrist <- sub(".*\\.(l|r)$", ".\\1", x)
+  # Combine
+  paste0("Teacher ", num, wrist)
+}
 
-# Define color and label dynamically
-fill_values <- setNames("blue", selected_teacher)
-fill_labels <- setNames("Teacher 1.l", selected_teacher) # need to change the sample!
-
-# Create Source vector with correct length and values
-source_vector <- rep(selected_rows[[1]], each = ncol(selected_rows) - 1)
-
-# Reshape data from wide to long format, excluding non-PCB columns
-prof_combined <- selected_rows %>%
-  pivot_longer(cols = starts_with("PCB"), names_to = "congener", values_to = "Conc") %>%
-  mutate(congener = sub("PCB", "", congener))
-
-# Add Source to the reshaped data
-prof_combined <- prof_combined %>%
-  mutate(Source = source_vector)
-
-prof_combined$congener <- gsub("\\.", "+", prof_combined$congener)
-
-# Convert congener to factor and set levels
-prof_combined$congener <- factor(prof_combined$congener, 
-                                 levels = unique(prof_combined$congener))
-
-# Create the bar plot
-plot.tea <- ggplot(prof_combined, aes(x = congener, y = Conc, fill = Source)) +
-  geom_bar(position = position_dodge(), stat = "identity", width = 0.9, 
+plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1,
            color = "black", linewidth = 0.2) +
-  xlab("") +
-  ylab("") +
-  ylim(0, 0.20) +
+  facet_wrap(~ Source, ncol = 1,
+             labeller = labeller(Source = teacher_labeller)) +
+  scale_y_continuous(limits = c(0, 0.2), n.breaks = 3) +
   theme_bw() +
-  theme(aspect.ratio = 3/20) +
-  theme(axis.text.y = element_text(face = "bold", size = 12),
-        axis.title.y = element_text(face = "bold", size = 13),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  scale_fill_manual(
-    values = fill_values,
-    labels = fill_labels,
-    guide = guide_legend(key.size = unit(0.5, "lines"))
-  ) +
-  theme(legend.position = c(1, 1),
-        legend.justification = c(1 ,1),
-        legend.background = element_rect(fill = NA, color = NA),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12, face = "bold"))
-  
-annotate("text", x = -Inf, y = Inf,
-           label = "(e)", hjust = 0, vjust = 1, 
-           size = 6, color = "black")
+  ylab(expression(bold("Conc. Fraction " * Sigma * "PCB"))) +
+  theme(
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 13),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 12, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(
+      angle = 90, vjust = 0.5, hjust = 1,
+      size = 9, face = "bold"
+    ),
+    axis.ticks.x.bottom = element_line())
 
 plot.tea
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/Teacher1_l.png", plot = plot.tea,
-       width = 10, height = 3, dpi = 1200)
+ggsave("Output/Plots/Profiles/Teachers/Teacher2.png", plot = plot.tea,
+       width = 22, height = 5, dpi = 500)
+
+# All PCB profiles for SI
+# "wt.01.l", "wt.01.r", "wt.02.l", "wt.02.r"
+# "wt.03.r", "wt.04.r", "wt.05.r", "wt.06.l"
+# "wt.06.r", "wt.07.l", "wt.07.r", "wt.08.r"
+# "wt.09.r", "wt.10.r", "wt.11.r", "wt.12.r"
+# "wt.13.r", "wt.14.r", "wt.15.r", "wt.15.l"
+# "wt.16.r", "wt.17.r", "wt.18.l", "wt.18.r"
+# "wt.20.r", "wt.21.r", "wt.22.r", "wt.23.l"
+# "wt.23.r", "wt.24.l", "wt.24.r", "wt.25.r"
+
+prof_long_sel <- prof_long %>%
+  filter(Source %in% c("wt.23.r", "wt.24.l", "wt.24.r", "wt.25.r"))
+
+teacher_labeller <- function(x) {
+  # Extract the teacher number
+  num <- sub("wt\\.0*(\\d+)\\..*", "\\1", x)
+  # Extract the wrist (.l or .r)
+  wrist <- sub(".*\\.(l|r)$", ".\\1", x)
+  # Combine
+  paste0("Teacher ", num, wrist)
+}
+
+plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1,
+           color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source, ncol = 1,
+             labeller = labeller(Source = teacher_labeller)) +
+  scale_y_continuous(limits = c(0, 0.2), n.breaks = 3) +
+  theme_bw() +
+  ylab(expression(bold("Conc. Fraction " * Sigma * "PCB"))) +
+  theme(
+    axis.text.y = element_text(face = "bold", size = 22),
+    axis.title.y = element_text(face = "bold", size = 24),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 24, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(
+      angle = 90, vjust = 0.5, hjust = 1,
+      size = 9, face = "bold"
+    ),
+    axis.ticks.x.bottom = element_line())
+
+plot.tea
+
+# Save plot
+ggsave("Output/Plots/Profiles/Teachers/Teacher29-32.png", plot = plot.tea,
+       width = 22, height = 15, dpi = 500)
+
+
 
