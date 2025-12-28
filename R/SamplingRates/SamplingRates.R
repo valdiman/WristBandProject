@@ -18,13 +18,15 @@ install.packages("dplyr")
 # Sampling rates calculations under static conditions ---------------------
 # Read data
 {
-  PUF <- read.csv("Data/PUF.csv") # ng/m3
-  WB <- read.csv("Data/WB.csv")
+  PUF.0 <- read.csv("Data/IRO/SampleConcentrationStudy1.csv")
+  PUF <- PUF.0[1:4, 8:180] # select rows and columns (ng/m3)
+  WB.0 <- read.csv("Data/IRO/SampleMassStudy1.csv")
+  WB <- WB.0[7:11, c(1, 5, 10:182)] # select rows and columns (ng/WB)
   logKoa <- read.csv("Data/logKoa.csv")
 }
 
 # Remove metadata
-WB.1 <- subset(WB, select = -c(sample:time))
+WB.1 <- subset(WB, select = -c(sid:time))
 
 # Perform linear regression of WD accumulate mass vs time to check linearity
 # Create matrix to storage data
@@ -45,10 +47,8 @@ WBMatrix <- cbind(congener, WBMatrix)
 write.csv(WBMatrix, file = "Output/Data/csv/SamplingRates/SR/WDLinearity.csv")
 
 # Calculate sampling rate
-# Remove sample name of PUFs
-PUF.1 <- subset(PUF, select = -c(sample))
 # Average individual PCBs from PUF
-PUF.mean <- t(colMeans(PUF.1))
+PUF.mean <- t(colMeans(PUF))
 # Convert time into days
 time <- WB$time/24
 
@@ -61,7 +61,7 @@ SR.st.1 <- matrix(nrow = length(WB.1), ncol = 3)
 
 for(i in 1:length(WB.1)) {
   if ((PUF.mean[i] > 0) && (sum(WB.1[i] > 0,
-                                na.rm = TRUE) > 3) && (sum(PUF.1[i] > 0,
+                                na.rm = TRUE) > 3) && (sum(PUF[i] > 0,
                                                            na.rm = TRUE) == 4)) {
     fit <- lm(WB.1[,i]/PUF.mean[i] ~ 0 + time)
     SR.st.1[i,1] <- format(signif(summary(fit)$coef[1,"Estimate"], digits = 3))
@@ -131,24 +131,21 @@ ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[17])) +
 # Sampling rates calculations under static and rotating conditions -------------------
 # Read data
 {
-  PUF.v2 <- read.csv("Data/PUF2.csv") # ng/m3
-  WB.st <- read.csv("Data/WB2.csv")
-  WB.rot <- read.csv("Data/WBROT.csv")
+  PUF.v2 <- PUF.0[5:6, 8:180] # select rows and columns (ng/m3)
+  WB.st <- WB.0[12:15, c(1, 5, 10:182)] # select rows and columns (ng/WB)
+  WB.rot <- WB.0[16:19, c(1, 5, 10:182)] # select rows and columns (ng/WB)
 }
 
 # Remove metadata
-WB.st.2 <- subset(WB.st, select = -c(sample:time))
-WB.rot.2 <- subset(WB.rot, select = -c(sample:time))
+WB.st.2 <- subset(WB.st, select = -c(sid:time))
+WB.rot.2 <- subset(WB.rot, select = -c(sid:time))
 # Convert time into days
 time.2 <- WB.st$time/24
 
 # Calculate sampling rate for stationary 2nd time
-# Remove sample name of PUFs
-PUF.2 <- subset(PUF.v2, select = -c(Concentration..ng.m3.))
 # Average individual PCBs from PUF
 # If value 0, the average is the number left.
-PUF.mean.2 <- t(apply(PUF.2, 2, function(x) mean(x[x != 0])))
-colnames(PUF.mean.2) <- colnames(PUF.2)  # Ensure the column names match the original data
+PUF.mean.2 <- t(apply(PUF.v2, 2, function(x) mean(x[x != 0])))
 
 # (dMWD/Cair) = Rsdt
 # Force intercept 0
