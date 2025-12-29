@@ -20,9 +20,9 @@ install.packages("RColorBrewer")
 
 # Read data ---------------------------------------------------------------
 {
-  data.Fred <- read.csv("Data/Frederiksen.csv")
+  data.Fred <- read.csv("Data/IRO/Frederiksen_data_2022.csv")
   logKoa <- read.csv("Data/logKoa.csv")
-  ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
+  ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 }
 
 # Select data -------------------------------------------------------------
