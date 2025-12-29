@@ -24,10 +24,11 @@ install.packages("rollapply")
 # 3 volunteers, V1, V2, and V3
 # Read data ---------------------------------------------------------------
 {
-  data.V1 <- read.csv("Data/Volunteer1.csv")
-  data.V2 <- read.csv("Data/Volunteer2.csv")
-  data.V3.1 <- read.csv("Data/Volunteer3.1.csv")
-  data.V3.2 <- read.csv("Data/Volunteer3.2.csv")
+  data <- read.csv("Data/IRO/SampleMassStudy2.csv")
+  data.V1 <- data[1:13, c(1, 7, 9:10, 12:184)] # volunteer 1
+  data.V2 <- data[14:21, c(1, 7, 9:10, 12:184)] # volunteer 2
+  data.V3.1 <- data[22:33, c(1, 7, 9:10, 12:184)] # volunteer 3
+  data.V3.2 <- data[34:42, c(1, 7, 9:10, 12:184)] # volunteer 3
   logKoa <- read.csv("Data/logKoa.csv")
   # ko from SamplingRates.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
@@ -35,36 +36,12 @@ install.packages("rollapply")
   ko <- ko[c(2,6)]
 }
 
-# Organize all dataset to have the same PCB congener list
-# Get PCB names from each dataset
-pcbs_V1 <- names(data.V1)[grep("^PCB", names(data.V1))]
-pcbs_V2 <- names(data.V2)[grep("^PCB", names(data.V2))]
-pcbs_V3.1 <- names(data.V3.1)[grep("^PCB", names(data.V3.1))]
-pcbs_V3.2 <- names(data.V3.2)[grep("^PCB", names(data.V3.2))]
-pcbs_ko <- ko$congener
-pcbs_logKoa <- logKoa$congener
-
-# Find common congeners across all
-common_pcbs <- Reduce(intersect, list(pcbs_V1, pcbs_V2, pcbs_V3.1, pcbs_V3.2,
-                                      pcbs_ko, pcbs_logKoa))
-length(common_pcbs)
-
-# Subset each dataset to include only the common PCBs
-data.V1.pcbs <- data.V1[, c("time.day", "sample.code", common_pcbs)]
-data.V2.pcbs <- data.V2[, c("time.day", "sample.code", common_pcbs)]
-data.V3.1.pcbs <- data.V3.1[, c("time.day", "sample.code", common_pcbs)]
-data.V3.2.pcbs <- data.V3.2[, c("time.day", "sample.code", common_pcbs)]
-
-# Subset ko and logKoa data frames
-ko.common <- ko[ko$congener %in% common_pcbs, ]
-logKoa.common <- logKoa[logKoa$congener %in% common_pcbs, ]
-
 # Calculate logKws
 # Regression created with data from Tromp et al 2019 (Table 2, Wristband)
 # & Frederiksen et al 2022 (Table 3)
 logKwb <- data.frame(
-  congener = logKoa.common$congener,
-  logKwb = 0.6156 * logKoa.common$logKoa + 2.161) # R2 = 0.96
+  congener = logKoa$congener,
+  logKwb = 0.6156 * logKoa$logKoa + 2.161) # R2 = 0.96
 
 # Calculate personal sampling rate V1 -------------------------------------
 # Static WBs were used to calculate PCB concentration
@@ -74,23 +51,23 @@ logKwb <- data.frame(
 # Both hands (d and nd)
 {
   # Select WBs to calculate air concentration
-  data.V1.1 <- data.V1.pcbs[1:3, ]
+  data.V1.1 <- data.V1[1:3, ]
   # Average 3 WBs. NA values not included in the calculations
-  data.V1.2 <- colMeans(data.V1.1[, 3:175], na.rm = TRUE)
+  data.V1.2 <- colMeans(data.V1.1[, 5:177], na.rm = TRUE)
   # Calculate air concentration in ng/m3
   # Use effective volume. Adult WBs
   Vwb <- data.V1$vol.WB[1]
   Awb <- data.V1$area.WB[1]
   # Calculate efective volume for static WBs
   veff_stat.V1 <- 10^(logKwb$logKwb) * Vwb * 
-    (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V1[1, 1]))
+    (1 - exp(-ko$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V1[1, 2] / 24))
   # Compute concentration
   conc.V1 <- data.V1.2 / veff_stat.V1
   # Calculate effective volume (Veff)
-  subset_data <- data.V1.pcbs[4:13, 3:175]
+  subset_data <- data.V1[4:13, 5:177]
   Veff.V1 <- t(apply(subset_data, 1, function(row) row / conc.V1))
   # Add metadata to Veff.V1 and change format
-  Veff.V1 <- cbind(data.V1.pcbs[4:13, 2], data.V1.pcbs[4:13, 1], Veff.V1)
+  Veff.V1 <- cbind(data.V1[4:13, 1], data.V1[4:13, 2] / 24, Veff.V1)
   # Transform to data.frame
   Veff.V1 <- as.data.frame(Veff.V1)
   # Add names to first 2 columns
@@ -179,7 +156,6 @@ SR.V1.d$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V1.d$R2[mask] <- NA
 SR.V1.d$p_value[mask] <- NA
 # Calculate ko from V1 d
-# Calculate ko from V1 nd
 Awb.V1 <- data.V1$area.WB[4] # [m2] youth
 SR.V1.d$ko <- SR.V1.d$`Sampling_Rate (m3/d)` / Awb.V1 # [m/d]
 
@@ -225,7 +201,7 @@ sr.ave.V1 <- as.data.frame(rowMeans(cbind(SR.V1.d$`Sampling_Rate (m3/d)`,
                                 SR.V1.nd$`Sampling_Rate (m3/d)`), 
                           na.rm = TRUE))
 
-sr.ave.V1$logkoa <- logKoa.common$logKoa
+sr.ave.V1$logkoa <- logKoa$logKoa
 colnames(sr.ave.V1) <- c('ave_sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
 model.V1.1 <- lm(log(sr.ave.V1$ave_sr) ~ sr.ave.V1$logKoa)
@@ -266,7 +242,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa1.png", plot = p.sr.V1.koa.
 # Create a long dataframe combining SR.V1.d and SR.V1.nd
 sr.long.V1 <- data.frame(
   sr = c(SR.V1.d$`Sampling_Rate (m3/d)`, SR.V1.nd$`Sampling_Rate (m3/d)`),
-  logKoa = rep(logKoa.common$logKoa, 2)  # Repeat logKoa values for both d and nd
+  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
 )
 
 # Remove any NA values
@@ -313,22 +289,22 @@ ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.
 # sampling rate of 0.5 m3/d was used for static WBs
 {
   # Select WBs to calculate air concentration
-  data.V2.1 <- data.V2.pcbs[1:3,]
+  data.V2.1 <- data.V2[1:3,]
   # Average 3 WBs
-  data.V2.2 <- colMeans(data.V2.1[, 3:175])
+  data.V2.2 <- colMeans(data.V2.1[, 5:177])
   # Calculate air concentration in ng/m3
   # Use effective volume. Adult WBs
   Vwb <- data.V1$vol.WB[1]
   Awb <- data.V1$area.WB[1]
   veff_stat.V2 <- 10^(logKwb$logKwb) * Vwb * 
-    (1 - exp(-ko.common$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V2[1, 1]))
+    (1 - exp(-ko$ko * Awb / Vwb / 10^(logKwb$logKwb) * data.V2[1, 2] / 24))
   # Compute concentration
   conc.V2 <- data.V2.2 / veff_stat.V2
   # Calculate effective volume (Veff)
-  subset_data <- data.V2.pcbs[4:8, 3:175]
+  subset_data <- data.V2[4:8, 5:177]
   Veff.V2 <- t(apply(subset_data, 1, function(row) row / conc.V2))
   # Add metadata to Veff.V2 and change format
-  Veff.V2 <- cbind(data.V2.pcbs[4:8, 2], data.V2.pcbs[4:8, 1], Veff.V2)
+  Veff.V2 <- cbind(data.V2[4:8, 1], data.V2[4:8, 2] / 24, Veff.V2)
   # Transform to data.frame
   Veff.V2 <- as.data.frame(Veff.V2)
   # Add names to first 2 columns
@@ -401,7 +377,7 @@ ggplot(SR.V2.d, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
 # Create a long dataframe combining SR.V2.d
 sr.V2 <- data.frame(
   sr = SR.V2.d$`Sampling_Rate (m3/d)`,
-  logKoa = logKoa.common$logKoa)
+  logKoa = logKoa$logKoa)
 
 # Remove any NA values
 sr.V2 <- na.omit(sr.V2)
@@ -418,11 +394,11 @@ r2 <- summary(model.V2)$r.squared
 p.sr.V2.koa <- ggplot(sr.V2, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 6.6, y = 5, label = paste("Vol. 2 (d)"),size = 5) +
-  annotate("text", x = 7.67, y = 4.7,
+  annotate("text", x = 6.6, y = 7, label = paste("Vol. 2 (d)"),size = 5) +
+  annotate("text", x = 7.67, y = 6.7,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
            size = 5) +
-  annotate("text", x = 6.58, y = 4.4, label = paste("R² =", round(r2, 2)), size = 5) +
+  annotate("text", x = 6.58, y = 6.4, label = paste("R² =", round(r2, 2)), size = 5) +
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log "*italic(K)[OA]))) +
@@ -447,22 +423,22 @@ ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
   Vwb <- data.V1$vol.WB[1]
   Awb <- data.V1$area.WB[1]
   # Prepare data
-  data.V3.1.1 <- data.V3.1.pcbs[1:6, 3:175]
+  data.V3.1.1 <- data.V3.1[1:6, 5:177]
   Kwb_val <- 10^logKwb$logKwb
-  ko_val <- ko.common$ko
+  ko_val <- ko$ko
   # Initialize lists to store results
   veff_stat_list <- list()
   conc_list <- list()
   Veff_list <- list()
   for (i in 1:6) {
     # Effective volume calculation
-    veff_stat <- Kwb_val * Vwb * (1 - exp(-ko_val * Awb / Vwb / Kwb_val * data.V3.1[i, 1]))
+    veff_stat <- Kwb_val * Vwb * (1 - exp(-ko_val * Awb / Vwb / Kwb_val * data.V3.1[i, 2] / 24))
     veff_stat_list[[i]] <- veff_stat
     # Air concentration calculation
     conc <- data.V3.1.1[i, ] / veff_stat
     conc_list[[i]] <- conc
     # Effective volume (Veff)
-    Veff <- data.V3.1.pcbs[i + 6, 3:175] / conc
+    Veff <- data.V3.1[i + 6, 5:177] / conc
     Veff_list[[i]] <- Veff
   }
   
@@ -472,9 +448,9 @@ ggsave("Output/Plots/SamplingRates/Personal/V2_logKoa.png", plot = p.sr.V2.koa,
   Veff.V3.1 <- as.data.frame(Veff.V3.1)
   # Select weeks
   Veff.V3.1st.nd <- Veff.V3.1[1:3, 3:175]
-  Veff.V3.1st.nd.t <- Veff.V3.1[1:3, 1]
+  Veff.V3.1st.nd.t <- Veff.V3.1[1:3, 2] / 24
   Veff.V3.2nd.nd <- Veff.V3.1[4:6, 3:175]
-  Veff.V3.2nd.nd.t <- Veff.V3.1[4:6, 1]
+  Veff.V3.2nd.nd.t <- Veff.V3.1[4:6, 2] /24
 }
 
 # Calculate sampling rate (SR) for 1st and 2nd weeks (m3/d)
@@ -561,7 +537,10 @@ SR.V3.2nd.nd$R2 <- as.numeric(SR.V3.2nd.nd$R2)
 SR.V3.2nd.nd$p_value <- as.numeric(SR.V3.2nd.nd$p_value)
 
 # Update R2 and p-value to NA based on conditions
-mask <- SR.V3.2nd.nd$R2 < 0.9 | SR.V3.2nd.nd$p_value > 0.05
+mask <- !is.finite(SR.V3.2nd.nd$R2) |
+  !is.finite(SR.V3.2nd.nd$p_value) |
+  SR.V3.2nd.nd$R2 < 0.9 |
+  SR.V3.2nd.nd$p_value > 0.05
 SR.V3.2nd.nd$`Sampling_Rate (m3/d)`[mask] <- NA
 SR.V3.2nd.nd$R2[mask] <- NA
 SR.V3.2nd.nd$p_value[mask] <- NA
@@ -596,8 +575,11 @@ sr.ave.V3 <- as.data.frame(rowMeans(cbind(SR.V3.1st.nd$`Sampling_Rate (m3/d)`,
                                               SR.V3.2nd.nd$`Sampling_Rate (m3/d)`), 
                                         na.rm = TRUE))
 
-sr.ave.V3$logkoa <- logKoa.common$logKoa
+sr.ave.V3$logkoa <- logKoa$logKoa
 colnames(sr.ave.V3) <- c('ave_sr', 'logKoa')
+# Remove any NA values
+sr.ave.V3 <- na.omit(sr.ave.V3)
+
 # Fit exponential regression model: sr = a * exp(b * logKoa)
 model.V3.1 <- lm(log(sr.ave.V3$ave_sr) ~ sr.ave.V3$logKoa)
 
@@ -637,7 +619,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.1.png",
 # Create a long dataframe combining SR.V3.1st. nd and SR.V3.2nd.nd
 sr.long.V3 <- data.frame(
   sr = c(SR.V3.1st.nd$`Sampling_Rate (m3/d)`, SR.V3.2nd.nd$`Sampling_Rate (m3/d)`),
-  logKoa = rep(logKoa.common$logKoa, 2)  # Repeat logKoa values for both d and nd
+  logKoa = rep(logKoa$logKoa, 2)  # Repeat logKoa values for both d and nd
 )
 
 # Remove any NA values
@@ -655,7 +637,7 @@ r2 <- summary(model.V3.2)$r.squared
 p.sr.V3.koa.2 <- ggplot(sr.long.V3, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 7.8, y = 7,
+  annotate("text", x = 7.5, y = 7,
            label = paste("Vol. 3 (nd 1st & 2nd weeks)"),size = 5) +
   annotate("text", x = min(sr.long.V3$logKoa) + 1.45, y = max(sr.long.V3$sr) * 1.2,
            label = paste("sr =", round(a, 3), "* exp(", round(b, 2), "* log Koa)"),
@@ -680,7 +662,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2.png",
 # (3) 1st week only
 sr.long.V3.1st <- data.frame(
   sr = c(SR.V3.1st.nd$`Sampling_Rate (m3/d)`),
-  logKoa = logKoa.common$logKoa)
+  logKoa = logKoa$logKoa)
 
 # Remove any NA values
 sr.long.V3.1st <- na.omit(sr.long.V3.1st)
@@ -724,7 +706,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.1st.week.png",
 # (4) 2nd week only
 sr.long.V3.2nd <- data.frame(
   sr = c(SR.V3.2nd.nd$`Sampling_Rate (m3/d)`),
-  logKoa = logKoa.common$logKoa)
+  logKoa = logKoa$logKoa)
 
 # Remove any NA values
 sr.long.V3.2nd <- na.omit(sr.long.V3.2nd)
@@ -776,73 +758,80 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
 Vwb <- data.V3.2$vol.WB[1]
 Awb <- data.V3.2$area.WB[1]
 Kwb_val <- 10^logKwb$logKwb  # Assuming logKwb is available for all congeners
-ko_val <- ko.common$ko  # Assuming ko values are available for all congeners
+ko_val <- ko$ko  # Assuming ko values are available for all congeners
 
 # Initialize lists to store results for each PCB
 SR.V3.2_results <- list()
 
-# Loop over each PCB (assuming PCB names are in `logKoa.common$congener`)
-for (congener in logKoa.common$congener) {
+# Loop over each PCB
+for (cg in as.character(logKoa$congener)) {
   
-  # Extract values for current PCB
-  PCB_vals <- data.V3.2.pcbs[[congener]]
-  logKoa_val <- logKoa.common$logKoa[logKoa.common$congener == congener]
-  ko_val_for_PCB <- ko_val[ko.common$congener == congener]
+  ## ---- Safety checks ----
+  if (!cg %in% names(data.V3.2)) next
   
-  # Time values for the first three rows
-  time_vals <- data.V3.2$time.day[1:3]
+  logKoa_val <- logKoa$logKoa[logKoa$congener == cg]
+  ko_val_for_PCB <- ko$ko[ko$congener == cg]
   
-  # Calculate Kwb
+  if (length(logKoa_val) != 1 || length(ko_val_for_PCB) != 1) next
+  
+  ## ---- Extract PCB values ----
+  PCB_vals <- data.V3.2[[cg]]
+  
+  ## ---- Time values (days) for static rows ----
+  time_vals <- data.V3.2$time[1:3] / 24
+  
+  ## ---- Calculate Kwb ----
   Kwb_val_for_PCB <- 10^(0.6156 * logKoa_val + 2.161)
   
-  # Calculate veff_stat for 3 static rows
+  ## ---- Calculate veff_stat ----
   veff_stat <- sapply(time_vals, function(time) {
-    Kwb_val_for_PCB * Vwb * (1 - exp(-ko_val_for_PCB * Awb * time / Vwb / Kwb_val_for_PCB))
+    Kwb_val_for_PCB * Vwb *
+      (1 - exp(-ko_val_for_PCB * Awb * time / Vwb / Kwb_val_for_PCB))
   })
   
-  # Calculate concentration using static rows (1 to 3)
+  ## ---- Concentration from static rows ----
   conc <- PCB_vals[1:3] / veff_stat
   
-  # Calculate Veff for rows 4 to 9
+  ## ---- Calculate Veff for rows 4–9 ----
   Veff <- sapply(4:9, function(row) {
     cycle_index <- ((row - 4) %% 3) + 1
     PCB_vals[row] / conc[cycle_index]
   })
   
-  # Create data frame for Veff results
+  ## ---- Assemble Veff data ----
   Veff_results <- data.frame(
-    Row = 4:9,
-    Time = data.V3.2$time.day[4:9],
+    Row  = 4:9,
+    Time = data.V3.2$time[4:9] / 24,
     Veff = Veff
   )
   
-  # Split data into `nw` and `w` for regression
   Veff_nw <- Veff_results[1:3, ]
-  Veff_w <- Veff_results[4:6, ]
+  Veff_w  <- Veff_results[4:6, ]
   
-  # Regression function
+  ## ---- Regression helper ----
   get_regression <- function(values, times) {
-    if (sum(!is.na(values)) == 3) {  # Ensure no NA or infinite values
+    if (sum(is.finite(values)) == 3) {
       fit <- lm(values ~ 0 + times)
-      SR <- format(signif(coef(summary(fit))[1, "Estimate"], digits = 3))
-      R2 <- format(signif(summary(fit)$adj.r.squared, digits = 3))
-      pval <- format(signif(coef(summary(fit))[1, "Pr(>|t|)"], digits = 3))
+      c(
+        signif(coef(summary(fit))[1, "Estimate"], 3),
+        signif(summary(fit)$adj.r.squared, 3),
+        signif(coef(summary(fit))[1, "Pr(>|t|)"], 3)
+      )
     } else {
-      SR <- R2 <- pval <- "0"
+      c(NA, NA, NA)
     }
-    return(c(SR, R2, pval))
   }
   
-  # Run regressions for nw and w
+  ## ---- Run regressions ----
   SR_nw <- get_regression(Veff_nw$Veff, Veff_nw$Time)
-  SR_w <- get_regression(Veff_w$Veff, Veff_w$Time)
+  SR_w  <- get_regression(Veff_w$Veff,  Veff_w$Time)
   
-  # Store regression results in a data frame
-  SR.V3.2_results[[congener]] <- data.frame(
+  ## ---- Store results ----
+  SR.V3.2_results[[cg]] <- data.frame(
     Sampling_Rate = c(SR_nw[1], SR_w[1]),
-    R2 = c(SR_nw[2], SR_w[2]),
-    p_value = c(SR_nw[3], SR_w[3]),
-    group = c(paste(congener, "nw", sep = "_"), paste(congener, "w", sep = "_"))
+    R2           = c(SR_nw[2], SR_w[2]),
+    p_value      = c(SR_nw[3], SR_w[3]),
+    group        = c(paste0(cg, "_nw"), paste0(cg, "_w"))
   )
 }
 
@@ -857,7 +846,10 @@ SR_V3.2$R2 <- as.numeric(SR_V3.2$R2)
 SR_V3.2$p_value <- as.numeric(SR_V3.2$p_value)
 
 # Define masks
-mask_filter <- SR_V3.2$R2 < 0.9 | SR_V3.2$p_value > 0.05
+mask_filter <- SR_V3.2$R2 < 0.9 | 
+  SR_V3.2$p_value > 0.05 | 
+  !is.finite(SR_V3.2$R2) | 
+  !is.finite(SR_V3.2$p_value)
 
 # Apply NA to filtered rows
 SR_V3.2[mask_filter, c("Sampling_Rate (m3/d)", "R2", "p_value")] <- NA
@@ -880,8 +872,8 @@ SR_V3.2$area <- NULL
 SR_V3.2_nw <- subset(SR_V3.2, grepl("_nw$", group))
 SR_V3.2_w  <- subset(SR_V3.2, grepl("_w$", group))
 
-SR_V3.2_nw$congener <- common_pcbs
-SR_V3.2_w$congener <- common_pcbs
+SR_V3.2_nw$congener <- congener
+SR_V3.2_w$congener <- congener
 rownames(SR_V3.2_nw) <- NULL
 rownames(SR_V3.2_w) <- NULL
 SR_V3.2_nw <- SR_V3.2_nw[, c("congener", setdiff(names(SR_V3.2_nw), "congener"))]
@@ -930,7 +922,7 @@ ggplot(SR_V3.2_w, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) 
 # (1) nw
 sr.V3.nw <- as.data.frame(SR_V3.2_nw$`Sampling_Rate`, na.rm = TRUE)
 
-sr.V3.nw$logkoa <- logKoa.common$logKoa
+sr.V3.nw$logkoa <- logKoa$logKoa
 colnames(sr.V3.nw) <- c('sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
 model.V3.nw <- lm(log(sr.V3.nw$sr) ~ sr.V3.nw$logKoa)
@@ -970,7 +962,7 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nw.png",
 # (2) w
 sr.V3.w <- as.data.frame(SR_V3.2_w$`Sampling_Rate`, na.rm = TRUE)
 
-sr.V3.w$logkoa <- logKoa.common$logKoa
+sr.V3.w$logkoa <- logKoa$logKoa
 colnames(sr.V3.w) <- c('sr', 'logKoa')
 # Fit exponential regression model: sr = a * exp(b * logKoa)
 model.V3.w <- lm(log(sr.V3.w$sr) ~ sr.V3.w$logKoa)
@@ -984,13 +976,14 @@ r2 <- summary(model.V3.w)$r.squared
 p.sr.V3.koa.w <- ggplot(sr.V3.w, aes(x = logKoa, y = sr)) +
   geom_point(size = 3, shape = 1, stroke = 1) +
   geom_smooth(method = "lm", formula = y ~ exp(x), se = FALSE, color = "blue") +
-  annotate("text", x = 6.7, y = 6.2, label = paste("Vol. 3 (wiped)")) +
-  annotate("text", x = 7.5, y = 6,
+  annotate("text", x = 6.9, y = 6.2, label = paste("Vol. 3 (wiped)"),
+           size = 5) +
+  annotate("text", x = 7.8, y = 5.9,
            label = paste("sr = ", round(a, 3),
                          " * exp(", round(b, 2), " x log Koa)", sep = ""),
-           size = 4) + 
-  annotate("text", x = 6.6, y = 5.8,
-           label = paste("R² = ", round(r2, 2)), size = 4) + 
+           size = 5) + 
+  annotate("text", x = 6.7, y = 5.6,
+           label = paste("R² = ", round(r2, 2)), size = 5) + 
   theme_bw() +
   theme(aspect.ratio = 1) +
   xlab(expression(bold("log "*italic(K)[OA]))) +
@@ -1094,7 +1087,7 @@ plot.18.30 <- plot.18.30 +
 plot.18.30
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRatesv5.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB18.30VoluntSamplingRates.png",
        plot = plot.18.30, width = 8, height = 10, dpi = 1300)
 
 # PCB 52
@@ -1177,7 +1170,7 @@ plot.52 <- plot.52 +
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRatesV5.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB52VoluntSamplingRates.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118
@@ -1257,7 +1250,7 @@ plot.118 <- plot.118 +
 plot.118
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB118VoluntSamplingRatesV2.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB118VoluntSamplingRates.png",
        plot = plot.118, width = 8, height = 10, dpi = 1300)
 
 # PCB 187
@@ -1340,7 +1333,7 @@ plot.187 <- plot.187 +
 plot.187
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRatesV5.png",
+ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRates.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
 
 # Combine sampling rates --------------------------------------------------
@@ -1388,7 +1381,7 @@ SR_averages_sd_cv$Average_ko2[173] <- SR_averages_sd_cv$Average_ko2[167]
 
 # Export results
 write.csv(SR_averages_sd_cv,
-          file = "Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv",
+          file = "Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv",
           row.names = FALSE)
 
 # Plot the average and stdev
@@ -1410,7 +1403,7 @@ Plot.AV.SR <- ggplot(SR_averages_sd_cv, aes(x = congener, y = Average_Sampling_R
 print(Plot.AV.SR)
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/AvePersonalSRsV2.png",
+ggsave("Output/Plots/SamplingRates/Personal/AvePersonalSRs.png",
        plot = Plot.AV.SR, width = 15, height = 5, dpi = 500)
 
 # Plot the combined data with different colors for each group
@@ -1434,6 +1427,6 @@ Plot.SRs <- ggplot(combined_SR, aes(x = congener, y = `Sampling_Rate (m3/d)`,
 print(Plot.SRs)
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/Personal/SRsV02.png",
+ggsave("Output/Plots/SamplingRates/Personal/SRs.png",
        plot = Plot.SRs, width = 15, height = 5, dpi = 500)
 
