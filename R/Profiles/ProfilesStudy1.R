@@ -18,7 +18,7 @@ install.packages("SnowballC")
   library(lsa) # cosine theta function
 }
 
-# Read data
+# Read data ---------------------------------------------------------------
 {
   PUF <- read.csv("Data/PUF.csv") # ng/m3
   WB <- read.csv("Data/WB.csv") # ng/g
