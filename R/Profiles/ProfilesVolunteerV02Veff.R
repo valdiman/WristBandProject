@@ -869,4 +869,3 @@ cosine_similarity.2 <- cosine(cosine_matrix)
 # View the resulting cosine similarity matrix
 cosine_similarity.2
 
-
