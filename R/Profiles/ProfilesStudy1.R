@@ -20,22 +20,23 @@ install.packages("SnowballC")
 
 # Read data ---------------------------------------------------------------
 {
-  PUF <- read.csv("Data/PUF.csv") # ng/m3
-  WB <- read.csv("Data/WB.csv") # ng/g
+  PUF.0 <- read.csv("Data/IRO/SampleConcentrationStudy1.csv")
+  PUF <- PUF.0[1:4, 8:180] # select rows and columns (ng/m3)
+  WB.0 <- read.csv("Data/IRO/SampleMassStudy1.csv")
+  WB <- WB.0[7:11, c(1, 5, 10:182)] # select rows and columns (ng/WB)
 }
 
 # Remove metadata
-PUF.1 <- subset(PUF, select = -c(sample))
-WB.1 <- subset(WB, select = -c(sample:time))
+WB.1 <- subset(WB, select = -c(sid:time))
 
 # Create PCB profiles -----------------------------------------------------
 # (1) PUF
 # Compute row sums
-tmp.puf <- rowSums(PUF.1, na.rm = TRUE)
+tmp.puf <- rowSums(PUF, na.rm = TRUE)
 # Normalize each row so sum = 1
-prof.puf.conc <- sweep(PUF.1, 1, tmp.puf, FUN = "/")
+prof.puf.conc <- sweep(PUF, 1, tmp.puf, FUN = "/")
 # Check
-rowSums(prof.puf.conc)  # should be all 1
+rowSums(prof.puf.conc, na.rm = TRUE)  # should be all 1
 
 # (2) WBs
 tmp.wb <- rowSums(WB.1, na.rm = TRUE)
