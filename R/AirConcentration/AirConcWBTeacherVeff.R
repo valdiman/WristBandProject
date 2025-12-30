@@ -22,13 +22,15 @@ install.packages("stringr")
 
 # Read data ---------------------------------------------------------------
 {
-  bl <- read.csv("Data/WBTeBlanks.csv")
-  wt <- read.csv("Data/WBteSamples.csv")
+  bl.0 <- read.csv("Data/IRO/BlankMassStudy3_4_5.csv")
+  bl <- bl.0[8:28, c(1, 8:180)] # select rows and columns
+  wt.0 <- read.csv("Data/IRO/SampleMassStudy3_4_5.csv")
+  wt <- wt.0[39:74, c(1, 7, 9:10, 12:184)]
 }
 
 # Distribution analysis ---------------------------------------------------
 # Remove metadata from blank data
-bl.1 <- subset(bl, select = -c(sample.code))
+bl.1 <- subset(bl, select = -c(sid))
 # Look at the distribution of the blank data
 # Create matrix to storage data
 normality <- matrix(nrow = length(bl.1[1,]), ncol = 2)
@@ -98,7 +100,7 @@ loq <- data.frame(t(loq))
 # Sample loq comparison ---------------------------------------------------
 # If s.1 > loq, then wt[, 2:174], if not 0
 # Remove sample names from wt
-wt.1 <- wt[, 2:174]
+wt.1 <- wt[, 5:177]
 # Create matrix to storage s.1 or loq values in s.2
 wt.2 <- matrix(NA, nrow = dim(wt.1)[1], ncol = dim(wt.1)[2])
 # Do comparison
@@ -115,11 +117,11 @@ for(i in 1:dim(wt.1)[1]) {
 # Transform to data.frame
 wt.2 <- data.frame(wt.2)
 # Add sample
-wt.2 <- cbind(wt$code.teacher, wt.2)
+wt.2 <- cbind(wt$sid, wt.2)
 # Change column name
-names(wt.2)[names(wt.2) == 'wt$code.teacher'] <- 'code.teacher'
+names(wt.2)[names(wt.2) == 'wt$sid'] <- 'code.teacher'
 # Add column names
-colnames(wt.2)[2:174] <- colnames(wt)[2:174]
+colnames(wt.2)[2:174] <- colnames(wt)[5:177]
 
 # Individual PCB detection frequency --------------------------------------
 wt.fr <- as.data.frame(colSums(wt.2[2:174] > 0)/length(wt.2[, 1])*100)
@@ -179,7 +181,7 @@ ggplot(wt.2, aes(y = rowSums(wt.2[2:174]), x = factor(code.teacher))) +
   # Transpose
   prof <- t(prof)
   # Include sample names
-  colnames(prof) <- wt$code.teacher
+  colnames(prof) <- wt$sid
   # Get congeners
   congener <- row.names(prof)
   # Add congener names to first column
@@ -197,7 +199,7 @@ ggplot(wt.2, aes(y = rowSums(wt.2[2:174]), x = factor(code.teacher))) +
 }
 
 # Plots
-ggplot(prof, aes(x = congener, y = wt.01.r)) + # change y
+ggplot(prof, aes(x = congener, y = S02)) + # change y
   geom_bar(position = position_dodge(), stat = "identity",
            fill = "black") +
   xlab("") +
@@ -239,10 +241,10 @@ write.csv(costheta, file = "Output/Data/csv/Teachers/costheta.csv")
 
 # Predict Concentrations  ------------------------------------------------
 # Read kos
-ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSRV02.csv")
+ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 pcb_list <- ko.p$congener
 # Read logKoa
-logKoa <- read.csv("Data/logKoa.csv")
+logKoa <- read.csv("Data/IRO/logKoa.csv")
 # Calculate logKws
 # Regression created with data from Tromp et al 2019 (Table 2, Wristband)
 # & Frederiksen et al 2022 (Table 3)
@@ -257,6 +259,10 @@ ko.p <- ko.p[7]
 # Subset wt.1
 wt.3 <- wt.1[, intersect(pcb_list, colnames(wt.1))]
 # Add school year
+
+# Here!!
+
+
 wt.3 <- cbind(wt$school.year, wt.3)
 # Add time back
 wt.3 <- cbind(wt$time.day, wt.3)
