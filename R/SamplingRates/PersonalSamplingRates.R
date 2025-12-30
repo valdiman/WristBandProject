@@ -29,7 +29,7 @@ install.packages("rollapply")
   data.V2 <- data[14:21, c(1, 7, 9:10, 12:184)] # volunteer 2
   data.V3.1 <- data[22:33, c(1, 7, 9:10, 12:184)] # volunteer 3
   data.V3.2 <- data[34:42, c(1, 7, 9:10, 12:184)] # volunteer 3
-  logKoa <- read.csv("Data/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/logKoa.csv")
   # ko from SamplingRates.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]

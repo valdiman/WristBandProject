@@ -1,4 +1,4 @@
-## Script to combine Frederiksen and Volunteer 2 data to be plotted
+## Script to combine Frederiksen and Volunteers 2 data to be plotted
 
 # Install packages
 install.packages("ggplot2")
@@ -86,7 +86,7 @@ plot.FerdVol2 <- ggplot(combined_data, aes(x = Conc.Air, y = Conc.WB,
   guides(fill = guide_legend(override.aes = list(shape = 21), order = 2),
          shape = guide_legend(order = 1))
 
-# See plot
+# See plot (Figure 4)
 plot.FerdVol2
 
 # Save plot in folder

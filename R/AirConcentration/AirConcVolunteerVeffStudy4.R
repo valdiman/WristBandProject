@@ -22,7 +22,7 @@ install.packages("tibble")
 {
   data.0 <- read.csv("Data/IRO/SampleMassStudy3_4_5.csv")
   data.2 <- data.0[26:38, c(1, 6, 7, 9:10, 12:184)]
-  logKoa <- read.csv("Data/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/logKoa.csv")
   # ko from SamplingRates_ko.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]

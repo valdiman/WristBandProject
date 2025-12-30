@@ -22,7 +22,7 @@ install.packages("dplyr")
   PUF <- PUF.0[1:4, 8:180] # select rows and columns (ng/m3)
   WB.0 <- read.csv("Data/IRO/SampleMassStudy1.csv")
   WB <- WB.0[7:11, c(1, 5, 10:182)] # select rows and columns (ng/WB)
-  logKoa <- read.csv("Data/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/logKoa.csv")
 }
 
 # Remove metadata
