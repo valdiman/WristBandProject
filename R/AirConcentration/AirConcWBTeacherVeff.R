@@ -39,7 +39,9 @@ for (i in 1:length(bl.1[1, ])) {
   normality[i, 1] <- shapiro.test(bl.1[,i])$p.value
   normality[i, 2] <- shapiro.test(log10(bl.1[,i]))$p.value
 }
-  
+
+
+
 # Just 3 significant figures
 normality <- formatC(signif(normality, digits = 3))
 # Add congener names
@@ -199,7 +201,7 @@ ggplot(wt.2, aes(y = rowSums(wt.2[2:174]), x = factor(code.teacher))) +
 }
 
 # Plots
-ggplot(prof, aes(x = congener, y = S02)) + # change y
+ggplot(prof, aes(x = congener, y = S02_1)) + # change y (sid)
   geom_bar(position = position_dodge(), stat = "identity",
            fill = "black") +
   xlab("") +
@@ -216,7 +218,7 @@ ggplot(prof, aes(x = congener, y = S02)) + # change y
 # Remove congener column
 prof.cos <- prof[, 2:37]
 # Create matrix to storage results
-costheta <- matrix(nrow = length(prof.cos[1,]),
+costheta.mass <- matrix(nrow = length(prof.cos[1,]),
                       ncol = length(prof.cos[1,]))
 
 # Perform Cosine Theta
@@ -224,20 +226,20 @@ for (i in 1:length(prof.cos[1,])) {
   for (j in 1:length(prof.cos[1,])) {
     m1 <- prof.cos[,i]
     m2 <- prof.cos[,j]
-    costheta[i,j] <- sum(m1*m2)/(sum(m1^2)*sum(m2^2))^0.5
+    costheta.mass[i,j] <- sum(m1*m2)/(sum(m1^2)*sum(m2^2))^0.5
   }
 }
 
 # Just 3 significant figures
-costheta <- formatC(signif(costheta, digits = 3))
+costheta.mass <- formatC(signif(costheta.mass, digits = 3))
 # Remove upper diagonal values
-costheta[upper.tri(costheta)] <- NA
+costheta.mass[upper.tri(costheta.mass)] <- NA
 # Add name to columns
-colnames(costheta) <- colnames(prof.cos)
+colnames(costheta.mass) <- colnames(prof.cos)
 # Add names to rows
-rownames(costheta) <- colnames(prof.cos)
+rownames(costheta.mass) <- colnames(prof.cos)
 # Export data
-write.csv(costheta, file = "Output/Data/csv/Teachers/costheta.csv")
+write.csv(costheta.mass, file = "Output/Data/csv/Teachers/CosineThetaMass.csv")
 
 # Predict Concentrations  ------------------------------------------------
 # Read kos
@@ -259,23 +261,23 @@ ko.p <- ko.p[7]
 # Subset wt.1
 wt.3 <- wt.1[, intersect(pcb_list, colnames(wt.1))]
 # Add school year
+wt.3$school.year <- c(1968, 1968, 1926, 1926, NA, 2017, 1962, 1939,
+  1939, 1918, 1918, 1939, 1939, 1939, 1939, 2017,
+  2006, 1972, 1972, 1970, 1970, 1968, 1968, 1968,
+  1968, 1968, 1968, 1968, 2017, 2017, 2017, 2017,
+  2017, 2017, 2017, 2017)
 
-# Here!!
-
-
-wt.3 <- cbind(wt$school.year, wt.3)
 # Add time back
-wt.3 <- cbind(wt$time.day, wt.3)
+wt.3 <- cbind(wt$time / 24, wt.3) # transform hours to day
 # Add sample
-wt.3 <- cbind(wt$code.teacher, wt.3)
+wt.3 <- cbind(wt$sid, wt.3)
 # Add WB volume
 wt.3 <- cbind(wt$vol.WB, wt.3)
 # Add WB area
 wt.3 <- cbind(wt$area.WB, wt.3)
 # Change column names
-names(wt.3)[names(wt.3) == 'wt$school.year'] <- 'school.year'
-names(wt.3)[names(wt.3) == 'wt$code.teacher'] <- 'code.teacher'
-names(wt.3)[names(wt.3) == 'wt$time.day'] <- 'time.day'
+names(wt.3)[names(wt.3) == 'wt$sid'] <- 'code.teacher'
+names(wt.3)[names(wt.3) == 'wt$time/24'] <- 'time.day'
 names(wt.3)[names(wt.3) == 'wt$vol.WB'] <- 'vol.WB'
 names(wt.3)[names(wt.3) == 'wt$area.WB'] <- 'area.WB'
 
@@ -286,23 +288,24 @@ time_matrix <- matrix(rep(wt.3$time.day, each = 173), nrow = 36, byrow = TRUE)
 logK_matrix <- matrix(rep(logKwb$logKwb, times = 36), nrow = 36, byrow = FALSE)
 ko2 <- ko.p$Average_ko2
 
-# Calculate veff.teacher as a 36 x 171 matrix
+# Calculate veff.teacher as a 36 x 173 matrix
 veff.teacher <- 10^logK_matrix * vol_matrix * 
   (1 - exp(-ko2 * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
 
 # Estimate concentration from worn WBs
-wt.mass <- wt.3[, 6:178]
+wt.mass <- wt.3[, 5:177]
 conc.WB <- wt.mass / veff.teacher
 conc.WB <- as.data.frame(conc.WB)
-conc.WB$code.teacher <- wt$code.teacher
-conc.WB$school.year <- wt$school.year
-conc.WB$sample <- wt$Congener.Sample
+conc.WB$code.teacher <- wt.3$code.teacher
+conc.WB$school.year <- wt.3$school.year
 
 # Export data
-write.csv(conc.WB, file = "Output/Data/csv/Teachers/ConcentrationTeachers.csv")
+write.csv(conc.WB,
+          file = "Output/Data/csv/Teachers/ConcentrationTeachers.csv",
+          row.names = FALSE)
 
 # Predicted Total PCB Concentration ---------------------------------------
-tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:171], na.rm = TRUE))
+tPCB.conc.WB <- as.data.frame(rowSums(conc.WB[, 1:173], na.rm = TRUE))
 tPCB.conc.WB$code.teacher <- conc.WB$code.teacher
 tPCB.conc.WB$school.year <- conc.WB$school.year
 # Change columns names
@@ -335,29 +338,28 @@ ggplot(tPCB.conc.WB, aes(x = factor(ID), y = tPCB, fill = code.teacher)) +
 
 # Averaging duplicates
 updated_tPCB <- tPCB.conc.WB %>%
-  mutate(prefix = str_sub(code.teacher, 1, -3)) %>%
+  mutate(prefix = str_remove(code.teacher, "_[^_]+$")) %>%
   group_by(prefix) %>%
   mutate(
     mean_tPCB = ifelse(n() > 1, mean(tPCB, na.rm = TRUE), tPCB),
-    sd_tPCB = ifelse(n() > 1, sd(tPCB, na.rm = TRUE), NA),
-    rsd_tPCB = ifelse(!is.na(sd_tPCB) & mean_tPCB != 0,
-                      (sd_tPCB / mean_tPCB) * 100, NA)
+    sd_tPCB   = ifelse(n() > 1, sd(tPCB, na.rm = TRUE), NA),
+    rsd_tPCB  = ifelse(!is.na(sd_tPCB) & mean_tPCB != 0,
+                       (sd_tPCB / mean_tPCB) * 100, NA)
   ) %>%
   ungroup() %>%
   select(-prefix)
 
 # Remove duplicates and keep only one row for each prefix
 plot_data <- updated_tPCB %>%
-  group_by(prefix = str_sub(code.teacher, 1, -3)) %>%  # Group by prefix
-  slice(1) %>%  # Keep only the first entry for each prefix group
+  mutate(prefix = str_remove(code.teacher, "_[^_]+$")) %>%
+  group_by(prefix) %>%
+  slice(1) %>%
   ungroup() %>%
   mutate(
-    label = str_remove(prefix, "\\."),                 # Remove dot for label
-    tea_label = str_replace(prefix, "^wt", "tea")      # Replace "wt" with "tea" at the start
-  )
+    label = prefix)
 
 # Plot the data
-tPCB.wt <- ggplot(plot_data, aes(x = factor(tea_label), y = mean_tPCB)) +
+tPCB.wt <- ggplot(plot_data, aes(x = factor(label), y = mean_tPCB)) +
   geom_bar(stat = 'identity', width = 0.8, fill = "black") +
   geom_errorbar(aes(ymin = mean_tPCB - sd_tPCB, ymax = mean_tPCB + sd_tPCB),
                 width = 0.2) +
@@ -373,21 +375,13 @@ tPCB.wt <- ggplot(plot_data, aes(x = factor(tea_label), y = mean_tPCB)) +
 print(tPCB.wt)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCBVeff.png", plot = tPCB.wt,
+ggsave("Output/Plots/Teachers/WTtPCBVeffV2.png", plot = tPCB.wt,
        width = 10, height = 5, dpi = 1200)
 
-# Create a cleaned version of 'code.teacher' without the .l or .r
-updated_tPCB <- updated_tPCB %>%
-  mutate(code.teacher.clean = sub("\\.[lr]$", "", code.teacher))  # Remove the last character and dot
-
-# Remove duplicate rows where the mean was calculated
-unique_tPCB <- updated_tPCB %>%
-  distinct(code.teacher.clean, .keep_all = TRUE)
-
 # Plot the mean PCB concentrations against 'school.year'
-ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB, label = code.teacher.clean)) +
+ggplot(updated_tPCB, aes(x = school.year, y = mean_tPCB, label = code.teacher)) +
   geom_point(size = 4, color = "black") +  # Plot the mean as points
-  geom_text(vjust = -1, hjust = 0.5, fontface = "bold", size = 3.5) +  # Add cleaned 'code.teacher' labels
+  geom_text(vjust = -1, hjust = 0.5, fontface = "bold", size = 3.5) +
   theme_bw() +
   ylim(0, 10) +
   ylab(expression(bold("Estimated Air Concentration " *Sigma*"PCB (ng/m3)"))) +
@@ -398,8 +392,8 @@ ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB, label = code.teacher.cle
   ggtitle("Mean PCB Concentration by School Year")
 
 # Improve version
-tPCB.wt.yr <- ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB)) +
-  geom_point(size = 4, shape =21, color = "black", fill = "white") +  # Plot the mean as points
+tPCB.wt.yr <- ggplot(updated_tPCB, aes(x = school.year, y = tPCB)) +
+  geom_point(size = 4, shape = 21, color = "black", fill = "white") +
   theme_bw() +
   ylab(expression(bold("Estimated Air Concentration " * Sigma * "PCB (ng/m³)"))) +
   xlab("School Built") +
@@ -413,7 +407,7 @@ tPCB.wt.yr <- ggplot(unique_tPCB, aes(x = school.year, y = mean_tPCB)) +
 print(tPCB.wt.yr)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCByrVeff.png", plot = tPCB.wt.yr,
+ggsave("Output/Plots/Teachers/WTtPCByrVeffV2.png", plot = tPCB.wt.yr,
        width = 10, height = 5, dpi = 1200)
 
 # Predicted PCBi Concentrations -------------------------------------------
@@ -472,7 +466,7 @@ plot.pcbi <- ggplot(plot.pcb.long, aes(x = Congener, y = Concentration)) +
 plot.pcbi
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTPCBiVeff.png", plot = plot.pcbi,
+ggsave("Output/Plots/Teachers/WTPCBiVeffV2.png", plot = plot.pcbi,
        width = 10, height = 5, dpi = 1200)
 
 # Concentration Profile Analysis ------------------------------------------
@@ -509,7 +503,8 @@ costheta_df <- as.data.frame(costheta.samples)
 costheta_df$school.year <- conc.WB$school.year
 
 # Export
-write.csv(costheta_df, file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff.csv")
+write.csv(costheta_df,
+          file = "Output/Data/csv/Teachers/CosineThetaTeachersVeffV2.csv")
 
 # Cosine theta visualization ----------------------------------------------
 # Calculate tPCB values to be added to the plot
@@ -584,8 +579,8 @@ plot.cos.theta.low <- ggplot(data = costheta_correlations[1:16, ], # low values 
 plot.cos.theta.low
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff.png", plot = plot.cos.theta.low,
-       width = 10, height = 10, dpi = 1200)
+ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeffV2.png",
+       plot = plot.cos.theta.low, width = 10, height = 10, dpi = 1200)
 
 plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high values >= 0.85
                               aes(x = Var1, y = Var2, fill = Value)) +
@@ -603,11 +598,11 @@ plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high va
 plot.cos.theta.high
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff.png", plot = plot.cos.theta.high,
-       width = 10, height = 10, dpi = 1200)
+ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeffV2.png",
+       plot = plot.cos.theta.high, width = 10, height = 10, dpi = 1200)
 
 # Plot Individual PCB Profiles --------------------------------------------
-# e.g., wt.19.l = Teacher 19.l & wt.25.r = Teacher 25.r plots included in main text
+# e.g., S01_1 = Teacher & wt.25.r = Teacher 25.r plots included in main text
 prof_long <- prof.WB.conc %>%
   pivot_longer(
     cols = starts_with("PCB"),
@@ -620,13 +615,16 @@ prof_long <- prof.WB.conc %>%
 
 # 2 PCB profiles for main text
 prof_long_sel <- prof_long %>%
-  filter(Source %in% c("wt.19.l", "wt.25.l"))
+  filter(Source %in% c("S01_1", "S01_2"))
+
+# Here
+
 
 teacher_labeller <- function(x) {
   # Extract the teacher number
-  num <- sub("wt\\.0*(\\d+)\\..*", "\\1", x)
+  #num <- sub("wt\\.0*(\\d+)\\..*", "\\1", x)
   # Extract the wrist (.l or .r)
-  wrist <- sub(".*\\.(l|r)$", ".\\1", x)
+  #wrist <- sub(".*\\.(l|r)$", ".\\1", x)
   # Combine
   paste0("Teacher ", num, wrist)
 }
