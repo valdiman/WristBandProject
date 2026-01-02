@@ -79,8 +79,11 @@ Data
 --------
 
 The data files can be found and downloaded at https://doi.org/XXX. The files are:
+
 BlankMassStudy3_4_5.csv
+
 Frederiksen_data_2022.csv
+
 logKoa.csv
 SampleConcentrationStudy1.csv
 SampleMassStudy1.csv
