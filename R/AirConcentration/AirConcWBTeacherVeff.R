@@ -1,5 +1,5 @@
-## Script to analyze school teacher wristband data
-# estimate concentrations and PCB profiles
+## Script to analyze school teacher wristband data and
+# estimate concentrations and PCB profiles from worn WB
 
 # Install packages
 install.packages("reshape2")
@@ -138,9 +138,9 @@ wt.fr.stats <- wt.fr %>%
 
 # Add PCB names as a new column in wt.fr
 wt.fr$congener <- colnames(wt.2)[2:174]
-wt.fr$congener <- gsub('\\.', '+', wt.fr$congener) # replace dot for +
+wt.fr$congener <- gsub('\\.', '+', wt.fr$congener)
 wt.fr$congener <- factor(wt.fr$congener,
-                                 levels = rev(wt.fr$congener)) # change the order to be plotted.
+                                 levels = rev(wt.fr$congener))
 
 # Detection frequency plot
 plot.cong.freq <- ggplot(wt.fr, aes(x = Detection.Frequency, y = congener)) +
@@ -448,10 +448,9 @@ plot.pcb.data <- conc.WB[, 1:173]
 # Reshape the data from wide to long format
 plot.pcb.long <- pivot_longer(
   plot.pcb.data, 
-  cols = everything(),          # Convert all congener columns
-  names_to = "Congener",         # Column name for congener names
-  values_to = "Concentration"    # Column name for concentration values
-)
+  cols = everything(),
+  names_to = "Congener",
+  values_to = "Concentration")
 
 plot.pcb.long <- plot.pcb.long %>%
   mutate(Congener = factor(Congener, levels = colnames(plot.pcb.data)))
@@ -560,7 +559,7 @@ costheta_long <- costheta_long %>%
 # Sort the long data by correlation value in ascending order
 costheta_correlations <- costheta_long %>%
   arrange(Value) %>%
-  filter(Var1 != Var2)  # Exclude self-correlations (diagonal values)
+  filter(Var1 != Var2)
 
 # Change wt to tea
 costheta_correlations <- costheta_correlations %>%
@@ -578,7 +577,8 @@ plot.cos.theta.low <- ggplot(data = costheta_correlations[1:16, ], # low values 
   theme_minimal() +
   theme(panel.background = element_rect(fill = "white", color = NA),
         plot.background = element_rect(fill = "white", color = NA),
-        axis.text.x = element_text(face = "bold", size = 10, angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.x = element_text(face = "bold", size = 10, angle = 90,
+                                   hjust = 1, vjust = 0.5),
         axis.text.y = element_text(face = "bold", size = 10)) +
   geom_text(aes(label = round(Value, 2)), color = "black", size = 3) 
 
@@ -597,7 +597,8 @@ plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high va
   theme_minimal() +
   theme(panel.background = element_rect(fill = "white", color = NA),
         plot.background = element_rect(fill = "white", color = NA),
-        axis.text.x = element_text(face = "bold", size = 10, angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.x = element_text(face = "bold", size = 10, angle = 90,
+                                   hjust = 1, vjust = 0.5),
         axis.text.y = element_text(face = "bold", size = 10)) +
   geom_text(aes(label = round(Value, 2)), color = "black", size = 3)
 

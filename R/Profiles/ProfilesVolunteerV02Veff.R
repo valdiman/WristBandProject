@@ -1,5 +1,6 @@
 ## Script to fabricate PCB profiles
 # and calculate cosine theta for similarity analysis
+# for Study 4
 
 # Install packages
 install.packages("ggplot2")
@@ -56,11 +57,11 @@ colSums(prof.wb.conc[, 2:11], na.rm = TRUE)
 prof_combined.V1 <- prof.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air PCB office 1") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V1.o) %>%
               rename(Conc = conc.V1.o) %>%
-              mutate(Source = "Vol. 1 office-only")) %>%  # Change this label
+              mutate(Source = "Vol. 1 office-only")) %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V1.h) %>%
               rename(Conc = conc.V1.h) %>%
@@ -111,7 +112,7 @@ prof_wide <- prof_combined.V1 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 1 office-only`, `Vol. 1 full-day`),  # use exact column names
+    cols = c(`Vol. 1 office-only`, `Vol. 1 full-day`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -155,7 +156,7 @@ diff.V1
 prof_combined.V2 <- prof.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air PCB office 1") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V2.o) %>%
               rename(Conc = conc.V2.o) %>%
@@ -210,7 +211,7 @@ prof_wide <- prof_combined.V2 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 2 office-only`, `Vol. 2 full-day`),  # use exact column names
+    cols = c(`Vol. 2 office-only`, `Vol. 2 full-day`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -254,7 +255,7 @@ diff.V2
 prof_combined.V3 <- prof.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air PCB office 1") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V3.o) %>%
               rename(Conc = conc.V3.o) %>%
@@ -309,7 +310,7 @@ prof_wide <- prof_combined.V3 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 3 office-only`, `Vol. 3 full-day`),  # use exact column names
+    cols = c(`Vol. 3 office-only`, `Vol. 3 full-day`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -353,7 +354,7 @@ diff.V3
 prof_combined.V8 <- prof.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
-  mutate(Source = "Air PCB office 2") %>%  # Change this label
+  mutate(Source = "Air PCB office 2") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V5.o) %>%
               rename(Conc = conc.V5.o) %>%
@@ -408,7 +409,7 @@ prof_wide <- prof_combined.V8 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 8 office-only`, `Vol. 8 full-day`),  # use exact column names
+    cols = c(`Vol. 8 office-only`, `Vol. 8 full-day`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -452,7 +453,7 @@ diff.V8
 prof_combined.V9 <- prof.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
-  mutate(Source = "Air PCB office 2") %>%  # Change this label
+  mutate(Source = "Air PCB office 2") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V4.o) %>%
               rename(Conc = conc.V4.o) %>%
@@ -507,7 +508,7 @@ prof_wide <- prof_combined.V9 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 9 office-only`, `Vol. 9 full-day`),  # use exact column names
+    cols = c(`Vol. 9 office-only`, `Vol. 9 full-day`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -551,7 +552,7 @@ diff.V9
 prof_combined.1 <-  prof.air.conc %>%
   select(congener, Conc.Air.1) %>%
   rename(Conc = Conc.Air.1) %>%
-  mutate(Source = "Air PCB office 1") %>%  # Change this label
+  mutate(Source = "Air PCB office 1") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V3.h) %>%
               rename(Conc = conc.V3.h) %>%
@@ -606,7 +607,7 @@ prof_wide <- prof_combined.1 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 1 full-day`, `Vol. 3 full-day`),  # use exact column names
+    cols = c(`Vol. 1 full-day`, `Vol. 3 full-day`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -650,7 +651,7 @@ diff.1
 prof_combined.2 <-  prof.air.conc %>%
   select(congener, Conc.Air.2) %>%
   rename(Conc = Conc.Air.2) %>%
-  mutate(Source = "Air PCB office 2") %>%  # Change this label
+  mutate(Source = "Air PCB office 2") %>%
   bind_rows(prof.wb.conc %>%
               select(congener, conc.V4.h) %>%
               rename(Conc = conc.V4.h) %>%

@@ -1,4 +1,4 @@
-## Concentration estimation
+## Concentration estimation for Study 3
 # Office only
 
 # Install packages
@@ -334,13 +334,13 @@ conc_air_long <- conc.air %>% rownames_to_column(var = "PCB")
 
 conc_air_long <- conc_air_long %>%
   pivot_longer(
-    cols = -PCB,  # All columns except 'PCB'
+    cols = -PCB,
     names_to = "Volunteer",
     values_to = "Conc.Air"
   ) %>%
   mutate(Volunteer = gsub("Conc.Air.", "", Volunteer))
 
-# Duplicate Mi.Ya rows and create new rows for Mi and Ya
+# Duplicate V1.V2 rows and create new rows for V1 and V2
 conc_air_long <- conc_air_long %>%
   # Filter out V1.V2 rows
   filter(Volunteer != "V1.V2") %>%
@@ -354,19 +354,19 @@ conc_air_long <- conc_air_long %>%
   )
 
 conc_wb_long <- as.data.frame(conc.wb) %>%
-  rownames_to_column(var = "PCB") %>%  # Convert row names to a column
+  rownames_to_column(var = "PCB") %>%
   pivot_longer(
-    cols = -PCB,  # All columns except 'Volunteer'
-    names_to = "Volunteer",   # Column for PCB names
-    values_to = "Conc.WB"  # Column for concentration values
+    cols = -PCB,
+    names_to = "Volunteer",
+    values_to = "Conc.WB"
   ) %>%
-  mutate(Volunteer = gsub("wb.", "", Volunteer)) %>%  # Remove 'wb.' from Volunteer names
+  mutate(Volunteer = gsub("wb.", "", Volunteer)) %>%
   select(PCB, Conc.WB, Volunteer)
 
 # Modify Volunteer to remove the 'conc.' prefix and the suffix (.l or .r)
 conc_wb_long <- conc_wb_long %>%
-  mutate(Volunteer_Simplified = gsub("^conc\\.", "", Volunteer),  # Remove 'conc.' prefix
-         Volunteer_Simplified = gsub("\\..*", "", Volunteer_Simplified))  # Remove everything after the first '.'
+  mutate(Volunteer_Simplified = gsub("^conc\\.", "", Volunteer),
+         Volunteer_Simplified = gsub("\\..*", "", Volunteer_Simplified))
 
 merged_data <- conc_air_long %>%
   inner_join(conc_wb_long, by = c("PCB", "Volunteer" = "Volunteer_Simplified"))

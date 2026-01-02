@@ -1,5 +1,6 @@
 ## Script to fabricate PCB profiles
 # and calculate cosine theta for similarity analysis
+# for Study 3
 
 # Install packages
 install.packages("ggplot2")
@@ -164,7 +165,7 @@ prof_wide <- prof_combined.V1 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 1 nd`, `Vol. 1 d`),  # use exact column names
+    cols = c(`Vol. 1 nd`, `Vol. 1 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -247,8 +248,7 @@ p_prof_comb.V2 <- ggplot(prof_combined.V2, aes(x = congener,
   scale_x_discrete(
     labels = function(x) gsub("\\.", "+", x))
 
-
-# Print the plots
+# See the plots
 print(p_prof_comb.V2)
 
 # Save plot in folder
@@ -263,7 +263,7 @@ prof_wide <- prof_combined.V2 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 2 nd`, `Vol. 2 d`),  # use exact column names
+    cols = c(`Vol. 2 nd`, `Vol. 2 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -290,7 +290,7 @@ p_scat_comb.V2 <- ggplot(plot_data, aes(x = `Air PCB`, y = Conc, color = Vol_Typ
                "Vol. 2 d" = "#E69F00"),
     guide = guide_legend(key.size = unit(0.5, "lines")))
 
-# Print the plots
+# See the plots
 print(p_scat_comb.V2)
 
 # Save plot in folder
@@ -344,7 +344,7 @@ p_prof_comb.V3 <- ggplot(prof_combined.V3, aes(x = congener,
   scale_x_discrete(
     labels = function(x) gsub("\\.", "+", x))
 
-# Print the plots
+# See the plots
 print(p_prof_comb.V3)
 
 # Save plot in folder
@@ -359,7 +359,7 @@ prof_wide <- prof_combined.V3 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 3 nd`, `Vol. 3 d`),  # use exact column names
+    cols = c(`Vol. 3 nd`, `Vol. 3 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -455,7 +455,7 @@ prof_wide <- prof_combined.V4 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 4 nd`, `Vol. 4 d`),  # use exact column names
+    cols = c(`Vol. 4 nd`, `Vol. 4 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -551,7 +551,7 @@ prof_wide <- prof_combined.V5 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 5 nd`, `Vol. 5 d`),  # use exact column names
+    cols = c(`Vol. 5 nd`, `Vol. 5 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -647,7 +647,7 @@ prof_wide <- prof_combined.V6 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 6 nd`, `Vol. 6 d`),  # use exact column names
+    cols = c(`Vol. 6 nd`, `Vol. 6 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -794,7 +794,7 @@ prof_wide <- prof_combined.V7 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 7 nd`, `Vol. 7 d`),  # use exact column names
+    cols = c(`Vol. 7 nd`, `Vol. 7 d`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )
@@ -885,7 +885,7 @@ prof_wide <- prof_combined.V8 %>%
 # Make a long-format for plotting multiple y-values against Air PCB
 plot_data <- prof_wide %>%
   pivot_longer(
-    cols = c(`Vol. 8 nd`),  # use exact column names
+    cols = c(`Vol. 8 nd`),
     names_to = "Vol_Type",
     values_to = "Conc"
   )

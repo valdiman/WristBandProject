@@ -1,4 +1,4 @@
-## Concentration estimation
+## Concentration estimation for Study 4
 # Office and home
 
 
@@ -208,15 +208,15 @@ data_long <- data.plot %>%
 # Set the factor levels for Concentration_Category to control the order
 data_long$Concentration_Category <- factor(
   data_long$Concentration_Category,
-  levels = c("Air", "Of", "Ho")  # Desired order
+  levels = c("Air", "Of", "Ho")
 )
 
 # Plot
 plotAirWBtPCB <- ggplot(data_long, aes(x = Volunteer_Group, y = Concentration,
                       fill = Concentration_Category)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7) +  # Dodge for side-by-side bars
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
   scale_fill_manual(
-    values = c("Ho" = "#E69F00", "Of" = "blue", "Air" = "#009E73"),  # Custom colors
+    values = c("Ho" = "#E69F00", "Of" = "blue", "Air" = "#009E73"),
     labels = c("Ho" = "WB full-day", "Of" = "WB office-only",
                "Air" = "Air PCB office")  # Custom labels
   ) +
@@ -334,7 +334,7 @@ conc_air_common <- conc.air %>% rownames_to_column(var = "PCB")
 # Transform conc_air_common into long format
 conc_air_long <- conc_air_common %>%
   pivot_longer(
-    cols = starts_with("Conc.Air"),  # This will select Conc.Air.1 and Conc.Air.2
+    cols = starts_with("Conc.Air"),
     names_to = "Conc.Type",
     values_to = "Conc.Air"
   )
@@ -342,14 +342,14 @@ conc_air_long <- conc_air_common %>%
 # Replicate the rows: 3 times for Conc.Air.1 and 2 times for Conc.Air.2
 conc_air_long <- conc_air_long %>%
   mutate(Replicate_Count = case_when(
-    Conc.Type == "Conc.Air.1" ~ 3,  # Replicate Conc.Air.1 3 times
-    Conc.Type == "Conc.Air.2" ~ 2,  # Replicate Conc.Air.2 2 times
+    Conc.Type == "Conc.Air.1" ~ 3,
+    Conc.Type == "Conc.Air.2" ~ 2,
     TRUE ~ 1
   )) %>%
   uncount(weights = Replicate_Count) %>%  # Replicate based on the count
   mutate(Volunteer = case_when(
-    Conc.Type == "Conc.Air.1" ~ rep(c("Vol1", "Vol2", "Vol3"), length.out = n()),  # Assign Vol1, Vol2, Vol3
-    Conc.Type == "Conc.Air.2" ~ rep(c("Vol4", "Vol5"), length.out = n()),  # Assign Vol4, Vol5
+    Conc.Type == "Conc.Air.1" ~ rep(c("Vol1", "Vol2", "Vol3"), length.out = n()),
+    Conc.Type == "Conc.Air.2" ~ rep(c("Vol4", "Vol5"), length.out = n()),
     TRUE ~ NA_character_
   ))
 
@@ -359,11 +359,11 @@ t.conc.wb <- t(conc.wb)
 # WB Move row names to the first column
 conc_wb_clean <- t.conc.wb %>%
   as.data.frame() %>%
-  rownames_to_column(var = "Row.Name")  # Row names are moved to 'Row.Name' column
+  rownames_to_column(var = "Row.Name")
 
 # Remove rows that end with 'o'
 conc_wb_clean <- conc_wb_clean %>%
-  filter(!grepl("o$", Row.Name))  # Filter out rows where the 'Row.Name' ends with 'o'
+  filter(!grepl("o$", Row.Name))
 
 # Rename the first column to 'Volunteer'
 conc_wb_clean <- conc_wb_clean %>%
@@ -371,7 +371,7 @@ conc_wb_clean <- conc_wb_clean %>%
 
 # Assign 'Vol1', 'Vol2', ..., 'Vol5' based on row numbers
 conc_wb_clean <- conc_wb_clean %>%
-  mutate(Volunteer = paste0("Vol", rep(1:5, length.out = n())))  # Assigns Vol1 to Vol5 cyclically
+  mutate(Volunteer = paste0("Vol", rep(1:5, length.out = n())))
 
 conc_wb_clean_long <- conc_wb_clean %>%
   pivot_longer(cols = starts_with("PCB"), 

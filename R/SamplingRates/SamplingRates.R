@@ -1,4 +1,4 @@
-## Script to calcualte individual PCB sampling rates
+## Script to calculate individual PCB sampling rates
 # for silicone wristbands. Sampling rates were calculated with
 # (i) static (2 times) and (ii) rotating set up.
 # Airborne concentration was measured using low volume samplers (PUF)

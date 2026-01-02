@@ -1,5 +1,7 @@
 ## Script to calculate individual PCB "personal" sampling rates
-# for silicone wristbands.
+# for silicone wristbands. Office airborne PCB concentrations
+# were obtained using a static WB and the sampling rates from
+# Study 1 (static)
 # nd non-dominant hand
 # d dominant hand
 
@@ -279,7 +281,7 @@ p.sr.V1.koa.2 <- ggplot(sr.long.V1, aes(x = logKoa, y = sr)) +
 p.sr.V1.koa.2
 
 # Save plot in folder
-ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa2.png", plot = p.sr.V1.koa.2,
+ggsave("Output/Plots/SamplingRates/Personal/V1_logKoa.png", plot = p.sr.V1.koa.2,
        width = 6, height = 6, dpi = 500)
 
 # Calculate personal sampling rate V2 -------------------------------------
@@ -766,7 +768,7 @@ SR.V3.2_results <- list()
 # Loop over each PCB
 for (cg in as.character(logKoa$congener)) {
   
-  ## ---- Safety checks ----
+  # Safety checks
   if (!cg %in% names(data.V3.2)) next
   
   logKoa_val <- logKoa$logKoa[logKoa$congener == cg]
@@ -774,31 +776,31 @@ for (cg in as.character(logKoa$congener)) {
   
   if (length(logKoa_val) != 1 || length(ko_val_for_PCB) != 1) next
   
-  ## ---- Extract PCB values ----
+  # Extract PCB values
   PCB_vals <- data.V3.2[[cg]]
   
-  ## ---- Time values (days) for static rows ----
+  # Time values (days) for static rows
   time_vals <- data.V3.2$time[1:3] / 24
   
-  ## ---- Calculate Kwb ----
+  # Calculate Kwb
   Kwb_val_for_PCB <- 10^(0.6156 * logKoa_val + 2.161)
   
-  ## ---- Calculate veff_stat ----
+  # Calculate veff_stat
   veff_stat <- sapply(time_vals, function(time) {
     Kwb_val_for_PCB * Vwb *
       (1 - exp(-ko_val_for_PCB * Awb * time / Vwb / Kwb_val_for_PCB))
   })
   
-  ## ---- Concentration from static rows ----
+  # Concentration from static rows
   conc <- PCB_vals[1:3] / veff_stat
   
-  ## ---- Calculate Veff for rows 4–9 ----
+  # Calculate Veff for rows 4–9
   Veff <- sapply(4:9, function(row) {
     cycle_index <- ((row - 4) %% 3) + 1
     PCB_vals[row] / conc[cycle_index]
   })
   
-  ## ---- Assemble Veff data ----
+  # Assemble Veff data
   Veff_results <- data.frame(
     Row  = 4:9,
     Time = data.V3.2$time[4:9] / 24,
@@ -808,7 +810,7 @@ for (cg in as.character(logKoa$congener)) {
   Veff_nw <- Veff_results[1:3, ]
   Veff_w  <- Veff_results[4:6, ]
   
-  ## ---- Regression helper ----
+  # Regression
   get_regression <- function(values, times) {
     if (sum(is.finite(values)) == 3) {
       fit <- lm(values ~ 0 + times)
@@ -822,11 +824,11 @@ for (cg in as.character(logKoa$congener)) {
     }
   }
   
-  ## ---- Run regressions ----
+  # Run regressions
   SR_nw <- get_regression(Veff_nw$Veff, Veff_nw$Time)
   SR_w  <- get_regression(Veff_w$Veff,  Veff_w$Time)
   
-  ## ---- Store results ----
+  # Store results
   SR.V3.2_results[[cg]] <- data.frame(
     Sampling_Rate = c(SR_nw[1], SR_w[1]),
     R2           = c(SR_nw[2], SR_w[2]),
@@ -858,7 +860,7 @@ SR_V3.2[mask_filter, c("Sampling_Rate (m3/d)", "R2", "p_value")] <- NA
 Awb.V3.nw <- data.V3.2$area.WB[3]  # NW
 Awb.V3.w <- data.V3.2$area.WB[4]   # W
 
-# Assign area based on group (using grepl for pattern matching)
+# Assign area based on group
 SR_V3.2$area <- ifelse(grepl("_nw$", SR_V3.2$group), Awb.V3.nw,
                        ifelse(grepl("_w$", SR_V3.2$group), Awb.V3.w, NA))
 
@@ -1347,7 +1349,7 @@ congener_order <- combined_SR$congener %>% unique()
 # Convert congener to factor with preserved order
 combined_SR$congener <- factor(combined_SR$congener, levels = congener_order)
 
-# Proceed with summarizing (do NOT use arrange here)
+# Proceed with summarizing
 SR_averages_sd_cv <- combined_SR %>%
   group_by(congener) %>%
   summarise(

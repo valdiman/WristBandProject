@@ -1,5 +1,6 @@
-## Script to fabricate PCB profiles &
+## Script to create PCB profiles &
 # and calculate cosine theta for similarity analysis
+# for Study 1
 
 # Install packages
 install.packages("ggplot2")
@@ -85,21 +86,10 @@ p.puf <- ggplot(df_summary, aes(x = PCB, y = mean_conc)) +
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) +
-  labs(
-    x = NULL,
-    y = expression(bold("Conc. Fraction " * Sigma * "PCB"))
-  ) +
-  annotate(
-    "text",
-    x = 150,           # choose x-position (PCB number or factor level)
-    y = 0.15,         # choose y-position
-    label = "Active low-volume sampler", 
-    color = "black", 
-    size =3,
-    fontface = "bold"
-  )
+    panel.grid.minor = element_blank()) +
+  labs(x = NULL, y = expression(bold("Conc. Fraction " * Sigma * "PCB"))) +
+  annotate("text", x = 150, y = 0.15, label = "Active low-volume sampler", 
+    color = "black", size = 3, fontface = "bold")
 
 p.puf
 
@@ -111,34 +101,26 @@ ggsave("Output/Plots/Profiles/Study1/PUFConcentration.png", plot = p.puf,
 df_long.wb <- prof.wb %>%
   mutate(obs = 1:n()) %>%
   pivot_longer(
-    cols = matches("^PCB"),   # matches any column starting with "PCB"
+    cols = matches("^PCB"),
     names_to = "PCB",
     values_to = "concentration"
   ) %>%
   filter(!is.na(concentration)) %>%
   mutate(
     PCB = factor(PCB, levels = unique(PCB)),
-    Source = "WB PCB"
-  )
+    Source = "WB PCB")
 
 df_summary <- df_long.wb %>%
   group_by(PCB) %>%
   summarise(
     mean_conc = mean(concentration),
     sd_conc   = sd(concentration),
-    .groups = "drop"
-  )
+    .groups = "drop")
 
 p.wb <- ggplot(df_summary, aes(x = PCB, y = mean_conc)) +
-  geom_col(
-    fill = "orange",
-    color = "black",
-    linewidth = 0.2
-  ) +
-  geom_errorbar(aes(ymin = mean_conc,  # start from mean
-                    ymax = mean_conc + sd_conc),  # extend only upwards
-                width = 0.2,
-                color = "black") +
+  geom_col( fill = "orange", color = "black", linewidth = 0.2) +
+  geom_errorbar(aes(ymin = mean_conc, ymax = mean_conc + sd_conc),
+                width = 0.2, color = "black") +
   theme_bw() +
   theme(
     aspect.ratio = 3/20,
@@ -147,21 +129,10 @@ p.wb <- ggplot(df_summary, aes(x = PCB, y = mean_conc)) +
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) +
-  labs(
-    x = NULL,
-    y = expression(bold("Mass Fraction " * Sigma * "PCB"))
-  ) +
-  annotate(
-    "text",
-    x = 160,           # choose x-position (PCB number or factor level)
-    y = 0.15,         # choose y-position
-    label = "Static WB", 
-    color = "black", 
-    size =3,
-    fontface = "bold"
-  )
+    panel.grid.minor = element_blank()) +
+  labs(x = NULL,y = expression(bold("Mass Fraction " * Sigma * "PCB"))) +
+  annotate("text", x = 160, y = 0.15, label = "Static WB",  color = "black",
+           size =3, fontface = "bold")
 
 p.wb
 
