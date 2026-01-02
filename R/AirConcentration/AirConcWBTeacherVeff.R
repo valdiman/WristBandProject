@@ -40,8 +40,6 @@ for (i in 1:length(bl.1[1, ])) {
   normality[i, 2] <- shapiro.test(log10(bl.1[,i]))$p.value
 }
 
-
-
 # Just 3 significant figures
 normality <- formatC(signif(normality, digits = 3))
 # Add congener names
@@ -52,8 +50,8 @@ normality <- cbind(congeners, normality)
 colnames(normality) <- c("Congener", "shapiro.normal", "shapiro.log10")
 # Create Q-Q plot for individual PCB congeners
 {
-  qqnorm(bl.1$PCB9, main = "Concentration (ng/g)")
-  qqline(bl.1$PCB9)
+  qqnorm(bl.1$PCB52, main = "Concentration (ng/g)")
+  qqline(bl.1$PCB52)
 }
 
 # Bar plot to visualize Shapiro test (normality)
@@ -95,15 +93,16 @@ ggplot(norma, aes(x = Congener, y = -log10(shapiro.log10))) +
 write.csv(normality, file = "Output/Data/csv/Teachers/BlankNormalityTeachers.csv")
 
 # Calculate LOQ -----------------------------------------------------------
+# From above analysis, normal scale is used to calculate LOQ
 # Create LOQ, i.e., upper 95 CI% (mean + 1.96*sd/(n)^0.5)
 loq <- colMeans(bl.1) + 1.96*sapply(bl.1, sd)/sqrt(21)
 loq <- data.frame(t(loq))
 
 # Sample loq comparison ---------------------------------------------------
-# If s.1 > loq, then wt[, 2:174], if not 0
-# Remove sample names from wt
+# If s.1 > loq, then wt[, 5:177], if not 0
+# Remove metadata from wt
 wt.1 <- wt[, 5:177]
-# Create matrix to storage s.1 or loq values in s.2
+# Create matrix to storage
 wt.2 <- matrix(NA, nrow = dim(wt.1)[1], ncol = dim(wt.1)[2])
 # Do comparison
 for(i in 1:dim(wt.1)[1]) {
@@ -118,11 +117,11 @@ for(i in 1:dim(wt.1)[1]) {
 
 # Transform to data.frame
 wt.2 <- data.frame(wt.2)
-# Add sample
+# Add sample code
 wt.2 <- cbind(wt$sid, wt.2)
 # Change column name
 names(wt.2)[names(wt.2) == 'wt$sid'] <- 'code.teacher'
-# Add column names
+# Add column names (congener)
 colnames(wt.2)[2:174] <- colnames(wt)[5:177]
 
 # Individual PCB detection frequency --------------------------------------
@@ -281,16 +280,24 @@ names(wt.3)[names(wt.3) == 'wt$time/24'] <- 'time.day'
 names(wt.3)[names(wt.3) == 'wt$vol.WB'] <- 'vol.WB'
 names(wt.3)[names(wt.3) == 'wt$area.WB'] <- 'area.WB'
 
+n_teachers <- nrow(wt.3)
+n_pcbs <- nrow(logKwb)
+
 # Calculate Veff
-vol_matrix <- matrix(rep(wt.3$vol.WB, each = 173), nrow = 36, byrow = TRUE)
-area_matrix <- matrix(rep(wt.3$area.WB, each = 173), nrow = 36, byrow = TRUE)
-time_matrix <- matrix(rep(wt.3$time.day, each = 173), nrow = 36, byrow = TRUE)
-logK_matrix <- matrix(rep(logKwb$logKwb, times = 36), nrow = 36, byrow = FALSE)
-ko2 <- ko.p$Average_ko2
+vol_matrix  <- matrix(rep(wt.3$vol.WB, times = n_pcbs),
+                      nrow = n_teachers, ncol = n_pcbs)
+area_matrix <- matrix(rep(wt.3$area.WB, times = n_pcbs),
+                      nrow = n_teachers, ncol = n_pcbs)
+time_matrix <- matrix(rep(wt.3$time.day, times = n_pcbs),
+                      nrow = n_teachers, ncol = n_pcbs)
+logK_matrix <- matrix(rep(logKwb$logKwb, each = n_teachers),
+                      nrow = n_teachers, ncol = n_pcbs)
+ko2_matrix  <- matrix(rep(ko2, each = n_teachers),
+                      nrow = n_teachers, ncol = n_pcbs)
 
 # Calculate veff.teacher as a 36 x 173 matrix
-veff.teacher <- 10^logK_matrix * vol_matrix * 
-  (1 - exp(-ko2 * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
+veff.teacher <- 10^logK_matrix * vol_matrix *
+  (1 - exp(-ko2_matrix * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
 
 # Estimate concentration from worn WBs
 wt.mass <- wt.3[, 5:177]
@@ -375,7 +382,7 @@ tPCB.wt <- ggplot(plot_data, aes(x = factor(label), y = mean_tPCB)) +
 print(tPCB.wt)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCBVeffV2.png", plot = tPCB.wt,
+ggsave("Output/Plots/Teachers/WTtPCBVeff.png", plot = tPCB.wt,
        width = 10, height = 5, dpi = 1200)
 
 # Plot the mean PCB concentrations against 'school.year'
@@ -407,7 +414,7 @@ tPCB.wt.yr <- ggplot(updated_tPCB, aes(x = school.year, y = tPCB)) +
 print(tPCB.wt.yr)
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTtPCByrVeffV2.png", plot = tPCB.wt.yr,
+ggsave("Output/Plots/Teachers/WTtPCByrVeff.png", plot = tPCB.wt.yr,
        width = 10, height = 5, dpi = 1200)
 
 # Predicted PCBi Concentrations -------------------------------------------
@@ -466,7 +473,7 @@ plot.pcbi <- ggplot(plot.pcb.long, aes(x = Congener, y = Concentration)) +
 plot.pcbi
 
 # Save plot in folder
-ggsave("Output/Plots/Teachers/WTPCBiVeffV2.png", plot = plot.pcbi,
+ggsave("Output/Plots/Teachers/WTPCBiVeff.png", plot = plot.pcbi,
        width = 10, height = 5, dpi = 1200)
 
 # Concentration Profile Analysis ------------------------------------------
@@ -504,7 +511,7 @@ costheta_df$school.year <- conc.WB$school.year
 
 # Export
 write.csv(costheta_df,
-          file = "Output/Data/csv/Teachers/CosineThetaTeachersVeffV2.csv")
+          file = "Output/Data/csv/Teachers/CosineThetaTeachersVeff.csv")
 
 # Cosine theta visualization ----------------------------------------------
 # Calculate tPCB values to be added to the plot
@@ -579,7 +586,7 @@ plot.cos.theta.low <- ggplot(data = costheta_correlations[1:16, ], # low values 
 plot.cos.theta.low
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeffV2.png",
+ggsave("Output/Plots/Profiles/Teachers/CosThetaLowVeff.png",
        plot = plot.cos.theta.low, width = 10, height = 10, dpi = 1200)
 
 plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high values >= 0.85
@@ -598,42 +605,36 @@ plot.cos.theta.high <- ggplot(data = costheta_correlations[583:595, ], # high va
 plot.cos.theta.high
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeffV2.png",
+ggsave("Output/Plots/Profiles/Teachers/CosThetaHighVeff.png",
        plot = plot.cos.theta.high, width = 10, height = 10, dpi = 1200)
 
 # Plot Individual PCB Profiles --------------------------------------------
-# e.g., S01_1 = Teacher & wt.25.r = Teacher 25.r plots included in main text
+hand_vec <- wt.0$hand[39:74]
+
 prof_long <- prof.WB.conc %>%
+  # First, create a standard column "Source" with hand info
+  mutate(Source = `conc.WB$code.teacher`,
+         Source = sub("_\\d$", "", Source),
+         Source = paste0(Source, ".", hand_vec),
+         Source = paste0("Teacher ", Source)) %>%
   pivot_longer(
     cols = starts_with("PCB"),
     names_to = "congener",
-    values_to = "Conc") %>%
+    values_to = "Conc"
+  ) %>%
   mutate(
     congener = gsub("\\.", "+", congener),
-    congener = factor(congener, levels = unique(congener)),
-    Source = `conc.WB$code.teacher`)
+    congener = factor(congener, levels = unique(congener)))
 
 # 2 PCB profiles for main text
 prof_long_sel <- prof_long %>%
-  filter(Source %in% c("S01_1", "S01_2"))
-
-# Here
-
-
-teacher_labeller <- function(x) {
-  # Extract the teacher number
-  #num <- sub("wt\\.0*(\\d+)\\..*", "\\1", x)
-  # Extract the wrist (.l or .r)
-  #wrist <- sub(".*\\.(l|r)$", ".\\1", x)
-  # Combine
-  paste0("Teacher ", num, wrist)
-}
+  filter(Source %in% c("Teacher S19.l", "Teacher S25.l")) %>%
+  mutate(Source_label = Source)
 
 plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
   geom_bar(stat = "identity", width = 1,
            color = "black", linewidth = 0.2) +
-  facet_wrap(~ Source, ncol = 1,
-             labeller = labeller(Source = teacher_labeller)) +
+  facet_wrap(~ Source_label, ncol = 1) +
   scale_y_continuous(limits = c(0, 0.2), n.breaks = 3) +
   theme_bw() +
   ylab(expression(bold("Conc. Fraction " * Sigma * "PCB"))) +
@@ -660,32 +661,22 @@ ggsave("Output/Plots/Profiles/Teachers/Teacher2.png", plot = plot.tea,
        width = 22, height = 5, dpi = 500)
 
 # All PCB profiles for SI
-# "wt.01.l", "wt.01.r", "wt.02.l", "wt.02.r"
-# "wt.03.r", "wt.04.r", "wt.05.r", "wt.06.l"
-# "wt.06.r", "wt.07.l", "wt.07.r", "wt.08.r"
-# "wt.09.r", "wt.10.r", "wt.11.r", "wt.12.r"
-# "wt.13.r", "wt.14.r", "wt.15.r", "wt.15.l"
-# "wt.16.r", "wt.17.r", "wt.18.l", "wt.18.r"
-# "wt.20.r", "wt.21.r", "wt.22.r", "wt.23.l"
-# "wt.23.r", "wt.24.l", "wt.24.r", "wt.25.r"
+# "Teacher S01.l", "Teacher S01.r", "Teacher S02.l", "Teacher S02.r",
+# "Teacher S03.r", "Teacher S04.r", "Teacher S05.r", "Teacher S06.l",
+# "Teacher S06.r", "Teacher S07.l", "Teacher S07.r", "Teacher S08.r",
+# "Teacher S09.r", "Teacher S10.r", "Teacher S11.r", "Teacher S12.r",
+# "Teacher S13.r", "Teacher S14.r", "Teacher S15.r", "Teacher S15.l",
+# "Teacher S16.r", "Teacher S17.r", "Teacher S18.l", "Teacher S18.r",
+# "Teacher S20.r", "Teacher S21.r", "Teacher S22.r", "Teacher S23.l",
+# "Teacher S23.r", "Teacher S24.l", "Teacher S24.r", "Teacher S25.r"
 
 prof_long_sel <- prof_long %>%
-  filter(Source %in% c("wt.23.r", "wt.24.l", "wt.24.r", "wt.25.r"))
-
-teacher_labeller <- function(x) {
-  # Extract the teacher number
-  num <- sub("wt\\.0*(\\d+)\\..*", "\\1", x)
-  # Extract the wrist (.l or .r)
-  wrist <- sub(".*\\.(l|r)$", ".\\1", x)
-  # Combine
-  paste0("Teacher ", num, wrist)
-}
+  filter(Source %in% c("Teacher S23.r", "Teacher S24.l", "Teacher S24.r", "Teacher S25.r")) %>%
+  mutate(Source_label = Source)  # optional, for faceting
 
 plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
-  geom_bar(stat = "identity", width = 1,
-           color = "black", linewidth = 0.2) +
-  facet_wrap(~ Source, ncol = 1,
-             labeller = labeller(Source = teacher_labeller)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source_label, ncol = 1) +
   scale_y_continuous(limits = c(0, 0.2), n.breaks = 3) +
   theme_bw() +
   ylab(expression(bold("Conc. Fraction " * Sigma * "PCB"))) +
@@ -710,6 +701,4 @@ plot.tea
 # Save plot
 ggsave("Output/Plots/Profiles/Teachers/Teacher29-32.png", plot = plot.tea,
        width = 22, height = 15, dpi = 500)
-
-
 
