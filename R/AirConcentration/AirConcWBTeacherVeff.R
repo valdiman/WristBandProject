@@ -1,5 +1,5 @@
 ## Script to analyze school teacher wristband data and
-# estimate concentrations and PCB profiles from worn WB
+# estimate concentrations and PCB profiles from worn WBs
 
 # Install packages
 install.packages("reshape2")
@@ -204,13 +204,13 @@ ggplot(prof, aes(x = congener, y = S02_1)) + # change y (sid)
   geom_bar(position = position_dodge(), stat = "identity",
            fill = "black") +
   xlab("") +
-  ylim(0, 0.12) +
+  ylim(0, 0.07) +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
   ylab(expression(bold("Mass fraction "*Sigma*"PCB"))) +
   theme(axis.text.y = element_text(face = "bold", size = 10),
         axis.title.y = element_text(face = "bold", size = 10)) +
-  theme(axis.text.x = element_text(face = "bold", size = 5,
+  theme(axis.text.x = element_text(face = "bold", size = 8,
                                    angle = 60, hjust = 1),
         axis.title.x = element_text(face = "bold", size = 7))
 
@@ -292,12 +292,12 @@ time_matrix <- matrix(rep(wt.3$time.day, times = n_pcbs),
                       nrow = n_teachers, ncol = n_pcbs)
 logK_matrix <- matrix(rep(logKwb$logKwb, each = n_teachers),
                       nrow = n_teachers, ncol = n_pcbs)
-ko2_matrix  <- matrix(rep(ko2, each = n_teachers),
+ko_matrix  <- matrix(rep(ko.p$Average_ko2, each = n_teachers),
                       nrow = n_teachers, ncol = n_pcbs)
 
 # Calculate veff.teacher as a 36 x 173 matrix
 veff.teacher <- 10^logK_matrix * vol_matrix *
-  (1 - exp(-ko2_matrix * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
+  (1 - exp(-ko_matrix * area_matrix / vol_matrix / 10^logK_matrix * time_matrix))
 
 # Estimate concentration from worn WBs
 wt.mass <- wt.3[, 5:177]
@@ -664,7 +664,6 @@ ggsave("Output/Plots/Profiles/Teachers/Teacher2.png", plot = plot.tea,
 # All PCB profiles for SI
 # "Teacher S01.l", "Teacher S01.r", "Teacher S02.l", "Teacher S02.r",
 # "Teacher S03.r", "Teacher S04.r", "Teacher S05.r", "Teacher S06.l",
-# "Teacher S06.r", "Teacher S07.l", "Teacher S07.r", "Teacher S08.r",
 # "Teacher S09.r", "Teacher S10.r", "Teacher S11.r", "Teacher S12.r",
 # "Teacher S13.r", "Teacher S14.r", "Teacher S15.r", "Teacher S15.l",
 # "Teacher S16.r", "Teacher S17.r", "Teacher S18.l", "Teacher S18.r",
@@ -672,7 +671,7 @@ ggsave("Output/Plots/Profiles/Teachers/Teacher2.png", plot = plot.tea,
 # "Teacher S23.r", "Teacher S24.l", "Teacher S24.r", "Teacher S25.r"
 
 prof_long_sel <- prof_long %>%
-  filter(Source %in% c("Teacher S23.r", "Teacher S24.l", "Teacher S24.r", "Teacher S25.r")) %>%
+  filter(Source %in% c("Teacher S01.l", "Teacher S01.r", "Teacher S02.l", "Teacher S02.r")) %>%
   mutate(Source_label = Source)  # optional, for faceting
 
 plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
@@ -700,6 +699,48 @@ plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
 plot.tea
 
 # Save plot
-ggsave("Output/Plots/Profiles/Teachers/Teacher29-32.png", plot = plot.tea,
+ggsave("Output/Plots/Profiles/Teachers/Teacher1-4.png", plot = plot.tea,
+       width = 22, height = 15, dpi = 500)
+
+# There are 2 'Teacher SO8.r
+# "Teacher S06.r", "Teacher S07.l", "Teacher S07.r", "Teacher S08.r",
+prof_long_sel <- prof_long %>%
+  filter(Source %in% c("Teacher S06.r", "Teacher S07.l", "Teacher S07.r", "Teacher S08.r")) %>%
+  group_by(Source) %>%
+  mutate(
+    Source_label = if_else(
+      Source == "Teacher S08.r",
+      paste0(Source, "_", dense_rank(`conc.WB$code.teacher`)),
+      Source
+    )
+  ) %>%
+  ungroup()
+
+plot.tea <- ggplot(prof_long_sel, aes(x = congener, y = Conc, fill = Source)) +
+  geom_bar(stat = "identity", width = 1, color = "black", linewidth = 0.2) +
+  facet_wrap(~ Source_label, ncol = 1) +
+  scale_y_continuous(limits = c(0, 0.2), n.breaks = 3) +
+  theme_bw() +
+  ylab(expression(bold("Conc. Fraction " * Sigma * "PCB"))) +
+  theme(
+    axis.text.y = element_text(face = "bold", size = 22),
+    axis.title.y = element_text(face = "bold", size = 24),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text = element_text(size = 24, face = "bold"),
+    legend.position = "none",
+    axis.text.x.bottom = element_text(
+      angle = 90, vjust = 0.5, hjust = 1,
+      size = 9, face = "bold"
+    ),
+    axis.ticks.x.bottom = element_line())
+
+plot.tea
+
+# Save plot
+ggsave("Output/Plots/Profiles/Teachers/Teacher9-12.png", plot = plot.tea,
        width = 22, height = 15, dpi = 500)
 
