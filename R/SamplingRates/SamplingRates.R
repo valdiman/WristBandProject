@@ -18,10 +18,10 @@ install.packages("dplyr")
 # Sampling rates calculations under static conditions ---------------------
 # Read data
 {
-  PUF.0 <- read.csv("Data/IRO/SampleConcentrationStudy1.csv")
-  PUF <- PUF.0[1:4, 8:180] # select rows and columns (ng/m3)
-  WB.0 <- read.csv("Data/IRO/SampleMassStudy1.csv")
-  WB <- WB.0[7:11, c(1, 5, 10:182)] # select rows and columns (ng/WB)
+  PUF.0 <- read.csv("Data/IRO/SamplePUFConcStudy1.csv")
+  PUF <- PUF.0[1:4, 4:176] # select rows and columns from Study 1 static (ng/m3)
+  WB.0 <- read.csv("Data/IRO/SampleWBMassStudy1.csv")
+  WB <- WB.0[1:5, c(1, 4, 7:179)] # select rows and columns from Study 1, first static experiment: sid, time and mass (ng/gWB)
   logKoa <- read.csv("Data/IRO/logKoa.csv")
 }
 
@@ -100,6 +100,8 @@ SR.ko.sd <- sd(SR.st.1$ko, na.rm = TRUE)
 
 # Add average of ko to the Na values.
 SR.st.1$ko[is.na(SR.st.1$ko)] <- SR.ko.ave
+# Format to 3 significant figures
+SR.st.1$ko <- signif(SR.st.1$ko, 3)
 
 # Export
 write.csv(SR.st.1, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
@@ -131,9 +133,9 @@ ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[17])) +
 # Sampling rates calculations under static and rotating conditions -------------------
 # Read data
 {
-  PUF.v2 <- PUF.0[5:6, 8:180] # select rows and columns (ng/m3)
-  WB.st <- WB.0[12:15, c(1, 5, 10:182)] # select rows and columns (ng/WB)
-  WB.rot <- WB.0[16:19, c(1, 5, 10:182)] # select rows and columns (ng/WB)
+  PUF.v2 <- PUF.0[5:6, 4:176] # select rows and columns (ng/m3)
+  WB.st <- WB.0[6:9, c(1, 4, 7:179)] # select rows and columns (ng/WB)
+  WB.rot <- WB.0[10:13, c(1, 4, 7:179)] # select rows and columns (ng/WB)
 }
 
 # Remove metadata
@@ -192,6 +194,8 @@ SR.ko.sd <- sd(SR.st.2$ko, na.rm = TRUE)
 
 # Add average of ko to the Na values.
 SR.st.2$ko[is.na(SR.st.2$ko)] <- SR.ko.ave
+# Format to 3 significant figures
+SR.st.2$ko <- signif(SR.st.2$ko, 3)
 
 #export
 write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2.csv")
@@ -267,6 +271,8 @@ SR.ko.sd <- sd(SR.rot$ko, na.rm = TRUE)
 
 # Add averege of ko to the Na values.
 SR.rot$ko[is.na(SR.rot$ko)] <- SR.ko.ave
+# Format to 3 significant figures
+SR.rot$ko <- signif(SR.rot$ko, 3)
 
 # Export
 write.csv(SR.rot, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateRotV1.csv")
@@ -670,3 +676,4 @@ p.sr.rot.koa
 # Save plot in folder
 ggsave("Output/Plots/SamplingRates/SR/Rot_logKoa.png", plot = p.sr.rot.koa,
        width = 6, height = 6, dpi = 500)
+
