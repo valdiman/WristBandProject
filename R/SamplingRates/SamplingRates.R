@@ -1,5 +1,5 @@
 ## Script to calculate individual PCB sampling rates
-# for silicone wristbands. Sampling rates were calculated with
+# for silicone wristbands (WB). Sampling rates were calculated with
 # (i) static (2 times) and (ii) rotating set up.
 # Airborne concentration was measured using low volume samplers (PUF)
 
@@ -19,16 +19,18 @@ install.packages("dplyr")
 # Read data
 {
   PUF.0 <- read.csv("Data/IRO/SamplePUFConcStudy1.csv")
-  PUF <- PUF.0[1:4, 4:176] # select rows and columns from Study 1 static (ng/m3)
+  # Select active low-volume sampler concentrations from Study 1 static PUF (ng/m3)
+  PUF <- PUF.0[1:4, 4:176]
   WB.0 <- read.csv("Data/IRO/SampleWBMassStudy1.csv")
-  WB <- WB.0[1:5, c(1, 4, 7:179)] # select rows and columns from Study 1, first static experiment: sid, time and mass (ng/gWB)
+  # Select WB mass from Study 1, first static experiment: sid, time and mass (ng/gWB)
+  WB <- WB.0[1:5, c(1, 4, 7:179)]
   logKoa <- read.csv("Data/IRO/logKoa.csv")
 }
 
 # Remove metadata
 WB.1 <- subset(WB, select = -c(sid:time))
 
-# Perform linear regression of WD accumulate mass vs time to check linearity
+# Perform linear regression of WB accumulate mass vs time to check linearity
 # Create matrix to storage data
 WBMatrix <- matrix(nrow = length(WB.1), ncol = 3)
 
@@ -88,7 +90,7 @@ mask <- SR.st.1$R2 < 0.9 | SR.st.1$`p-value` > 0.05
 SR.st.1$`Sampling Rate (m3/d)`[mask] <- NA
 SR.st.1$R2[mask] <- NA
 SR.st.1$`p-value`[mask] <- NA
-Awb <- 0.0054773 # [m2]
+Awb <- WB.0$area.WB[1] # [m2]
 SR.st.1$ko <- SR.st.1$`Sampling Rate (m3/d)` /  Awb # [m/d]
 
 # Values
@@ -106,7 +108,7 @@ SR.st.1$ko <- signif(SR.st.1$ko, 3)
 # Export
 write.csv(SR.st.1, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
 
-# Plots
+# Plot to check linearity and sampling rate
 # Change number congener in [] 
 
 fit1 <- lm(WB.1$PCB18.30/PUF.mean[16] ~ 0 + time)
@@ -133,9 +135,12 @@ ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[17])) +
 # Sampling rates calculations under static and rotating conditions -------------------
 # Read data
 {
-  PUF.v2 <- PUF.0[5:6, 4:176] # select rows and columns (ng/m3)
-  WB.st <- WB.0[6:9, c(1, 4, 7:179)] # select rows and columns (ng/WB)
-  WB.rot <- WB.0[10:13, c(1, 4, 7:179)] # select rows and columns (ng/WB)
+  # Select active low-volume sampler concentrations from Study 1 static/rotating PUF (ng/m3)
+  PUF.v2 <- PUF.0[5:6, 4:176]
+  # Select WB mass from Study 1, static experiment: sid, time and mass (ng/gWB)
+  WB.st <- WB.0[6:9, c(1, 4, 7:179)]
+  # Select WB mass from Study 1, rotating experiment: sid, time and mass (ng/gWB)
+  WB.rot <- WB.0[10:13, c(1, 4, 7:179)]
 }
 
 # Remove metadata
@@ -200,7 +205,7 @@ SR.st.2$ko <- signif(SR.st.2$ko, 3)
 #export
 write.csv(SR.st.2, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV2.csv")
 
-# Plots
+# Plot to check linearity and sampling rate
 # Change number congener in [] 
 
 fit1 <- lm(WB.st.2[, 154]/PUF.mean.2[154] ~ 0 + time.2)
@@ -277,7 +282,7 @@ SR.rot$ko <- signif(SR.rot$ko, 3)
 # Export
 write.csv(SR.rot, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateRotV1.csv")
 
-# Plots
+# Plot to check linearity and sampling rate
 # Change number congener in [] 
 
 fit1 <- lm(WB.rot.2$PCB18.30/PUF.mean.2[17] ~ 0 + time.2)
@@ -303,6 +308,7 @@ ggplot(WB.rot.2, aes(x = time.2*24, y = `PCB18.30`/PUF.mean.2[17])) +
            size = 2.5, fontface = 2)
 
 # Plot both 'stat' and 'dyn' sampling rates -------------------------------
+# Plots are shown in paper and SI
 # Combine plot
 # PCB 18+30
 WB$PCB18.30_comb <- WB.1$PCB18.30 / PUF.mean[17]
