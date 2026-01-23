@@ -19,14 +19,19 @@ install.packages("tibble")
 
 # Read data ---------------------------------------------------------------
 {
-  data.0 <- read.csv("Data/IRO/SampleMassStudy3_4_5.csv")
-  data <- data.0[1:25, c(1, 7, 9:10, 12:184)]
-  data.2 <- data.0[26:38, c(1, 7, 9:10, 12:184)]
+  data.0 <- read.csv("Data/IRO/SampleWBMassStudy3_4_5.csv", check.names = FALSE)
+  # Select data from Study 3
+  data <- data.0[1:25, c(1, 7:182)]
+  # Select data from Study 4 for only office time
+  data.2 <- data.0[26:38, c(1, 7:182)]
+  # Read individual PCB logKoa
   logKoa <- read.csv("Data/IRO/logKoa.csv")
   # ko from SamplingRates_ko.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]
   ko <- ko[c(2,6)]
+  # Modify "." to "+"
+  ko$congener <- gsub("\\.", "+", ko$congener)
 }
 
 # Calculate logKws
@@ -36,7 +41,7 @@ logKwb <- data.frame(
   congener = logKoa$congener,
   logKwb = 0.6156 * logKoa$logKoa + 2.161) # R2 = 0.96
 
-# Select only congeners
+# Select only congeners and to check that all have the same congeners
 common_ids <- intersect(ko$congener, logKwb$congener)
 ko <- ko[ko$congener %in% common_ids, ]
 logKwb <- logKwb[logKwb$congener %in% common_ids, ]

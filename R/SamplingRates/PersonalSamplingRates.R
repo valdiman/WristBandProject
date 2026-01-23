@@ -1,5 +1,5 @@
 ## Script to calculate individual PCB "personal" sampling rates
-# for silicone wristbands. Office airborne PCB concentrations
+# for silicone wristbands (WB). Office airborne PCB concentrations
 # were obtained using a static WB and the sampling rates from
 # Study 1 (static)
 # nd non-dominant hand
@@ -23,16 +23,21 @@ install.packages("rollapply")
   library(zoo)
 }
 
-# 3 volunteers, V1, V2, and V3
+# 3 volunteers, V1, V2, and V3 (non-wiped and wiped)
 # Read data ---------------------------------------------------------------
 {
-  data <- read.csv("Data/IRO/SampleMassStudy2.csv")
-  data.V1 <- data[1:13, c(1, 7, 9:10, 12:184)] # volunteer 1
-  data.V2 <- data[14:21, c(1, 7, 9:10, 12:184)] # volunteer 2
-  data.V3.1 <- data[22:33, c(1, 7, 9:10, 12:184)] # volunteer 3
-  data.V3.2 <- data[34:42, c(1, 7, 9:10, 12:184)] # volunteer 3
+  data <- read.csv("Data/IRO/SampleWBMassStudy2.csv", check.names = FALSE)
+  # Select volunteer 1
+  data.V1 <- data[1:13, c(1, 7:182)]
+  # Select volunteer 2
+  data.V2 <- data[14:21, c(1, 7:182)]
+  # Select volunteer 3
+  data.V3.1 <- data[22:33, c(1, 7:182)]
+  # Select volunteer 3 wiped WB experiment
+  data.V3.2 <- data[34:42, c(1, 7:182)]
+  # Read individual PCB logKoa
   logKoa <- read.csv("Data/IRO/logKoa.csv")
-  # ko from SamplingRates.R file
+  # Read ko from SamplingRates.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]
   ko <- ko[c(2,6)]
@@ -121,6 +126,8 @@ SR.V1.nd$p_value[mask] <- NA
 # Calculate ko from V1 nd
 Awb.V1 <- data.V1$area.WB[4] # [m2] youth
 SR.V1.nd$ko <- SR.V1.nd$`Sampling_Rate (m3/d)` / Awb.V1 # [m/d]
+# Format to 3 significant figures
+SR.V1.nd$ko <- signif(SR.V1.nd$ko, 3)
 
 # Export results
 write.csv(SR.V1.nd,
@@ -160,13 +167,15 @@ SR.V1.d$p_value[mask] <- NA
 # Calculate ko from V1 d
 Awb.V1 <- data.V1$area.WB[4] # [m2] youth
 SR.V1.d$ko <- SR.V1.d$`Sampling_Rate (m3/d)` / Awb.V1 # [m/d]
+# Format to 3 significant figures
+SR.V1.d$ko <- signif(SR.V1.d$ko, 3)
 
 # Export results
 write.csv(SR.V1.d,
           file = "Output/Data/csv/SamplingRates/Personal/SR.V1.d.csv",
           row.names = FALSE)
 
-# Plot
+# Plot for visualization only
 # Organize PCB names
 SR.V1.nd$congener <- factor(SR.V1.nd$congener,
                             levels = unique(SR.V1.nd$congener))
@@ -354,12 +363,14 @@ SR.V2.d$p_value[mask] <- NA
 # Calculate ko from V2 d
 Awb.V2 <- data.V2$area.WB[1] # [m2] adult
 SR.V2.d$ko <- SR.V2.d$`Sampling_Rate (m3/d)` / Awb.V2 # [m/d]
+# Format to 3 significant figures
+SR.V2.d$ko <- signif(SR.V2.d$ko, 3)
 
 # Export results
 write.csv(SR.V2.d,
           file = "Output/Data/csv/SamplingRates/Personal/SR.V2.d.csv", row.names = FALSE)
 
-# Plot
+# Plot for visualization only
 # Organize PCB names
 SR.V2.d$congener <- factor(SR.V2.d$congener,
                                levels = unique(SR.V2.d$congener))
@@ -490,13 +501,15 @@ SR.V3.1st.nd$p_value[mask] <- NA
 # Calculate ko from V3.1
 Awb.V3.1 <- data.V3.1$area.WB[1] # [m2] adult
 SR.V3.1st.nd$ko <- SR.V3.1st.nd$`Sampling_Rate (m3/d)` / Awb.V3.1 # [m/d]
+# Format to 3 significant figures
+SR.V3.1st.nd$ko <- signif(SR.V3.1st.nd$ko, 3)
 
 # Export results
 write.csv(SR.V3.1st.nd,
           file = "Output/Data/csv/SamplingRates/Personal/SR.V3.1st.nd.csv",
           row.names = FALSE)
 
-# Plot
+# Plot for visualization only
 # Organize PCB names
 SR.V3.1st.nd$congener <- factor(SR.V3.1st.nd$congener,
                             levels = unique(SR.V3.1st.nd$congener))
@@ -549,13 +562,15 @@ SR.V3.2nd.nd$p_value[mask] <- NA
 # Calculate ko from V3.1
 Awb.V3.2nd <- data.V3.1$area.WB[1] # [m2] adult
 SR.V3.2nd.nd$ko <- SR.V3.2nd.nd$`Sampling_Rate (m3/d)` / Awb.V3.2nd # [m/d]
+# Format to 3 significant figures
+SR.V3.2nd.nd$ko <- signif(SR.V3.2nd.nd$ko, 3)
 
 # Export results
 write.csv(SR.V3.2nd.nd,
           file = "Output/Data/csv/SamplingRates/Personal/SR.V3.2nd.nd.csv",
           row.names = FALSE)
 
-# Plot
+# Plot for visualization only
 # Organize PCB names
 SR.V3.2nd.nd$congener <- factor(SR.V3.2nd.nd$congener,
                               levels = unique(SR.V3.2nd.nd$congener))
@@ -756,89 +771,116 @@ ggsave("Output/Plots/SamplingRates/Personal/V3_logKoa.nd.2nd.week.png",
 # Concentrations were calculated for each sampling day 
 # sampling rate of 0.5 m3/d was used for static WBs
 
-# Constants
-Vwb <- data.V3.2$vol.WB[1]
-Awb <- data.V3.2$area.WB[1]
-Kwb_val <- 10^logKwb$logKwb  # Assuming logKwb is available for all congeners
-ko_val <- ko$ko  # Assuming ko values are available for all congeners
+# Assuming logKwb is available for all congeners
+Kwb_val <- 10^logKwb$logKwb
+# Assuming ko values are available for all congeners
+ko_val <- ko$ko
 
-# Initialize lists to store results for each PCB
+# Initialize list to store results for each PCB
 SR.V3.2_results <- list()
 
 # Loop over each PCB
 for (cg in as.character(logKoa$congener)) {
   
-  # Safety checks
-  if (!cg %in% names(data.V3.2)) next
+  # Safety check: skip if PCB not in data
+  if (!cg %in% names(data.V3.2)) {
+    SR.V3.2_results[[cg]] <- data.frame(
+      PCB = cg,
+      Sampling_Rate = c(NA, NA),
+      R2 = c(NA, NA),
+      p_value = c(NA, NA),
+      group = c(paste0(cg, "_nw"), paste0(cg, "_w"))
+    )
+    next
+  }
   
+  # Extract PCB-specific parameters
   logKoa_val <- logKoa$logKoa[logKoa$congener == cg]
   ko_val_for_PCB <- ko$ko[ko$congener == cg]
   
-  if (length(logKoa_val) != 1 || length(ko_val_for_PCB) != 1) next
+  # If missing parameters → fill NA
+  if (length(logKoa_val) != 1 || length(ko_val_for_PCB) != 1) {
+    SR.V3.2_results[[cg]] <- data.frame(
+      PCB = cg,
+      Sampling_Rate = c(NA, NA),
+      R2 = c(NA, NA),
+      p_value = c(NA, NA),
+      group = c(paste0(cg, "_nw"), paste0(cg, "_w"))
+    )
+    next
+  }
   
-  # Extract PCB values
-  PCB_vals <- data.V3.2[[cg]]
+  # Extract PCB concentrations
+  PCB_vals <- as.numeric(data.V3.2[[cg]])
   
-  # Time values (days) for static rows
-  time_vals <- data.V3.2$time[1:3] / 24
+  # Time for static rows (1:3)
+  time_vals <- as.numeric(data.V3.2$time[1:3]) / 24
+  
+  # Row-specific WB geometry
+  Vwb_vals <- as.numeric(data.V3.2$vol.WB[1:3])
+  Awb_vals <- as.numeric(data.V3.2$area.WB[1:3])
   
   # Calculate Kwb
   Kwb_val_for_PCB <- 10^(0.6156 * logKoa_val + 2.161)
   
-  # Calculate veff_stat
-  veff_stat <- sapply(time_vals, function(time) {
-    Kwb_val_for_PCB * Vwb *
-      (1 - exp(-ko_val_for_PCB * Awb * time / Vwb / Kwb_val_for_PCB))
-  })
+  # Calculate veff_stat row-by-row
+  veff_stat <- mapply(function(Vwb_i, Awb_i, t_i) {
+    Kwb_val_for_PCB * Vwb_i * (1 - exp(-ko_val_for_PCB * Awb_i * t_i / (Vwb_i * Kwb_val_for_PCB)))
+  }, Vwb_vals, Awb_vals, time_vals)
   
-  # Concentration from static rows
+  # Concentration per static row
   conc <- PCB_vals[1:3] / veff_stat
   
   # Calculate Veff for rows 4–9
   Veff <- sapply(4:9, function(row) {
-    cycle_index <- ((row - 4) %% 3) + 1
-    PCB_vals[row] / conc[cycle_index]
+    static_row <- ((row - 4) %% 3) + 1
+    PCB_vals[row] / conc[static_row]
   })
   
   # Assemble Veff data
   Veff_results <- data.frame(
-    Row  = 4:9,
-    Time = data.V3.2$time[4:9] / 24,
+    Row = 4:9,
+    Time = as.numeric(data.V3.2$time[4:9]) / 24,
     Veff = Veff
   )
   
+  # Split NW and W groups
   Veff_nw <- Veff_results[1:3, ]
   Veff_w  <- Veff_results[4:6, ]
   
-  # Regression
+  # Regression function (through origin)
   get_regression <- function(values, times) {
-    if (sum(is.finite(values)) == 3) {
-      fit <- lm(values ~ 0 + times)
-      c(
-        signif(coef(summary(fit))[1, "Estimate"], 3),
-        signif(summary(fit)$adj.r.squared, 3),
-        signif(coef(summary(fit))[1, "Pr(>|t|)"], 3)
-      )
-    } else {
-      c(NA, NA, NA)
-    }
+    ok <- is.finite(values) & is.finite(times)
+    if (sum(ok) < 2) return(c(Sampling_Rate = NA, R2 = NA, p_value = NA))
+    
+    fit <- lm(values[ok] ~ 0 + times[ok])
+    summary_fit <- summary(fit)
+    
+    c(
+      Sampling_Rate = as.numeric(coef(fit)[1]),
+      R2 = summary_fit$adj.r.squared,
+      p_value = coef(summary_fit)[1, "Pr(>|t|)"]
+    )
   }
   
   # Run regressions
   SR_nw <- get_regression(Veff_nw$Veff, Veff_nw$Time)
   SR_w  <- get_regression(Veff_w$Veff,  Veff_w$Time)
   
-  # Store results
+  # Store results (always two rows per PCB)
   SR.V3.2_results[[cg]] <- data.frame(
-    Sampling_Rate = c(SR_nw[1], SR_w[1]),
-    R2           = c(SR_nw[2], SR_w[2]),
-    p_value      = c(SR_nw[3], SR_w[3]),
-    group        = c(paste0(cg, "_nw"), paste0(cg, "_w"))
+    PCB = cg,
+    Sampling_Rate = c(SR_nw["Sampling_Rate"], SR_w["Sampling_Rate"]),
+    R2 = c(SR_nw["R2"], SR_w["R2"]),
+    p_value = c(SR_nw["p_value"], SR_w["p_value"]),
+    group = c(paste0(cg, "_nw"), paste0(cg, "_w"))
   )
 }
 
-# Combine all results for all congeners
+# Combine all congeners
 SR_V3.2 <- do.call(rbind, SR.V3.2_results)
+rownames(SR_V3.2) <- NULL
+
 # Change column name
 colnames(SR_V3.2)[colnames(SR_V3.2) == "Sampling_Rate"] <- "Sampling_Rate (m3/d)"
 
@@ -856,16 +898,13 @@ mask_filter <- SR_V3.2$R2 < 0.9 |
 # Apply NA to filtered rows
 SR_V3.2[mask_filter, c("Sampling_Rate (m3/d)", "R2", "p_value")] <- NA
 
-# Define areas
-Awb.V3.nw <- data.V3.2$area.WB[3]  # NW
-Awb.V3.w <- data.V3.2$area.WB[4]   # W
-
-# Assign area based on group
-SR_V3.2$area <- ifelse(grepl("_nw$", SR_V3.2$group), Awb.V3.nw,
-                       ifelse(grepl("_w$", SR_V3.2$group), Awb.V3.w, NA))
+# Define area
+SR_V3.2$area <- data.V3.2$area.WB[4]  # non-wiped and wiped
 
 # Calculate ko
 SR_V3.2$ko <- SR_V3.2$Sampling_Rate / SR_V3.2$area
+# Format to 3 significant figures
+SR_V3.2$ko <- signif(SR_V3.2$ko, 3)
 
 # Optional: drop the `area` column if not needed
 SR_V3.2$area <- NULL
@@ -874,12 +913,6 @@ SR_V3.2$area <- NULL
 SR_V3.2_nw <- subset(SR_V3.2, grepl("_nw$", group))
 SR_V3.2_w  <- subset(SR_V3.2, grepl("_w$", group))
 
-SR_V3.2_nw$congener <- congener
-SR_V3.2_w$congener <- congener
-rownames(SR_V3.2_nw) <- NULL
-rownames(SR_V3.2_w) <- NULL
-SR_V3.2_nw <- SR_V3.2_nw[, c("congener", setdiff(names(SR_V3.2_nw), "congener"))]
-SR_V3.2_w <- SR_V3.2_w[, c("congener", setdiff(names(SR_V3.2_w), "congener"))]
 SR_V3.2_nw$group <- "V3.nw.d"
 SR_V3.2_w$group <- "V3.w.d"
 
@@ -887,13 +920,13 @@ SR_V3.2_w$group <- "V3.w.d"
 write.csv(SR_V3.2_nw, "Output/Data/csv/SamplingRates/Personal/SR.V3.2_nw.csv", row.names = FALSE)
 write.csv(SR_V3.2_w,  "Output/Data/csv/SamplingRates/Personal/SR.V3.2_w.csv",  row.names = FALSE)
 
-# Plot
+# Plot for visualization only
 # (1) nw
 # Organize PCB names
-SR_V3.2_nw$congener <- factor(SR_V3.2_nw$congener,
-                              levels = unique(SR_V3.2_nw$congener))
+SR_V3.2_nw$PCB <- factor(SR_V3.2_nw$PCB,
+                              levels = unique(SR_V3.2_nw$PCB))
 
-ggplot(SR_V3.2_nw, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
+ggplot(SR_V3.2_nw, aes(x = PCB, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -905,10 +938,10 @@ ggplot(SR_V3.2_nw, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group))
         axis.title.x = element_text(face = "bold", size = 7))
 
 # (2) w
-SR_V3.2_w$congener <- factor(SR_V3.2_w$congener,
-                              levels = unique(SR_V3.2_w$congener))
+SR_V3.2_w$PCB <- factor(SR_V3.2_w$PCB,
+                              levels = unique(SR_V3.2_w$PCB))
 
-ggplot(SR_V3.2_w, aes(x = congener, y = `Sampling_Rate (m3/d)`, color = group)) +
+ggplot(SR_V3.2_w, aes(x = PCB, y = `Sampling_Rate (m3/d)`, color = group)) +
   geom_point() +
   theme_bw() +
   theme(aspect.ratio = 4/16) +
@@ -1012,19 +1045,19 @@ max_len <- max(length(Veff.V1.d.t), length(Veff.V1.nd.t),
 # Plot included in the manuscript
 up.V1.d <- data.frame(
   time = c(Veff.V1.d.t, rep(NA, max_len - length(Veff.V1.d[, 1]))),
-  veff = c(Veff.V1.d$PCB18.30, rep(NA, max_len - length(Veff.V1.d[, 1]))),
+  veff = c(Veff.V1.d$`PCB18+30`, rep(NA, max_len - length(Veff.V1.d[, 1]))),
   group = rep("Vol. 1 d")
 )
 
 up.V1.nd <- data.frame(
   time = c(Veff.V1.nd.t, rep(NA, max_len - length(Veff.V1.nd[, 1]))),
-  veff = c(Veff.V1.nd$PCB18.30, rep(NA, max_len - length(Veff.V1.nd[, 1]))),
+  veff = c(Veff.V1.nd$`PCB18+30`, rep(NA, max_len - length(Veff.V1.nd[, 1]))),
   group = rep("Vol. 1 nd")
 )
 
 up.V2.d <- data.frame(
   time = c(Veff.V2.d.t, rep(NA, max_len - length(Veff.V2.d[, 1]))),
-  veff = c(Veff.V2.d$PCB18.30, rep(NA, max_len - length(Veff.V2.d[, 1]))),
+  veff = c(Veff.V2.d$`PCB18+30`, rep(NA, max_len - length(Veff.V2.d[, 1]))),
   group = rep("Vol. 2 d")
 )
 
@@ -1032,7 +1065,13 @@ combined_data <- rbind(up.V1.d, up.V1.nd, up.V2.d)
 
 slopes <- combined_data %>%
   group_by(group) %>%
-  summarize(slope = coef(lm(veff ~ 0 + time))[1]) # [m3/d]
+  summarise(
+    slope = {
+      ok <- is.finite(veff) & is.finite(time)
+      if (sum(ok) < 2) NA_real_ else unname(coef(lm(veff[ok] ~ 0 + time[ok]))[1])
+    },
+    .groups = "drop"
+  )
 
 # Define colors for groups
 group_colors <- c("Vol. 1 d" = "#E65C00",
@@ -1065,25 +1104,32 @@ plot.18.30 <- plot.18.30 +
              fill = group_colors["Vol. 1 d"], color = "black",
              show.legend = FALSE) +
   annotate("text", x = 2, y = 2.0,
-           label = bquote(Vol. ~ "1 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 d"], 2)) ~ "(m"^3*"/d)"),
+           label = bquote(Vol. ~ "1 d" ~ "=" ~ .(
+             round(slopes$slope[match("Vol. 1 d", slopes$group)], 2)
+           ) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   geom_point(aes(x = 1, y = 1.85), size = 6, shape = 21,
              fill = group_colors["Vol. 1 nd"], color = "black",
              show.legend = FALSE) +
   annotate("text", x = 2, y = 1.85,
-           label = bquote(Vol. ~ "1 nd" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 1 nd"], 2)) ~ "(m"^3*"/d)"),
+           label = bquote(Vol. ~ "1 nd" ~ "=" ~ .(
+             round(slopes$slope[match("Vol. 1 nd", slopes$group)], 2)
+           ) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   geom_point(aes(x = 1, y = 1.7), size = 6, shape = 21,
              fill = group_colors["Vol. 2 d"], color = "black",
              show.legend = FALSE) +
   annotate("text", x = 2, y = 1.7,
-           label = bquote(Vol. ~ "2 d" ~ "=" ~ .(round(slopes$slope[slopes$group == "Vol. 2 d"], 2)) ~ "(m"^3*"/d)"),
+           label = bquote(Vol. ~ "2 d" ~ "=" ~ .(
+             round(slopes$slope[match("Vol. 2 d", slopes$group)], 2)
+           ) ~ "(m"^3*"/d)"),
            hjust = 0, size = 10, color = "black") +
   annotate("text", x = 35, y = 0.1,
            label = "Study 2", hjust = 0, size = 10, color = "black") +
   annotate("text", x = Inf, y = Inf,
            label = "(b)", hjust = 1.1, vjust = 1.5, 
            size = 10, color = "black")
+
 
 # See plot
 plot.18.30
@@ -1339,6 +1385,12 @@ ggsave("Output/Plots/SamplingRates/Personal/PCB187VoluntSamplingRates.png",
        plot = plot.187, width = 8, height = 10, dpi = 1300)
 
 # Combine sampling rates --------------------------------------------------
+# Need to change PCB to congener in SR_V3.2_nw and w
+SR_V3.2_nw <- SR_V3.2_nw %>%
+  rename(congener = PCB)
+SR_V3.2_w <- SR_V3.2_w %>%
+  rename(congener = PCB)
+
 # Combine the all data frames
 combined_SR <- rbind(SR.V1.nd, SR.V1.d, SR.V2.d, SR.V3.1st.nd,
                      SR.V3.2nd.nd, SR_V3.2_nw, SR_V3.2_w)
@@ -1380,6 +1432,8 @@ SR_averages_sd_cv$Average_ko2 <- ifelse(
 SR_averages_sd_cv$Average_ko2[171] <- SR_averages_sd_cv$Average_ko2[167]
 SR_averages_sd_cv$Average_ko2[172] <- SR_averages_sd_cv$Average_ko2[167]
 SR_averages_sd_cv$Average_ko2[173] <- SR_averages_sd_cv$Average_ko2[167]
+# Format to 3 significant figures
+SR_averages_sd_cv$Average_ko2 <- signif(SR_averages_sd_cv$Average_ko2, 3)
 
 # Export results
 write.csv(SR_averages_sd_cv,

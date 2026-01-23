@@ -24,6 +24,7 @@ install.packages("dplyr")
   WB.0 <- read.csv("Data/IRO/SampleWBMassStudy1.csv")
   # Select WB mass from Study 1, first static experiment: sid, time and mass (ng/gWB)
   WB <- WB.0[1:5, c(1, 4, 7:179)]
+  # Read individual PCB logKoa
   logKoa <- read.csv("Data/IRO/logKoa.csv")
 }
 
