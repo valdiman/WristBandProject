@@ -20,13 +20,18 @@ install.packages("RColorBrewer")
 
 # Read data ---------------------------------------------------------------
 {
-  data.Fred <- read.csv("Data/IRO/Frederiksen_data_2022.csv")
+  data.Fred.mass <- read.csv("Data/IRO/FrederiksenWBMass2022.csv",
+                             check.names = FALSE)
+  data.Fred.conc <- read.csv("Data/IRO/FrederiksenConc2022.csv",
+                             check.names = FALSE)
+  # Read individual PCB logKoa
   logKoa <- read.csv("Data/IRO/logKoa.csv")
+  # Read ko from SamplingRates.R file
   ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 }
 
 # Select data -------------------------------------------------------------
-congener_names <- colnames(data.Fred)[6:ncol(data.Fred)]
+congener_names <- colnames(data.Fred.mass)[4:ncol(data.Fred.mass)]
 # Select ko values
 ko.p <- ko.p %>% select(congener, Average_ko)
 # Filter ko to keep only matching congeners
@@ -48,8 +53,8 @@ names(ko.fred) <- ko_fred$congener
 
 # Calculate Veffs only with home time -------------------------------------
 # Change time to days
-wb.mass.Fred <- data.Fred %>%
-  mutate(time.day = time.home / 24)
+wb.mass.Fred <- data.Fred.mass %>%
+  mutate(time = time / 24)
 
 # Define Vwb and Awb
 Vwb <- 0.00000473 # [m3]
@@ -57,7 +62,7 @@ Awb <- 0.0054773 # [m2]
 
 # Veff calculations
 veff_fred <- outer(
-  wb.mass.Fred$time.day,
+  wb.mass.Fred$time,
   1:14,
   Vectorize(function(t, i) {
     10^(logKwb_fred)[i] * Vwb * (1 - exp(-ko_fred$Average_ko[i] * Awb / Vwb / 10^(logKwb_fred)[i] * t))
@@ -66,16 +71,13 @@ veff_fred <- outer(
 
 # Add row and column names
 colnames(veff_fred) <- ko_fred$congener
-rownames(veff_fred) <- wb.mass.Fred$ID
-
-# Select WB masses
-wb.mass.Fred <- data.Fred %>% filter(measurement == "mass")
+rownames(veff_fred) <- wb.mass.Fred$sid
 
 # Extract PCB columns by name from wb.mass.Fred using column names of veff_fred
 pcb_mass <- wb.mass.Fred[, congener_names]
 
-# Set row names to match IDs
-rownames(pcb_mass) <- wb.mass.Fred$ID
+# Set row names to match sid
+rownames(pcb_mass) <- wb.mass.Fred$sid
 
 # Ensure column order matches veff_fred
 pcb_mass <- pcb_mass[, colnames(veff_fred)]
@@ -86,6 +88,8 @@ conc_fred <- pcb_mass / veff_fred
 conc_fred_long <- as.data.frame(conc_fred) %>%
   mutate(ID = rownames(conc_fred)) %>%
   pivot_longer(-ID, names_to = "congener", values_to = "est_conc")
+
+
 
 # Filter data.Fred to keep only "concentration" rows
 data_conc <- data.Fred %>% 
