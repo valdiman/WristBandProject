@@ -170,14 +170,11 @@ veff_fred.2 <- outer(
 colnames(veff_fred.2) <- ko_fred$congener
 rownames(veff_fred.2) <- wb.mass.Fred.2$sid
 
-# Select WB masses
-wb.mass.Fred.2 <- data.Fred %>% filter(measurement == "mass")
-
 # Extract PCB columns by name from wb.mass.Fred using column names of veff_fred
 pcb_mass <- wb.mass.Fred.2[, congener_names]
 
 # Set row names to match IDs
-rownames(pcb_mass) <- wb.mass.Fred.2$ID
+rownames(pcb_mass) <- wb.mass.Fred.2$sid
 
 # Ensure column order matches veff_fred.2
 pcb_mass <- pcb_mass[, colnames(veff_fred.2)]
@@ -186,19 +183,16 @@ pcb_mass <- pcb_mass[, colnames(veff_fred.2)]
 conc_fred.2 <- pcb_mass / veff_fred.2
 
 conc_fred_long.2 <- as.data.frame(conc_fred.2) %>%
-  mutate(ID = rownames(conc_fred.2)) %>%
-  pivot_longer(-ID, names_to = "congener", values_to = "est_conc")
+  mutate(sid = rownames(conc_fred.2)) %>%
+  pivot_longer(-sid, names_to = "congener", values_to = "est_conc")
 
-# Filter data.Fred to keep only "concentration" rows
-data_conc <- data.Fred %>% 
-  filter(measurement == "concentration")
-
-data_conc_long <- data_conc %>%
-  select(ID, starts_with("PCB")) %>%
-  pivot_longer(-ID, names_to = "congener", values_to = "obs_conc")
+# Filter data.Fred.conc to keep only "concentration" rows
+data_conc_long <- data.Fred.conc %>%
+  select(sid, starts_with("PCB")) %>%
+  pivot_longer(-sid, names_to = "congener", values_to = "obs_conc")
 
 # Join the datasets by ID and congener
-compare_df.2 <- left_join(conc_fred_long.2, data_conc_long, by = c("ID", "congener"))
+compare_df.2 <- left_join(conc_fred_long.2, data_conc_long, by = c("sid", "congener"))
 
 plot_data.2 <- compare_df.2 %>%
   filter(est_conc > 0, obs_conc > 0)
@@ -250,4 +244,3 @@ ggsave("Output/Plots/AirConcentrations/Frederiksen/Frederiksen7dVeff.png", plot 
 # Export data
 write.csv(plot_data.2,
           file = "Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiV3.csv")
-
