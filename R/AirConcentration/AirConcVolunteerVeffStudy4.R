@@ -83,7 +83,7 @@ data.2.1 <- data.2[, common_ids]
 }
 
 # Calculate air concentration from worn WBs -------------------------------
-# Read ko from PersonalSamplingRatesV02
+# Read ko from PersonalSamplingRates.R
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 ko.p <- ko.p[c(1,7)]
 {
@@ -442,9 +442,9 @@ ggsave("Output/Plots/AirConcentrations/VoluntHomeOfficeAirWBPCBVeff.png",
 
 # Prepare data to combine with Frederiksen
 Volunteer2_PCBi_fred <- filtered_data %>%
-  filter(congener %in% c("PCB8", "PCB18.30", "PCB20.28", "PCB31", "PCB44.47.65",
-                    "PCB52", "PCB66", "PCB99", "PCB90.101.113", "PCB105",
-                    "PCB118", "PCB129.138.163", "PCB153.168", "PCB180.193"))
+  filter(congener %in% c("PCB8", "PCB18+30", "PCB20+28", "PCB31", "PCB44+47+65",
+                    "PCB52", "PCB66", "PCB99", "PCB90+101+113", "PCB105",
+                    "PCB118", "PCB129+138+163", "PCB153+168", "PCB180+193"))
 
 Volunteer2_PCBi_fred <- Volunteer2_PCBi_fred %>%
   mutate(congener = factor(congener, levels = unique(congener)))
