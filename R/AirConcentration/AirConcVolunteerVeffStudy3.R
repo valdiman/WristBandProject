@@ -117,7 +117,7 @@ write.csv(conc.air,
           file = "Output/Data/csv/Volunteer/VolunteerConcStaticWB.csv")
 
 # Estimate air concentration from volunteers WBs --------------------------
-# Read ko from PersonalSamplingRates
+# Read ko from PersonalSamplingRates.R
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 ko.p <- ko.p[c(1,7)]
 

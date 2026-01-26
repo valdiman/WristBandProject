@@ -1,4 +1,9 @@
 ## Script to combine Frederiksen and Volunteers 2 data to be plotted
+# Data from Frederiksen et al. (2022).
+# Airborne concentrations of individual PCB congeners or co-eluting congeners
+# measured in apartments (active low volume sampler), and masses of individual
+# PCB congeners or co-eluting congeners accumulated in wristbands worn by
+# participants
 
 # Install packages
 install.packages("ggplot2")
@@ -18,7 +23,9 @@ install.packages("tibble")
 
 # Read data ---------------------------------------------------------------
 {
+  # Data created in AirConcVolunteerVeffStudy4.R
   vol2 <- read.csv("Output/Data/csv/FrederiksenPCB/Volunteer2_PCBiVeff.csv")
+  # Data created in AirConcFrederiksenVeff.R
   fred <- read.csv("Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiVeff.csv")
 }
 
@@ -26,7 +33,7 @@ install.packages("tibble")
 fred_trimmed <- fred %>%
   rename(Conc.WB = est_conc,
          Conc.Air = obs_conc) %>%
-  select(congener, Conc.Air, Conc.WB, ID) %>%
+  select(congener, Conc.Air, Conc.WB, sid) %>%
   mutate(source = "fred")
 
 vol2 <- vol2 %>%
@@ -35,9 +42,9 @@ vol2 <- vol2 %>%
 combined_data <- bind_rows(fred_trimmed, vol2)
 
 # Create a custom order for congener_names
-congener_names <- c("PCB8", "PCB18.30", "PCB20.28", "PCB31", "PCB44.47.65",
+congener_names <- c("PCB8", "PCB18+30", "PCB20+28", "PCB31", "PCB44+47+65",
                     "PCB52", "PCB66", "PCB99", "PCB90.101.113", "PCB105",
-                    "PCB118", "PCB129.138.163", "PCB153.168", "PCB180.193")
+                    "PCB118", "PCB129+138+163", "PCB153+168", "PCB180+193")
 
 # Apply the factor levels to the congener column in the dataset
 combined_data <- combined_data %>%
