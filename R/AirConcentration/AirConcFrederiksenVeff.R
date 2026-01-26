@@ -1,5 +1,9 @@
 ## Script to compare mass accumulated in WBs and air concentration
-# in apartments from Frederiksen et al 2022
+# from Frederiksen et al. (2022).
+# Airborne concentrations of individual PCB congeners or co-eluting congeners
+# measured in apartments (active low volume sampler), and masses of individual
+# PCB congeners or co-eluting congeners accumulated in wristbands worn by
+# participants
 
 # Install packages
 install.packages("gridExtra")
@@ -26,12 +30,12 @@ install.packages("RColorBrewer")
                              check.names = FALSE)
   # Read individual PCB logKoa
   logKoa <- read.csv("Data/IRO/logKoa.csv")
-  # Read ko from SamplingRates.R file
+  # Read ko generated from PersonalSamplingRates.R file
   ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 }
 
 # Select data -------------------------------------------------------------
-congener_names <- colnames(data.Fred.mass)[4:ncol(data.Fred.mass)]
+congener_names <- grep("^PCB", colnames(data.Fred.mass), value = TRUE)
 # Select ko values
 ko.p <- ko.p %>% select(congener, Average_ko)
 # Filter ko to keep only matching congeners
@@ -82,25 +86,20 @@ rownames(pcb_mass) <- wb.mass.Fred$sid
 # Ensure column order matches veff_fred
 pcb_mass <- pcb_mass[, colnames(veff_fred)]
 
-# Element-wise division
+# Calculate concentration
 conc_fred <- pcb_mass / veff_fred
 
 conc_fred_long <- as.data.frame(conc_fred) %>%
-  mutate(ID = rownames(conc_fred)) %>%
-  pivot_longer(-ID, names_to = "congener", values_to = "est_conc")
+  mutate(sid = rownames(conc_fred)) %>%
+  pivot_longer(-sid, names_to = "congener", values_to = "est_conc")
 
-
-
-# Filter data.Fred to keep only "concentration" rows
-data_conc <- data.Fred %>% 
-  filter(measurement == "concentration")
-
-data_conc_long <- data_conc %>%
-  select(ID, starts_with("PCB")) %>%
-  pivot_longer(-ID, names_to = "congener", values_to = "obs_conc")
+# Filter data.Fred.conc to keep only "concentration" rows
+data_conc_long <- data.Fred.conc %>%
+  select(sid, starts_with("PCB")) %>%
+  pivot_longer(-sid, names_to = "congener", values_to = "obs_conc")
 
 # Join the datasets by ID and congener
-compare_df <- left_join(conc_fred_long, data_conc_long, by = c("ID", "congener"))
+compare_df <- left_join(conc_fred_long, data_conc_long, by = c("sid", "congener"))
 
 plot_data <- compare_df %>%
   filter(est_conc > 0, obs_conc > 0)
@@ -153,15 +152,14 @@ ggsave("Output/Plots/AirConcentrations/Frederiksen/FrederiksenHomeVeff.png", plo
 write.csv(plot_data,
           file = "Output/Data/csv/FrederiksenPCB/Frederiksen_PCBiVeff.csv")
 
-
 # Calculate Veff for 7 days -----------------------------------------------
 # Change time to 7 days
-wb.mass.Fred.2 <- data.Fred %>%
-  mutate(time.day = 7 * 24)
+wb.mass.Fred.2 <- data.Fred.mass %>%
+  mutate(time = 7 * 24)
 
 # Veff calculations
 veff_fred.2 <- outer(
-  wb.mass.Fred.2$time.day,
+  wb.mass.Fred.2$time,
   1:14,
   Vectorize(function(t, i) {
     10^(logKwb_fred)[i] * Vwb * (1 - exp(-ko_fred$Average_ko[i] * Awb / Vwb / 10^(logKwb_fred)[i] * t))
@@ -170,7 +168,7 @@ veff_fred.2 <- outer(
 
 # Add row and column names
 colnames(veff_fred.2) <- ko_fred$congener
-rownames(veff_fred.2) <- wb.mass.Fred.2$ID
+rownames(veff_fred.2) <- wb.mass.Fred.2$sid
 
 # Select WB masses
 wb.mass.Fred.2 <- data.Fred %>% filter(measurement == "mass")
