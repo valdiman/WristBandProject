@@ -19,13 +19,13 @@ install.packages("tibble")
 
 # Read data ---------------------------------------------------------------
 {
-  data.0 <- read.csv("Data/IRO/SampleWBMassStudy3_4_5.csv", check.names = FALSE)
+  data.0 <- read.csv("Data/IRO/09_SampleWBMassStudy3_4_5.csv", check.names = FALSE)
   # Select data from Study 3
   data <- data.0[1:25, c(1, 7:182)]
   # Select data from Study 4 for only office time
   data.2 <- data.0[26:38, c(1, 7:182)]
   # Read individual PCB logKoa
-  logKoa <- read.csv("Data/IRO/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/12_logKoa.csv")
   # ko from SamplingRates_ko.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]

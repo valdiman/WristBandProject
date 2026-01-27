@@ -18,14 +18,14 @@ install.packages("dplyr")
 # Sampling rates calculations under static conditions ---------------------
 # Read data
 {
-  PUF.0 <- read.csv("Data/IRO/SamplePUFConcStudy1.csv")
+  PUF.0 <- read.csv("Data/IRO/05_SamplePUFConcStudy1.csv", check.names = FALSE)
   # Select active low-volume sampler concentrations from Study 1 static PUF (ng/m3)
   PUF <- PUF.0[1:4, 4:176]
-  WB.0 <- read.csv("Data/IRO/SampleWBMassStudy1.csv")
+  WB.0 <- read.csv("Data/IRO/03_SampleWBMassStudy1.csv", check.names = FALSE)
   # Select WB mass from Study 1, first static experiment: sid, time and mass (ng/gWB)
   WB <- WB.0[1:5, c(1, 4, 7:179)]
   # Read individual PCB logKoa
-  logKoa <- read.csv("Data/IRO/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/12_logKoa.csv")
 }
 
 # Remove metadata
@@ -112,8 +112,8 @@ write.csv(SR.st.1, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1
 # Plot to check linearity and sampling rate
 # Change number congener in [] 
 
-fit1 <- lm(WB.1$PCB18.30/PUF.mean[16] ~ 0 + time)
-ggplot(WB, aes(x = time, y = WB.1$PCB18.30/PUF.mean[17])) +
+fit1 <- lm(WB.1$`PCB18+30`/PUF.mean[16] ~ 0 + time)
+ggplot(WB, aes(x = time, y = WB.1$`PCB18+30`/PUF.mean[17])) +
   theme_bw() +
   theme(aspect.ratio = 15/15) +
   xlab(expression(bold("Deployment time (hr)"))) +
@@ -286,8 +286,8 @@ write.csv(SR.rot, file = "Output/Data/csv/SamplingRates/SR/WDSamplingRateRotV1.c
 # Plot to check linearity and sampling rate
 # Change number congener in [] 
 
-fit1 <- lm(WB.rot.2$PCB18.30/PUF.mean.2[17] ~ 0 + time.2)
-ggplot(WB.rot.2, aes(x = time.2*24, y = `PCB18.30`/PUF.mean.2[17])) +
+fit1 <- lm(WB.rot.2$`PCB18+30`/PUF.mean.2[17] ~ 0 + time.2)
+ggplot(WB.rot.2, aes(x = time.2*24, y = `PCB18+30`/PUF.mean.2[17])) +
   theme_bw() +
   theme(aspect.ratio = 15/15) +
   xlab(expression(bold("Deployment time (hr)"))) +
@@ -312,8 +312,8 @@ ggplot(WB.rot.2, aes(x = time.2*24, y = `PCB18.30`/PUF.mean.2[17])) +
 # Plots are shown in paper and SI
 # Combine plot
 # PCB 18+30
-WB$PCB18.30_comb <- WB.1$PCB18.30 / PUF.mean[17]
-WB.rot.2$PCB18.30_comb <- WB.rot.2$PCB18.30 / PUF.mean.2[17]
+WB$PCB18.30_comb <- WB.1$`PCB18+30` / PUF.mean[17]
+WB.rot.2$PCB18.30_comb <- WB.rot.2$`PCB18+30` / PUF.mean.2[17]
 
 # Combine data, padding shorter dataset with NA
 max_len <- max(nrow(WB), nrow(WB.rot.2))
@@ -446,7 +446,7 @@ plot.52 <- plot.52 +
 plot.52
 
 # Save plot
-ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates5.png",
+ggsave("Output/Plots/SamplingRates/SR/PCB52SamplingRates.png",
        plot = plot.52, width = 8, height = 10, dpi = 1300)
 
 # PCB 118

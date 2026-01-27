@@ -24,12 +24,12 @@ install.packages("RColorBrewer")
 
 # Read data ---------------------------------------------------------------
 {
-  data.Fred.mass <- read.csv("Data/IRO/FrederiksenWBMass2022.csv",
+  data.Fred.mass <- read.csv("Data/IRO/10_FrederiksenWBMass2022.csv",
                              check.names = FALSE)
-  data.Fred.conc <- read.csv("Data/IRO/FrederiksenConc2022.csv",
+  data.Fred.conc <- read.csv("Data/IRO/11_FrederiksenConc2022.csv",
                              check.names = FALSE)
   # Read individual PCB logKoa
-  logKoa <- read.csv("Data/IRO/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/12_logKoa.csv")
   # Read ko generated from PersonalSamplingRates.R file
   ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 }

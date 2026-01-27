@@ -21,12 +21,12 @@ install.packages("SnowballC")
 
 # Read data ---------------------------------------------------------------
 {
-  PUF.0 <- read.csv("Data/IRO/SamplePUFConcStudy1.csv")
-  # Select active low-volume sampler concentrations from Study 1 static PUF (ng/m3)
-  PUF <- PUF.0[1:4, 4:176]
-  WB.0 <- read.csv("Data/IRO/SampleWBMassStudy1.csv")
+  WB.0 <- read.csv("Data/IRO/03_SampleWBMassStudy1.csv", check.names = FALSE)
   # Select WB mass from Study 1, first static experiment: sid, time and mass (ng/gWB)
   WB <- WB.0[1:5, c(1, 4, 7:179)]
+  PUF.0 <- read.csv("Data/IRO/05_SamplePUFConcStudy1.csv", check.names = FALSE)
+  # Select active low-volume sampler concentrations from Study 1 static PUF (ng/m3)
+  PUF <- PUF.0[1:4, 4:176]
 }
 
 # Remove metadata

@@ -26,7 +26,7 @@ install.packages("rollapply")
 # 3 volunteers, V1, V2, and V3 (non-wiped and wiped)
 # Read data ---------------------------------------------------------------
 {
-  data <- read.csv("Data/IRO/SampleWBMassStudy2.csv", check.names = FALSE)
+  data <- read.csv("Data/IRO/07_SampleWBMassStudy2.csv", check.names = FALSE)
   # Select volunteer 1
   data.V1 <- data[1:13, c(1, 7:182)]
   # Select volunteer 2
@@ -36,7 +36,7 @@ install.packages("rollapply")
   # Select volunteer 3 wiped WB experiment
   data.V3.2 <- data[34:42, c(1, 7:182)]
   # Read individual PCB logKoa
-  logKoa <- read.csv("Data/IRO/logKoa.csv")
+  logKoa <- read.csv("Data/IRO/12_logKoa.csv")
   # Read ko from SamplingRates.R file
   ko <- read.csv("Output/Data/csv/SamplingRates/SR/WDSamplingRateStatV1.csv")
   # Select only ko [m/d]
