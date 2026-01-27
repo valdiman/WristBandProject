@@ -23,9 +23,9 @@ install.packages("stringr")
 # Read data ---------------------------------------------------------------
 {
   # Data use to calculate LOQ for Study 5
-  bl.0 <- read.csv("Data/IRO/BlankWBMassStudy3_4_5.csv", check.names = FALSE)
+  bl.0 <- read.csv("Data/IRO/08_BlankWBMassStudy3_4_5.csv", check.names = FALSE)
   # PCB accummulated in WB worn by teachers
-  wt.0 <- read.csv("Data/IRO/SampleWBMassStudy3_4_5.csv", check.names = FALSE)
+  wt.0 <- read.csv("Data/IRO/09_SampleWBMassStudy3_4_5.csv", check.names = FALSE)
 }
 
 # Distribution analysis ---------------------------------------------------
@@ -246,7 +246,7 @@ write.csv(costheta.mass, file = "Output/Data/csv/Teachers/CosineThetaMass.csv")
 ko.p <- read.csv("Output/Data/csv/SamplingRates/Personal/PersonalAveSR.csv")
 pcb_list <- ko.p$congener
 # Read logKoa
-logKoa <- read.csv("Data/IRO/logKoa.csv")
+logKoa <- read.csv("Data/IRO/12_logKoa.csv")
 # Calculate logKws
 # Regression created with data from Tromp et al 2019 (Table 2, Wristband)
 # & Frederiksen et al 2022 (Table 3)
