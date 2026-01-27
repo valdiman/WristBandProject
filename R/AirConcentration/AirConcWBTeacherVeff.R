@@ -1,4 +1,4 @@
-## Script to analyze school teacher wristband data and
+## Script to analyze school teacher wristband data,
 # estimate concentrations and PCB profiles from worn WBs
 
 # Install packages
@@ -22,36 +22,36 @@ install.packages("stringr")
 
 # Read data ---------------------------------------------------------------
 {
-  bl.0 <- read.csv("Data/IRO/BlankMassStudy3_4_5.csv")
-  bl <- bl.0[8:28, c(1, 8:180)] # select rows and columns
-  wt.0 <- read.csv("Data/IRO/SampleMassStudy3_4_5.csv")
-  wt <- wt.0[39:74, c(1, 7, 9:10, 12:184)]
+  # Data use to calculate LOQ for Study 5
+  bl.0 <- read.csv("Data/IRO/BlankWBMassStudy3_4_5.csv", check.names = FALSE)
+  # PCB accummulated in WB worn by teachers
+  wt.0 <- read.csv("Data/IRO/SampleWBMassStudy3_4_5.csv", check.names = FALSE)
 }
 
 # Distribution analysis ---------------------------------------------------
-# Remove metadata from blank data
-bl.1 <- subset(bl, select = -c(sid))
+# Select rows and columns
+bl <- bl.0[8:28, c(6:178)]
 # Look at the distribution of the blank data
 # Create matrix to storage data
-normality <- matrix(nrow = length(bl.1[1,]), ncol = 2)
+normality <- matrix(nrow = length(bl[1,]), ncol = 2)
 
-for (i in 1:length(bl.1[1, ])) {
-  normality[i, 1] <- shapiro.test(bl.1[,i])$p.value
-  normality[i, 2] <- shapiro.test(log10(bl.1[,i]))$p.value
+for (i in 1:length(bl[1, ])) {
+  normality[i, 1] <- shapiro.test(bl[,i])$p.value
+  normality[i, 2] <- shapiro.test(log10(bl[,i]))$p.value
 }
 
 # Just 3 significant figures
 normality <- formatC(signif(normality, digits = 3))
 # Add congener names
-congeners <- colnames(bl.1)
+congeners <- colnames(bl)
 # Include congener names
 normality <- cbind(congeners, normality)
 # Change column names
 colnames(normality) <- c("Congener", "shapiro.normal", "shapiro.log10")
 # Create Q-Q plot for individual PCB congeners
 {
-  qqnorm(bl.1$PCB52, main = "Concentration (ng/g)")
-  qqline(bl.1$PCB52)
+  qqnorm(bl$PCB52, main = "Concentration (ng/g)")
+  qqline(bl$PCB52)
 }
 
 # Bar plot to visualize Shapiro test (normality)
@@ -95,10 +95,12 @@ write.csv(normality, file = "Output/Data/csv/Teachers/BlankNormalityTeachers.csv
 # Calculate LOQ -----------------------------------------------------------
 # From above analysis, normal scale is used to calculate LOQ
 # Create LOQ, i.e., upper 95 CI% (mean + 1.96*sd/(n)^0.5)
-loq <- colMeans(bl.1) + 1.96*sapply(bl.1, sd)/sqrt(21)
+loq <- colMeans(bl) + 1.96*sapply(bl, sd)/sqrt(21)
 loq <- data.frame(t(loq))
 
 # Sample loq comparison ---------------------------------------------------
+# Select rows and columns
+wt <- wt.0[39:74, c(1, 7:182)]
 # If s.1 > loq, then wt[, 5:177], if not 0
 # Remove metadata from wt
 wt.1 <- wt[, 5:177]
@@ -138,7 +140,6 @@ wt.fr.stats <- wt.fr %>%
 
 # Add PCB names as a new column in wt.fr
 wt.fr$congener <- colnames(wt.2)[2:174]
-wt.fr$congener <- gsub('\\.', '+', wt.fr$congener)
 wt.fr$congener <- factor(wt.fr$congener,
                                  levels = rev(wt.fr$congener))
 
