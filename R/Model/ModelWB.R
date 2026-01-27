@@ -1,4 +1,5 @@
-# Model WB for PCB 52
+# Script used to model wristband uptake of PCB52 under variable airborne concentrations.
+# The results are not included in the manuscript.
 
 # Packages and libraries --------------------------------------------------
 # Install packages
