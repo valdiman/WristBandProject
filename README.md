@@ -81,12 +81,19 @@ Data
 The data files need to run the scripts can be found and downloaded at https://doi.org/XXX. The files are:
 
 03_SampleWBMassStudy1.csv
+
 05_SamplePUFConcStudy1.csv
+
 07_SampleWBMassStudy2.csv
+
 08_BlankWBMassStudy3_4_5.csv
+
 09_SampleWBMassStudy3_4_5.csv
+
 10_FrederiksenWBMass2022.csv
+
 11_FrederiksenConc2022.csv
+
 12_logKoa.csv
 
 
