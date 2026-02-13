@@ -78,7 +78,11 @@ the data are storage ("Data/IRO"), and then an Output subfolder, where the resul
 Data
 --------
 
-The data files need to run the scripts can be found and downloaded at https://doi.org/XXX. The files are:
+The data files need to run the scripts can be found and downloaded at:
+Martinez, A., Metwali, N., Arp, L., Moran, M. E., Marek, R. F., Thorne, P. S. (2026). Dataset for: Individual PCB Measurements in Silicone Wristbands
+Used to Estimate Personal Exposure to Airborne PCB Concentrations [Dataset]. University of Iowa. https://doi.org/10.25820/data.007569
+
+The files are:
 
 03_SampleWBMassStudy1.csv
 
