@@ -11,7 +11,7 @@ as cosine theta, supporting the use of WBs as personal passive samplers for airb
 SHARING/ACCESS/ATTRIBUTION LICENSE INFORMATION
 --------------------------
 
-Licenses/restrictions: licensed under the 2-Clause BSD License - see the [LICENSE](LICENSE) file for details.
+Licenses/restrictions: licensed under the 2-Clause BSD License.
 
 ----------------------
 General Information
